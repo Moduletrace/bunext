@@ -1,0 +1,31 @@
+{
+    "name": "bunext",
+    "module": "index.ts",
+    "type": "module",
+    "bin": {
+        "bunext": "index.ts"
+    },
+    "files": [
+        "index.ts"
+    ],
+    "scripts": {
+        "dev": "cd envs/development && docker compose down && docker compose up --build",
+        "start": "cd envs/production && docker compose down && docker compose up -d --build",
+        "preview": "cd envs/preview && docker compose down && docker compose up -d --build"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^24.10.0",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "commander": "^14.0.2",
+        "ora": "^9.0.0",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0"
+    }
+}
