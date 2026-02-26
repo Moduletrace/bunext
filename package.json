@@ -15,6 +15,7 @@
     },
     "devDependencies": {
         "@types/bun": "latest",
+        "@types/micromatch": "^4.0.10",
         "@types/node": "^24.10.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2"
@@ -24,6 +25,7 @@
     },
     "dependencies": {
         "commander": "^14.0.2",
+        "micromatch": "^4.0.8",
         "ora": "^9.0.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0"

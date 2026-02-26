@@ -2,6 +2,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import type { GetRouteReturn } from "../../types";
 import grabAssetsPrefix from "../../utils/grab-assets-prefix";
 import grabOrigin from "../../utils/grab-origin";
+import grabRouter from "../../utils/grab-router";
 
 type Params = {
     route: string;
@@ -10,21 +11,13 @@ type Params = {
 export default async function getRoute({
     route,
 }: Params): Promise<GetRouteReturn | null> {
-    const { pagesDir } = grabDirNames();
+    const { ROUTES_DIR } = grabDirNames();
 
     if (route.match(/\(/)) {
         return null;
     }
 
-    const assetPrefix = grabAssetsPrefix();
-    const origin = grabOrigin();
-
-    const router = new Bun.FileSystemRouter({
-        style: "nextjs",
-        dir: pagesDir,
-        origin,
-        assetPrefix,
-    });
+    const router = grabRouter();
 
     const match = router.match(route);
 

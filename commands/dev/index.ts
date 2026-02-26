@@ -1,7 +1,8 @@
 import { Command } from "commander";
-import grabConfig from "../../functions/grab-config";
-import grabDirNames from "../../utils/grab-dir-names";
-import AppNames from "../../utils/grab-app-names";
+import grabConfig from "../../src/functions/grab-config";
+import startServer from "../../src/functions/server/start-server";
+import init from "../../src/functions/init";
+import type { BunextConfig } from "../../src/types";
 
 export default function () {
     return new Command("dev")
@@ -9,34 +10,15 @@ export default function () {
         .action(async () => {
             console.log(`Running development server ...`);
 
-            const config = await grabConfig();
-            global.CONFIG = config;
+            await init();
 
-            const { entrypoint } = grabDirNames();
-            const { defaultDistDir } = AppNames;
+            const config: BunextConfig = (await grabConfig()) || {};
 
-            let buildCmd = ["bun"];
+            global.CONFIG = {
+                ...config,
+                development: true,
+            };
 
-            buildCmd.push(
-                "build",
-                entrypoint,
-                "--outdir",
-                config.distDir || defaultDistDir,
-                "--watch"
-            );
-
-            const spawnedProcess = Bun.spawn({
-                cmd: buildCmd,
-            });
-
-            const exitCode = await spawnedProcess.exited;
-
-            // Bun.build({
-            //     entrypoints: [entrypoint],
-            //     outdir: config.distDir || defaultDistDir,
-            //     minify: true,
-            // });
-
-            // await startServer();
+            await startServer({ dev: true });
         });
 }

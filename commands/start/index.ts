@@ -1,5 +1,7 @@
 import { Command } from "commander";
-import grabConfig from "../../functions/grab-config";
+import grabConfig from "../../src/functions/grab-config";
+import startServer from "../../src/functions/server/start-server";
+import init from "../../src/functions/init";
 
 export default function () {
     return new Command("start")
@@ -7,7 +9,12 @@ export default function () {
         .action(async () => {
             console.log(`Starting production server ...`);
 
+            await init();
+
             const config = await grabConfig();
-            global.CONFIG = config;
+
+            global.CONFIG = { ...config };
+
+            await startServer();
         });
 }
