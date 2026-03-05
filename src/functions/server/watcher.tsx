@@ -1,12 +1,9 @@
 import { watch } from "fs";
 import grabDirNames from "../../utils/grab-dir-names";
-import writeWebPageHydrationScript from "./web-pages/write-web-page-hydration-script";
 import grabPageName from "../../utils/grab-page-name";
 import path from "path";
 import { execSync } from "child_process";
 import serverParamsGen from "./server-params-gen";
-import grabRouter from "../../utils/grab-router";
-import type { FC } from "react";
 
 const { ROOT_DIR, BUNX_HYDRATION_SRC_DIR, HYDRATION_DST_DIR, ROUTES_DIR } =
     grabDirNames();
@@ -55,9 +52,18 @@ export default function watcher() {
                     //     });
                     // }
 
+                    // await Bun.build({
+                    //     entrypoints: [
+                    //         `${BUNX_HYDRATION_SRC_DIR}/${pageName}.tsx`,
+                    //     ],
+                    //     outdir: HYDRATION_DST_DIR,
+                    //     minify: true,
+                    // });
+
                     let cmd = `bun build`;
                     cmd += ` ${BUNX_HYDRATION_SRC_DIR}/${pageName}.tsx --outdir ${HYDRATION_DST_DIR}`;
                     cmd += ` --minify`;
+                    // cmd += ` && bun pm cache rm`;
 
                     execSync(cmd, { stdio: "inherit" });
 
@@ -67,11 +73,21 @@ export default function watcher() {
                     });
 
                     const encoder = new TextEncoder();
-                    const msg = encoder.encode(`event: update\ndata: reload\n\n`);
+                    const msg = encoder.encode(
+                        `event: update\ndata: reload\n\n`,
+                    );
 
                     for (const controller of global.HMR_CONTROLLERS) {
-                        controller.enqueue(msg);
+                        controller.enqueue(msg.toString());
                     }
+
+                    // Let the SSE event flush before restarting the server.
+                    // The server restart is required to clear Bun's module cache
+                    // so the next request renders the updated route, not the
+                    // stale cached module (which causes a hydration mismatch).
+                    // await Bun.sleep(500);
+
+                    // await reloadServer();
                     global.RECOMPILING = false;
                 } else if (event == "rename") {
                     await reloadServer();

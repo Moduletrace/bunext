@@ -56,6 +56,10 @@ export default async function (params?: Params): Promise<ServeOptions> {
                     );
 
                     return new Response(file);
+                } else if (url.pathname.startsWith("/favicon.")) {
+                    const file = Bun.file(path.join(PUBLIC_DIR, url.pathname));
+
+                    return new Response(file);
                 } else {
                     return await handleWebPages({ req, server });
                 }
