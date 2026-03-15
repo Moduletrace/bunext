@@ -1,6 +1,5 @@
 import genWebHTML from "./generate-web-html";
 import grabPageComponent from "./grab-page-component";
-import writeWebPageHydrationScript from "./write-web-page-hydration-script";
 
 type Params = {
     req: Request;

@@ -23,7 +23,9 @@ export default async function genWebHTML({
     const SCRIPT_SRC = path.join("/public/pages", pageName + ".js");
     const CSS_SRC = path.join("/public/pages", pageName + ".css");
     const { HYDRATION_DST_DIR } = grabDirNames();
-    const cssExists = await Bun.file(path.join(HYDRATION_DST_DIR, pageName + ".css")).exists();
+    const cssExists = await Bun.file(
+        path.join(HYDRATION_DST_DIR, pageName + ".css"),
+    ).exists();
 
     let html = `<!DOCTYPE html>\n`;
     html += `<html>\n`;
@@ -32,16 +34,16 @@ export default async function genWebHTML({
     if (cssExists) {
         html += `        <link rel="stylesheet" href="${CSS_SRC}" />\n`;
     }
-    if (isDevelopment()) {
-        html += `<script>
-            const hmr = new EventSource("/__hmr");
-            hmr.addEventListener("update", (event) => {
-                if (event.data === "reload") {
-                    window.location.reload();
-                }
-            });
-        </script>\n`;
-    }
+    // if (isDevelopment()) {
+    //     html += `<script>
+    //         const hmr = new EventSource("/__hmr");
+    //         hmr.addEventListener("update", (event) => {
+    //             if (event.data === "reload") {
+    //                 window.location.reload();
+    //             }
+    //         });
+    //     </script>\n`;
+    // }
     html += `    </head>\n`;
     html += `    <body>\n`;
     html += `        <div id="${ClientRootElementIDName}">${componentHTML}</div>\n`;

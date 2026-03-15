@@ -28,6 +28,7 @@ export default function watcher() {
                     global.RECOMPILING = true;
 
                     await allPagesBundler();
+                    reloadServer();
 
                     global.LAST_BUILD_TIME = Date.now();
 

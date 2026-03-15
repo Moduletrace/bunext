@@ -1,7 +1,13 @@
 export default function isDevelopment() {
     const config = global.CONFIG;
 
-    if (config.development) return true;
+    if (process.env.NODE_ENV == "production") {
+        return false;
+    }
+
+    if (config.development) {
+        return true;
+    }
 
     return false;
 }
