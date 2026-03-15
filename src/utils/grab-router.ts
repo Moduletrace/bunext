@@ -1,7 +1,7 @@
 import grabDirNames from "./grab-dir-names";
 
 export default function grabRouter() {
-    const { ROUTES_DIR } = grabDirNames();
+    const { PAGES_DIR } = grabDirNames();
 
     if (process.env.NODE_ENV == "production") {
         return global.ROUTER;
@@ -9,6 +9,6 @@ export default function grabRouter() {
 
     return new Bun.FileSystemRouter({
         style: "nextjs",
-        dir: ROUTES_DIR,
+        dir: PAGES_DIR,
     });
 }

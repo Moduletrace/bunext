@@ -63,7 +63,6 @@ export type GetRouteReturn = {
 export type BunxRouteParams = {
     req: Request;
     url: URL;
-    server: Server;
     body?: any;
     query?: any;
 };
@@ -120,7 +119,13 @@ export type BunextServerRouteConfig = {
 };
 
 export type PageDistGenParams = {
+    pageName: string;
+    page_file: string;
+};
+
+export type LivePageDistGenParams = {
     component: ReactNode;
+    head?: ReactNode;
     pageProps?: any;
     module?: BunextPageModule;
     pageName: string;
@@ -128,16 +133,34 @@ export type PageDistGenParams = {
 
 export type BunextPageModule = {
     default: FC<any>;
-    server?: (
-        routeParams: BunxRouteParams,
-    ) => Promise<BunextPageModuleServerReturn>;
+    server?: BunextPageServerFn;
 };
 
-export type BunextPageModuleServerReturn = {
-    props?: any;
+export type BunextPageServerFn<
+    T extends { [k: string]: any } = { [k: string]: any },
+> = (routeParams: BunxRouteParams) => Promise<BunextPageModuleServerReturn<T>>;
+
+export type BunextPageModuleServerReturn<
+    T extends { [k: string]: any } = { [k: string]: any },
+> = {
+    props?: T;
 };
 
 export type BunextPageModuleMetadata = {
     title?: string;
     description?: string;
+};
+
+export type GrabPageComponentRes = {
+    component: JSX.Element;
+    serverRes?: BunextPageModuleServerReturn;
+    routeParams?: BunxRouteParams;
+    pageName: string;
+    module: BunextPageModule;
+};
+
+export type PageFiles = {
+    local_path: string;
+    url_path: string;
+    file_name: string;
 };

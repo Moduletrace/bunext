@@ -11,7 +11,7 @@ type Params = {
 export default async function getRoute({
     route,
 }: Params): Promise<GetRouteReturn | null> {
-    const { ROUTES_DIR } = grabDirNames();
+    const {} = grabDirNames();
 
     if (route.match(/\(/)) {
         return null;

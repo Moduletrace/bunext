@@ -38,7 +38,7 @@ export default async function ({
         };
     }
 
-    const routeParams: BunxRouteParams = await grabRouteParams({ req, server });
+    const routeParams: BunxRouteParams = await grabRouteParams({ req });
 
     const module = await import(match.filePath);
     const config = module.config as BunextServerRouteConfig | undefined;
@@ -62,7 +62,7 @@ export default async function ({
     }
 
     const res: APIResponseObject = await module["default"](
-        routeParams as BunxRouteParams
+        routeParams as BunxRouteParams,
     );
 
     return res;

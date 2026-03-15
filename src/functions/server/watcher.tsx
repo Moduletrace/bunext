@@ -1,101 +1,57 @@
 import { watch } from "fs";
 import grabDirNames from "../../utils/grab-dir-names";
-import grabPageName from "../../utils/grab-page-name";
-import path from "path";
-import { execSync } from "child_process";
 import serverParamsGen from "./server-params-gen";
+import allPagesBundler from "../bundler/all-pages-bundler";
 
-const { ROOT_DIR, BUNX_HYDRATION_SRC_DIR, HYDRATION_DST_DIR, ROUTES_DIR } =
+const { ROOT_DIR, BUNX_HYDRATION_SRC_DIR, HYDRATION_DST_DIR, PAGES_DIR } =
     grabDirNames();
 
 export default function watcher() {
     watch(
         ROOT_DIR,
-        { recursive: true, persistent: true },
-        async (event, filename) => {
+        {
+            recursive: true,
+            persistent: true,
+        },
+        (event, filename) => {
+            // if (!filename) return;
+            // if (filename.match(/ /)) return;
+            // if (filename.match(/^node_modules\//)) return;
+            // if (filename.match(/\.bunext|\/?public\//)) return;
+            // if (!filename.match(/\.(tsx|ts|css|js|jsx)$/)) return;
+
             if (global.RECOMPILING) return;
-            if (!filename) return;
-            if (filename.match(/ /)) return;
-            if (filename.match(/^node_modules\//)) return;
-            if (filename.match(/\.bunext|\/public\//)) return;
 
-            if (filename.match(/\/routes\//)) {
-                if (event == "change") {
-                    clearTimeout(global.WATCHER_TIMEOUT);
-
+            clearTimeout(global.WATCHER_TIMEOUT);
+            global.WATCHER_TIMEOUT = setTimeout(async () => {
+                try {
                     global.RECOMPILING = true;
 
-                    const fullPath = path.join(ROOT_DIR, filename);
+                    await allPagesBundler();
 
-                    const pageName = grabPageName({ path: fullPath });
-
-                    // const router = grabRouter();
-                    // const match = router.match(fullPath);
-
-                    // if (match?.filePath) {
-                    //     const module = await import(match.filePath);
-
-                    //     const serverRes = await (async () => {
-                    //         try {
-                    //             return await module["server"]();
-                    //         } catch (error) {
-                    //             return {};
-                    //         }
-                    //     })();
-
-                    //     const Component = module.default as FC<any>;
-                    //     const component = <Component pageProps={serverRes} />;
-
-                    //     await writeWebPageHydrationScript({
-                    //         pageName,
-                    //         component,
-                    //     });
-                    // }
-
-                    // await Bun.build({
-                    //     entrypoints: [
-                    //         `${BUNX_HYDRATION_SRC_DIR}/${pageName}.tsx`,
-                    //     ],
-                    //     outdir: HYDRATION_DST_DIR,
-                    //     minify: true,
-                    // });
-
-                    let cmd = `bun build`;
-                    cmd += ` ${BUNX_HYDRATION_SRC_DIR}/${pageName}.tsx --outdir ${HYDRATION_DST_DIR}`;
-                    cmd += ` --minify`;
-                    // cmd += ` && bun pm cache rm`;
-
-                    execSync(cmd, { stdio: "inherit" });
-
-                    global.ROUTER = new Bun.FileSystemRouter({
-                        style: "nextjs",
-                        dir: ROUTES_DIR,
-                    });
-
-                    const encoder = new TextEncoder();
-                    const msg = encoder.encode(
-                        `event: update\ndata: reload\n\n`,
-                    );
+                    global.LAST_BUILD_TIME = Date.now();
 
                     for (const controller of global.HMR_CONTROLLERS) {
-                        controller.enqueue(msg.toString());
+                        try {
+                            controller.enqueue(
+                                `event: update\ndata: ${global.LAST_BUILD_TIME}\n\n`,
+                            );
+                        } catch {
+                            global.HMR_CONTROLLERS.delete(controller);
+                        }
                     }
-
-                    // Let the SSE event flush before restarting the server.
-                    // The server restart is required to clear Bun's module cache
-                    // so the next request renders the updated route, not the
-                    // stale cached module (which causes a hydration mismatch).
-                    // await Bun.sleep(500);
-
-                    // await reloadServer();
+                } catch (error: any) {
+                    console.log(error);
+                } finally {
                     global.RECOMPILING = false;
-                } else if (event == "rename") {
-                    await reloadServer();
                 }
-            } else if (filename.match(/\.(js|ts|tsx|jsx)$/)) {
-                clearTimeout(global.WATCHER_TIMEOUT);
-                await reloadServer();
-            }
+            }, 150);
+
+            // if (filename.match(/\/pages\//)) {
+            // } else if (filename.match(/\.(js|ts|tsx|jsx)$/)) {
+            //     clearTimeout(global.WATCHER_TIMEOUT);
+            //     global.WATCHER_TIMEOUT = setTimeout(() => reloadServer(), 150);
+            // }
         },
     );
 

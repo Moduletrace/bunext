@@ -1,4 +1,5 @@
 import AppNames from "../../utils/grab-app-names";
+import allPagesBundler from "../bundler/all-pages-bundler";
 import serverParamsGen from "./server-params-gen";
 import watcher from "./watcher";
 
@@ -14,6 +15,8 @@ export default async function startServer(params?: Params) {
     const server = Bun.serve(serverParams);
 
     global.SERVER = server;
+
+    await allPagesBundler();
 
     console.log(
         `${name} Server Running on  http://localhost:${server.port} ...`,

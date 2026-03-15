@@ -3,13 +3,16 @@
     "module": "index.ts",
     "type": "module",
     "bin": {
-        "bunext": "index.ts"
+        "bunext": "dist/index.js"
     },
     "files": [
-        "index.ts"
+        "dist",
+        "README.md",
+        "package.json"
     ],
     "scripts": {
-        "dev": "cd envs/development && docker compose down && docker compose up --build",
+        "dev": "tsc --watch",
+        "docker:dev": "cd envs/development && docker compose down && docker compose up --build",
         "start": "cd envs/production && docker compose down && docker compose up -d --build",
         "preview": "cd envs/preview && docker compose down && docker compose up -d --build"
     },
@@ -18,16 +21,19 @@
         "@types/micromatch": "^4.0.10",
         "@types/node": "^24.10.0",
         "@types/react": "^19.2.2",
-        "@types/react-dom": "^19.2.2"
+        "@types/react-dom": "^19.2.2",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4"
     },
     "peerDependencies": {
-        "typescript": "^5.0.0"
+        "typescript": "^5.0.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     },
     "dependencies": {
+        "chalk": "^5.6.2",
         "commander": "^14.0.2",
         "micromatch": "^4.0.8",
-        "ora": "^9.0.0",
-        "react": "^19.2.0",
-        "react-dom": "^19.2.0"
+        "ora": "^9.0.0"
     }
 }

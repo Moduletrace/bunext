@@ -8,6 +8,7 @@ import type { BunextConfig } from "./src/types";
 import type { FileSystemRouter, Server } from "bun";
 import init from "./src/functions/init";
 import grabDirNames from "./src/utils/grab-dir-names";
+import build from "./commands/build";
 
 /**
  * # Declare Global Variables
@@ -20,6 +21,7 @@ declare global {
     var WATCHER_TIMEOUT: any;
     var ROUTER: FileSystemRouter;
     var HMR_CONTROLLERS: Set<ReadableStreamDefaultController<string>>;
+    var LAST_BUILD_TIME: number;
 }
 
 global.ORA_SPINNER = ora();
@@ -28,11 +30,11 @@ global.HMR_CONTROLLERS = new Set();
 
 await init();
 
-const { ROUTES_DIR } = grabDirNames();
+const { PAGES_DIR } = grabDirNames();
 
 const router = new Bun.FileSystemRouter({
     style: "nextjs",
-    dir: ROUTES_DIR,
+    dir: PAGES_DIR,
 });
 
 global.ROUTER = router;
@@ -50,6 +52,7 @@ program
  */
 program.addCommand(dev());
 program.addCommand(start());
+program.addCommand(build());
 
 /**
  * # Handle Unavailable Commands
@@ -57,7 +60,7 @@ program.addCommand(start());
 program.on("command:*", () => {
     console.error(
         "Invalid command: %s\nSee --help for a list of available commands.",
-        program.args.join(" ")
+        program.args.join(" "),
     );
     process.exit(1);
 });

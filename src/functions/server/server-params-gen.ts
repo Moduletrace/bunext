@@ -6,14 +6,14 @@ import handleWebPages from "./web-pages/handle-web-pages";
 import handleRoutes from "./handle-routes";
 import isDevelopment from "../../utils/is-development";
 
-const port = grabAppPort();
-const { PUBLIC_DIR } = grabDirNames();
-
 type Params = {
     dev?: boolean;
 };
 
 export default async function (params?: Params): Promise<ServeOptions> {
+    const port = grabAppPort();
+    const { PUBLIC_DIR } = grabDirNames();
+
     return {
         async fetch(req, server) {
             try {
@@ -61,7 +61,7 @@ export default async function (params?: Params): Promise<ServeOptions> {
 
                     return new Response(file);
                 } else {
-                    return await handleWebPages({ req, server });
+                    return await handleWebPages({ req });
                 }
             } catch (error: any) {
                 return new Response(`Server Error: ${error.message}`, {
@@ -70,9 +70,6 @@ export default async function (params?: Params): Promise<ServeOptions> {
             }
         },
         port,
-        development: isDevelopment() && {
-            hmr: true,
-            console: true,
-        },
+        idleTimeout: 0,
     } as ServeOptions;
 }
