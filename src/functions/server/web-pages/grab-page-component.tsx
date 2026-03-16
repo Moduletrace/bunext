@@ -4,7 +4,6 @@ import grabPageName from "../../../utils/grab-page-name";
 import grabRouteParams from "../../../utils/grab-route-params";
 import grabRouter from "../../../utils/grab-router";
 import type { BunextPageModule, GrabPageComponentRes } from "../../../types";
-import bundle from "../../../utils/bundle";
 import path from "path";
 import AppNames from "../../../utils/grab-app-names";
 import { existsSync } from "fs";
@@ -110,9 +109,11 @@ export default async function grabPageComponent({
         //     });
         // }
 
-        const module: BunextPageModule = await import(
-            `${filePath}?t=${global.LAST_BUILD_TIME ?? 0}`
-        );
+        const module: BunextPageModule = await import(filePath);
+
+        // const module: BunextPageModule = await import(
+        //     `${filePath}?t=${global.LAST_BUILD_TIME ?? 0}`
+        // );
 
         const Component = module.default as FC<any>;
         const component = <Component />;

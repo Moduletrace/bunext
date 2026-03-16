@@ -27,8 +27,9 @@ export default function watcher() {
                 try {
                     global.RECOMPILING = true;
 
+                    console.log(`File Changed. Rebuilding ...`);
+
                     await allPagesBundler();
-                    reloadServer();
 
                     global.LAST_BUILD_TIME = Date.now();
 

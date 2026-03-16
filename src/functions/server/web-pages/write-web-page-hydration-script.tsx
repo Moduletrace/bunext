@@ -27,9 +27,10 @@ export default async function (params: PageDistGenParams) {
     script += `}\n`;
 
     script += `let root: any = null;\n\n`;
+    script += `const component = <App {...window.${ClientWindowPagePropsName}} />;\n\n`;
     script += `const container = document.getElementById("${ClientRootElementIDName}");\n\n`;
     script += `if (container) {\n`;
-    script += `    root = hydrateRoot(container, <App {...window.${ClientWindowPagePropsName}} />);\n`;
+    script += `    root = hydrateRoot(container, component);\n`;
     script += `}\n\n`;
     if (isDevelopment()) {
         script += `const hmr = new EventSource("/__hmr");\n`;
@@ -37,12 +38,15 @@ export default async function (params: PageDistGenParams) {
         // script += `    console.log(\`HMR even received:\`, event);\n`;
         script += `    if (event.data && root) {\n`;
         script += `        console.log(\`HMR Changes Detected. Reloading ...\`);\n`;
+        // script += `        import("${page_file}?t=" + event.data.update).then((module) => {\n`;
+        // script += `            root.render(module.default);\n`;
+        // script += `        })\n`;
         // script += `        console.log("root", root);\n`;
         // script += `        root.unmount();\n`;
         // script += `        const container = document.getElementById("${ClientRootElementIDName}");\n\n`;
-        // script += `        root = hydrateRoot(container!, <App {...window.${ClientWindowPagePropsName}} />);\n`;
-        script += `        root.render(<App {...window.${ClientWindowPagePropsName}} />);\n`;
-        // script += `        window.location.reload();\n`;
+        // script += `        root = hydrateRoot(container!, component);\n`;
+        // script += `        root.render(component);\n`;
+        script += `        window.location.reload();\n`;
         script += `    }\n`;
         script += ` });\n`;
     }

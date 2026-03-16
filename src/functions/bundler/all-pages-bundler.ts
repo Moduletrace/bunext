@@ -1,3 +1,4 @@
+import plugin from "bun-plugin-tailwind";
 import { readdirSync, statSync, unlinkSync } from "fs";
 import grabAllPages from "../../utils/grab-all-pages";
 import grabDirNames from "../../utils/grab-dir-names";
@@ -7,6 +8,7 @@ import path from "path";
 import bundle from "../../utils/bundle";
 import AppNames from "../../utils/grab-app-names";
 import type { PageFiles } from "../../types";
+import isDevelopment from "../../utils/is-development";
 
 const { BUNX_HYDRATION_SRC_DIR, HYDRATION_DST_DIR } = grabDirNames();
 
@@ -64,6 +66,24 @@ export default async function allPagesBundler() {
         out_dir: HYDRATION_DST_DIR,
         exec_options: { stdio: "ignore" },
     });
+
+    // console.log(`Bundling ...`);
+
+    // const result = await Bun.build({
+    //     entrypoints,
+    //     outdir: HYDRATION_DST_DIR,
+    //     plugins: [plugin],
+    //     minify: true,
+    //     target: "browser",
+    //     // sourcemap: "linked",
+    //     define: {
+    //         "process.env.NODE_ENV": JSON.stringify(
+    //             isDevelopment() ? "development" : "production",
+    //         ),
+    //     },
+    // });
+
+    // console.log("result", result);
 
     console.timeEnd("build");
 }

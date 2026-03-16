@@ -1,3 +1,4 @@
+import plugin from "bun-plugin-tailwind";
 import { execSync, type ExecSyncOptions } from "child_process";
 
 type Params = {
