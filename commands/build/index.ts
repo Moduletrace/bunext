@@ -1,9 +1,7 @@
 import { Command } from "commander";
 import grabConfig from "../../src/functions/grab-config";
-import startServer from "../../src/functions/server/start-server";
 import init from "../../src/functions/init";
 import type { BunextConfig } from "../../src/types";
-import grabAllPages from "../../src/utils/grab-all-pages";
 import allPagesBundler from "../../src/functions/bundler/all-pages-bundler";
 
 export default function () {
@@ -11,6 +9,8 @@ export default function () {
         .description("Build Project")
         .action(async () => {
             console.log(`Building Project ...`);
+
+            process.env.NODE_ENV = "production";
 
             await init();
 
@@ -21,6 +21,8 @@ export default function () {
                 development: true,
             };
 
-            allPagesBundler();
+            allPagesBundler({
+                exit_after_first_build: true,
+            });
         });
 }

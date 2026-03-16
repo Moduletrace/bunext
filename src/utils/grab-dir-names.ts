@@ -7,6 +7,10 @@ export default function grabDirNames() {
     const API_DIR = path.join(PAGES_DIR, "api");
     const PUBLIC_DIR = path.join(ROOT_DIR, "public");
     const HYDRATION_DST_DIR = path.join(PUBLIC_DIR, "pages");
+    const HYDRATION_DST_DIR_MAP_JSON_FILE = path.join(
+        HYDRATION_DST_DIR,
+        "map.json",
+    );
     const CONFIG_FILE = path.join(ROOT_DIR, "bunext.config.ts");
 
     const BUNX_CWD_DIR = path.resolve(ROOT_DIR, ".bunext");
@@ -41,5 +45,6 @@ export default function grabDirNames() {
         BUNX_ROOT_PRESETS_DIR,
         BUNX_ROOT_500_PRESET_COMPONENT,
         BUNX_ROOT_500_FILE_NAME,
+        HYDRATION_DST_DIR_MAP_JSON_FILE,
     };
 }

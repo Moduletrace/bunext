@@ -8,22 +8,15 @@ type Params = {
 
 export default async function ({ req }: Params): Promise<Response> {
     try {
-        const { component, pageName, module, serverRes } =
+        const { component, bundledMap, module, serverRes } =
             await grabPageComponent({ req });
 
         const html = await genWebHTML({
             component,
             pageProps: serverRes,
-            pageName,
+            bundledMap,
             module,
         });
-
-        // writeWebPageHydrationScript({
-        //     component,
-        //     pageName,
-        //     module,
-        //     pageProps: serverRes,
-        // });
 
         const res_opts: ResponseInit = {
             headers: {
@@ -44,6 +37,8 @@ export default async function ({ req }: Params): Promise<Response> {
 
         return res;
     } catch (error: any) {
+        console.log(`Handle web pages Error =>`, error.message);
+
         return new Response(error.message || `Page Not Found`, {
             status: 404,
         });

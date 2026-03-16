@@ -4,11 +4,16 @@ import { program } from "commander";
 import start from "./commands/start";
 import dev from "./commands/dev";
 import ora, { type Ora } from "ora";
-import type { BunextConfig } from "./src/types";
+import type {
+    BundlerCTXMap,
+    BunextConfig,
+    GlobalHMRControllerObject,
+} from "./src/types";
 import type { FileSystemRouter, Server } from "bun";
 import init from "./src/functions/init";
 import grabDirNames from "./src/utils/grab-dir-names";
 import build from "./commands/build";
+import type { BuildContext, BuildResult } from "esbuild";
 
 /**
  * # Declare Global Variables
@@ -20,13 +25,17 @@ declare global {
     var RECOMPILING: boolean;
     var WATCHER_TIMEOUT: any;
     var ROUTER: FileSystemRouter;
-    var HMR_CONTROLLERS: Set<ReadableStreamDefaultController<string>>;
+    var HMR_CONTROLLERS: GlobalHMRControllerObject[];
     var LAST_BUILD_TIME: number;
+    var BUNDLER_CTX: BuildContext | undefined;
+    var BUNDLER_CTX_MAP: BundlerCTXMap[] | undefined;
+    var IS_FIRST_BUNDLE_READY: boolean;
 }
 
 global.ORA_SPINNER = ora();
 global.ORA_SPINNER.clear();
-global.HMR_CONTROLLERS = new Set();
+global.HMR_CONTROLLERS = [];
+global.IS_FIRST_BUNDLE_READY = false;
 
 await init();
 

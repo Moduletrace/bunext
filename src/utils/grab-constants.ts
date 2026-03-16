@@ -7,6 +7,7 @@ export default async function grabConstants() {
 
     const ClientWindowPagePropsName = "__PAGE_PROPS__";
     const ClientRootElementIDName = "__bunext";
+    const ClientRootComponentWindowName = "BUNEXT_ROOT";
 
     const ServerDefaultRequestBodyLimitBytes = MB_IN_BYTES * 10;
 
@@ -15,5 +16,6 @@ export default async function grabConstants() {
         ClientWindowPagePropsName,
         MBInBytes: MB_IN_BYTES,
         ServerDefaultRequestBodyLimitBytes,
-    };
+        ClientRootComponentWindowName,
+    } as const;
 }

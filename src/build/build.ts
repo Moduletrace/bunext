@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import type { BuildConfig } from "bun";
 import plugin from "bun-plugin-tailwind";
 import { existsSync } from "fs";
 import { rm } from "fs/promises";
@@ -48,8 +49,8 @@ const parseValue = (value: string): any => {
     return value;
 };
 
-function parseArgs(): Partial<Bun.BuildConfig> {
-    const config: Partial<Bun.BuildConfig> = {};
+function parseArgs(): Partial<BuildConfig> {
+    const config: any = {};
     const args = process.argv.slice(2);
 
     for (let i = 0; i < args.length; i++) {

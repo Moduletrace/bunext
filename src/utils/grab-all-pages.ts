@@ -2,6 +2,7 @@ import { existsSync, readdirSync, statSync } from "fs";
 import grabDirNames from "./grab-dir-names";
 import path from "path";
 import type { PageFiles } from "../types";
+import AppNames from "./grab-app-names";
 
 type Params = {
     exclude_api?: boolean;
@@ -37,11 +38,11 @@ function grabPageDirRecursively({ page_dir }: { page_dir: string }) {
             continue;
         }
 
-        if (page.match(/__root\.(tx|js)x?/)) {
+        if (page.match(new RegExp(`${AppNames["RootPagesComponentName"]}`))) {
             continue;
         }
 
-        if (page.match(/\(|\)/)) {
+        if (page.match(/\(|\)|--/)) {
             continue;
         }
 

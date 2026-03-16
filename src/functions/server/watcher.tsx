@@ -1,14 +1,13 @@
 import { watch } from "fs";
 import grabDirNames from "../../utils/grab-dir-names";
 import serverParamsGen from "./server-params-gen";
-import allPagesBundler from "../bundler/all-pages-bundler";
+// import allPagesBundler from "../bundler/all-pages-bundler";
 
-const { ROOT_DIR, BUNX_HYDRATION_SRC_DIR, HYDRATION_DST_DIR, PAGES_DIR } =
-    grabDirNames();
+const { PAGES_DIR } = grabDirNames();
 
 export default function watcher() {
     watch(
-        ROOT_DIR,
+        PAGES_DIR,
         {
             recursive: true,
             persistent: true,
@@ -20,6 +19,8 @@ export default function watcher() {
             // if (filename.match(/\.bunext|\/?public\//)) return;
             // if (!filename.match(/\.(tsx|ts|css|js|jsx)$/)) return;
 
+            console.log("event", event);
+
             if (global.RECOMPILING) return;
 
             clearTimeout(global.WATCHER_TIMEOUT);
@@ -29,19 +30,19 @@ export default function watcher() {
 
                     console.log(`File Changed. Rebuilding ...`);
 
-                    await allPagesBundler();
+                    // await allPagesBundler();
 
-                    global.LAST_BUILD_TIME = Date.now();
+                    // global.LAST_BUILD_TIME = Date.now();
 
-                    for (const controller of global.HMR_CONTROLLERS) {
-                        try {
-                            controller.enqueue(
-                                `event: update\ndata: ${global.LAST_BUILD_TIME}\n\n`,
-                            );
-                        } catch {
-                            global.HMR_CONTROLLERS.delete(controller);
-                        }
-                    }
+                    // for (const controller of global.HMR_CONTROLLERS) {
+                    //     try {
+                    //         controller.enqueue(
+                    //             `event: update\ndata: ${global.LAST_BUILD_TIME}\n\n`,
+                    //         );
+                    //     } catch {
+                    //         global.HMR_CONTROLLERS.delete(controller);
+                    //     }
+                    // }
                 } catch (error: any) {
                     console.log(error);
                 } finally {

@@ -28,8 +28,7 @@ export default async function ({
 
     if (!match?.filePath) {
         const errMsg = `Route ${url.pathname} not found`;
-
-        console.error(errMsg);
+        // console.error(errMsg);
 
         return {
             success: false,

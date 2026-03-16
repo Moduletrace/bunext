@@ -128,7 +128,7 @@ export type LivePageDistGenParams = {
     head?: ReactNode;
     pageProps?: any;
     module?: BunextPageModule;
-    pageName: string;
+    bundledMap: BundlerCTXMap;
 };
 
 export type BunextPageModule = {
@@ -155,7 +155,7 @@ export type GrabPageComponentRes = {
     component: JSX.Element;
     serverRes?: BunextPageModuleServerReturn;
     routeParams?: BunxRouteParams;
-    pageName: string;
+    bundledMap: BundlerCTXMap;
     module: BunextPageModule;
 };
 
@@ -163,4 +163,21 @@ export type PageFiles = {
     local_path: string;
     url_path: string;
     file_name: string;
+};
+
+export type BundlerCTXMap = {
+    path: string;
+    hash: string;
+    type: string;
+    entrypoint: string;
+    local_path: string;
+    url_path: string;
+    file_name: string;
+    css_path?: string;
+};
+
+export type GlobalHMRControllerObject = {
+    controller: ReadableStreamDefaultController<string>;
+    page_url: string;
+    target_map: BundlerCTXMap;
 };
