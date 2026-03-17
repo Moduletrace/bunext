@@ -1,4 +1,8 @@
-export default function DefaultServerErrorPage() {
+import type { PropsWithChildren } from "react";
+
+export default function DefaultServerErrorPage({
+    children,
+}: PropsWithChildren) {
     return (
         <div
             style={{
@@ -8,9 +12,12 @@ export default function DefaultServerErrorPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexDirection: "column",
+                gap: "20px",
             }}
         >
-            <span>500 Internal Server Error</span>
+            <h1>500 Internal Server Error</h1>
+            <span>{children}</span>
         </div>
     );
 }

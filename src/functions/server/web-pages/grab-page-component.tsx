@@ -1,15 +1,16 @@
 import type { FC } from "react";
 import grabDirNames from "../../../utils/grab-dir-names";
 import grabRouteParams from "../../../utils/grab-route-params";
-import grabRouter from "../../../utils/grab-router";
 import type {
-    BundlerCTXMap,
     BunextPageModule,
+    BunextPageModuleServerReturn,
+    BunxRouteParams,
     GrabPageComponentRes,
 } from "../../../types";
 import path from "path";
 import AppNames from "../../../utils/grab-app-names";
 import { existsSync } from "fs";
+import grabPageErrorComponent from "./grab-page-error-component";
 
 class NotFoundError extends Error {}
 
@@ -23,20 +24,22 @@ export default async function grabPageComponent({
     file_path: passed_file_path,
 }: Params): Promise<GrabPageComponentRes> {
     const url = req?.url ? new URL(req.url) : undefined;
-    const router = grabRouter();
+    const router = global.ROUTER;
 
-    const {
-        BUNX_ROOT_500_PRESET_COMPONENT,
-        BUNX_ROOT_404_PRESET_COMPONENT,
-        PAGES_DIR,
-    } = grabDirNames();
+    const { PAGES_DIR } = grabDirNames();
 
-    const routeParams = req ? await grabRouteParams({ req }) : undefined;
+    let routeParams: BunxRouteParams | undefined = undefined;
 
     try {
-        const match = url ? router.match(url.pathname) : undefined;
+        routeParams = req ? await grabRouteParams({ req }) : undefined;
 
-        console.log("match", match);
+        let url_path = url ? url.pathname : undefined;
+
+        if (url_path && url?.search) {
+            url_path += url.search;
+        }
+
+        const match = url_path ? router.match(url_path) : undefined;
 
         if (!match?.filePath && url?.pathname) {
             throw new NotFoundError(`Page ${url.pathname} not found`);
@@ -91,14 +94,22 @@ export default async function grabPageComponent({
 
         const module: BunextPageModule = await import(`${file_path}?t=${now}`);
 
-        const serverRes = await (async () => {
+        const serverRes: BunextPageModuleServerReturn = await (async () => {
             try {
                 if (routeParams) {
-                    return await module["server"]?.(routeParams);
+                    const serverData = await module["server"]?.(routeParams);
+                    return {
+                        ...serverData,
+                        query: match?.query,
+                    };
                 }
-                return {};
+                return {
+                    query: match?.query,
+                };
             } catch (error) {
-                return {};
+                return {
+                    query: match?.query,
+                };
             }
         })();
 
@@ -132,55 +143,10 @@ export default async function grabPageComponent({
             meta,
         };
     } catch (error: any) {
-        const is404 = error instanceof NotFoundError;
-        const errorRoute = is404 ? "/404" : "/500";
-        const presetComponent = is404
-            ? BUNX_ROOT_404_PRESET_COMPONENT
-            : BUNX_ROOT_500_PRESET_COMPONENT;
-
-        try {
-            const match = router.match(errorRoute);
-            const filePath = match?.filePath || presetComponent;
-
-            const bundledMap = match?.filePath
-                ? (global.BUNDLER_CTX_MAP?.find(
-                      (m) => m.local_path === match.filePath,
-                  ) ?? ({} as BundlerCTXMap))
-                : ({} as BundlerCTXMap);
-
-            const module: BunextPageModule = await import(filePath);
-            const Component = module.default as FC<any>;
-            const component = <Component />;
-
-            return {
-                component,
-                routeParams,
-                module,
-                bundledMap,
-            };
-        } catch {
-            const DefaultNotFound: FC = () => (
-                <div
-                    style={{
-                        width: "100vw",
-                        height: "100vh",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                >
-                    <span>
-                        {is404 ? "404 Not Found" : "500 Internal Server Error"}
-                    </span>
-                </div>
-            );
-
-            return {
-                component: <DefaultNotFound />,
-                routeParams,
-                module: { default: DefaultNotFound },
-                bundledMap: {} as BundlerCTXMap,
-            };
-        }
+        return await grabPageErrorComponent({
+            error,
+            routeParams,
+            is404: error instanceof NotFoundError,
+        });
     }
 }

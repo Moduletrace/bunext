@@ -38,6 +38,8 @@ export default function watcher() {
 
                     console.log(`Page ${action}: ${filename}. Rebuilding ...`);
 
+                    global.ROUTER.reload();
+
                     await global.BUNDLER_CTX?.dispose();
                     global.BUNDLER_CTX = undefined;
 

@@ -176,8 +176,10 @@ export type BunextPageServerFn<
 
 export type BunextPageModuleServerReturn<
     T extends { [k: string]: any } = { [k: string]: any },
+    Q extends { [k: string]: any } = { [k: string]: any },
 > = {
     props?: T;
+    query?: Q;
 };
 
 export type BunextPageModuleMetadata = {
