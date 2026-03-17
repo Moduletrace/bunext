@@ -30,12 +30,14 @@ declare global {
     var BUNDLER_CTX: BuildContext | undefined;
     var BUNDLER_CTX_MAP: BundlerCTXMap[] | undefined;
     var IS_FIRST_BUNDLE_READY: boolean;
+    var BUNDLER_REBUILDS: 0;
 }
 
 global.ORA_SPINNER = ora();
 global.ORA_SPINNER.clear();
 global.HMR_CONTROLLERS = [];
 global.IS_FIRST_BUNDLE_READY = false;
+global.BUNDLER_REBUILDS = 0;
 
 await init();
 

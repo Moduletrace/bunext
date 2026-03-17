@@ -11,11 +11,14 @@ export default async function grabConstants() {
 
     const ServerDefaultRequestBodyLimitBytes = MB_IN_BYTES * 10;
 
+    const MaxBundlerRebuilds = 5;
+
     return {
         ClientRootElementIDName,
         ClientWindowPagePropsName,
         MBInBytes: MB_IN_BYTES,
         ServerDefaultRequestBodyLimitBytes,
         ClientRootComponentWindowName,
+        MaxBundlerRebuilds,
     } as const;
 }
