@@ -11,7 +11,6 @@ import isDevelopment from "../../utils/is-development";
 import type { BundlerCTXMap } from "../../types";
 import { execSync } from "child_process";
 import grabConstants from "../../utils/grab-constants";
-import rebuildBundler from "../server/rebuild-bundler";
 
 const { HYDRATION_DST_DIR, PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } =
     grabDirNames();
@@ -41,15 +40,9 @@ type Params = {
 
 export default async function allPagesBundler(params?: Params) {
     const pages = grabAllPages({ exclude_api: true });
-    const {
-        ClientRootElementIDName,
-        ClientRootComponentWindowName,
-        MaxBundlerRebuilds,
-    } = await grabConstants();
+    const { ClientRootElementIDName, ClientRootComponentWindowName } =
+        await grabConstants();
 
-    // Use index-based keys so bracket paths (e.g. [[...catch_all]]) never
-    // appear in any path that esbuild's binary tracks internally. The actual
-    // file path is only ever used inside our JS plugin callbacks.
     const virtualEntries: Record<string, string> = {};
     const dev = isDevelopment();
 
@@ -60,16 +53,15 @@ export default async function allPagesBundler(params?: Params) {
 
     const does_root_exist = existsSync(root_component_path);
 
-    for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
-        const virtualKey = `page-${i}`;
+    for (const page of pages) {
+        const key = page.local_path;
 
         let txt = ``;
         txt += `import { hydrateRoot } from "react-dom/client";\n`;
         if (does_root_exist) {
             txt += `import Root from "${root_component_path}";\n`;
         }
-        txt += `import Page from "page-entry:${i}";\n\n`;
+        txt += `import Page from "${page.local_path}";\n\n`;
         txt += `const pageProps = window.__PAGE_PROPS__ || {};\n`;
 
         if (does_root_exist) {
@@ -80,7 +72,7 @@ export default async function allPagesBundler(params?: Params) {
         txt += `const root = hydrateRoot(document.getElementById("${ClientRootElementIDName}"), component);\n\n`;
         txt += `window.${ClientRootComponentWindowName} = root;\n`;
 
-        virtualEntries[virtualKey] = txt;
+        virtualEntries[key] = txt;
     }
 
     const virtualPlugin: esbuild.Plugin = {
@@ -91,33 +83,11 @@ export default async function allPagesBundler(params?: Params) {
                 namespace: "virtual",
             }));
 
-            build.onResolve({ filter: /^page-entry:/ }, (args) => ({
-                path: args.path.replace("page-entry:", ""),
-                namespace: "page-entry",
-            }));
-
             build.onLoad({ filter: /.*/, namespace: "virtual" }, (args) => ({
                 contents: virtualEntries[args.path],
                 loader: "tsx",
                 resolveDir: process.cwd(),
             }));
-
-            build.onLoad(
-                { filter: /.*/, namespace: "page-entry" },
-                async (args) => {
-                    const page = pages[parseInt(args.path)];
-                    try {
-                        return {
-                            contents: await readFile(page.local_path, "utf-8"),
-                            loader: "tsx" as const,
-                            resolveDir: path.dirname(page.local_path),
-                            watchFiles: [page.local_path],
-                        };
-                    } catch (e: any) {
-                        return { errors: [{ text: e.message }] };
-                    }
-                },
-            );
         },
     };
 
@@ -128,38 +98,19 @@ export default async function allPagesBundler(params?: Params) {
                 console.time("build");
             });
 
-            build.onEnd(async (result) => {
-                if (result.errors.length > 0) {
-                    const messages = await esbuild.formatMessages(
-                        result.errors,
-                        { kind: "error", color: true },
-                    );
-                    for (const msg of messages) {
-                        process.stderr.write(msg);
-                    }
-
-                    global.BUNDLER_REBUILDS++;
-
-                    if (global.BUNDLER_REBUILDS > MaxBundlerRebuilds) {
-                        console.error(`Max Rebuilds all failed.`);
-                        process.exit(1);
-                    }
-
-                    await rebuildBundler();
-                    console.timeEnd("build");
-                    return;
-                }
+            build.onEnd((result) => {
+                if (result.errors.length > 0) return;
 
                 const artifacts: (BundlerCTXMap | undefined)[] = Object.entries(
                     result.metafile!.outputs,
                 )
                     .filter(([, meta]) => meta.entryPoint)
                     .map(([outputPath, meta]) => {
-                        const indexMatch =
-                            meta.entryPoint?.match(/^virtual:page-(\d+)$/);
-                        const target_page = indexMatch
-                            ? pages[parseInt(indexMatch[1])]
-                            : undefined;
+                        const target_page = pages.find((p) => {
+                            return (
+                                meta.entryPoint === `virtual:${p.local_path}`
+                            );
+                        });
 
                         if (!target_page || !meta.entryPoint) {
                             return undefined;
@@ -196,7 +147,6 @@ export default async function allPagesBundler(params?: Params) {
                     // );
 
                     global.BUNDLER_CTX_MAP = final_artifacts;
-                    global.BUNDLER_REBUILDS = 0;
                     params?.post_build_fn?.({ artifacts: final_artifacts });
                 }
 
@@ -221,7 +171,7 @@ export default async function allPagesBundler(params?: Params) {
     execSync(`rm -rf ${HYDRATION_DST_DIR}`);
 
     const ctx = await esbuild.context({
-        entryPoints: Object.keys(virtualEntries).map((k) => `virtual:${k}`), // ["virtual:page-0", ...]
+        entryPoints: Object.keys(virtualEntries).map((k) => `virtual:${k}`),
         outdir: HYDRATION_DST_DIR,
         bundle: true,
         minify: !dev,
@@ -240,9 +190,7 @@ export default async function allPagesBundler(params?: Params) {
         jsx: "automatic",
     });
 
-    await ctx.rebuild().catch((error: any) => {
-        console.error(`Build failed:`, error.message);
-    });
+    await ctx.rebuild();
 
     if (params?.watch) {
         global.BUNDLER_CTX = ctx;

@@ -14,9 +14,10 @@ export default function watcher() {
             recursive: true,
             persistent: true,
         },
-        (event, filename) => {
+        async (event, filename) => {
             if (!filename) return;
-            if (!PAGE_FILE_RE.test(filename)) return;
+            const file_path = path.join(SRC_DIR, filename);
+            // if (!PAGE_FILE_RE.test(filename)) return;
 
             // "change" events (file content modified) are already handled by
             // esbuild's internal ctx.watch(). Only "rename" (create or delete)
@@ -28,20 +29,17 @@ export default function watcher() {
             const fullPath = path.join(SRC_DIR, filename);
             const action = existsSync(fullPath) ? "created" : "deleted";
 
-            clearTimeout(global.WATCHER_TIMEOUT);
-            global.WATCHER_TIMEOUT = setTimeout(async () => {
-                try {
-                    global.RECOMPILING = true;
+            try {
+                global.RECOMPILING = true;
 
-                    console.log(`Page ${action}: ${filename}. Rebuilding ...`);
+                console.log(`Page ${action}: ${filename}. Rebuilding ...`);
 
-                    await rebuildBundler();
-                } catch (error: any) {
-                    console.error(error);
-                } finally {
-                    global.RECOMPILING = false;
-                }
-            }, 150);
+                await rebuildBundler();
+            } catch (error: any) {
+                console.error(error);
+            } finally {
+                global.RECOMPILING = false;
+            }
         },
     );
 }
