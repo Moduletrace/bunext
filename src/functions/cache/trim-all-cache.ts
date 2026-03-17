@@ -12,7 +12,7 @@ export default async function trimAllCache() {
             const cached_item = cached_items[i];
             if (!cached_item.endsWith(`.meta.json`)) continue;
 
-            const cache_key = cached_item.replace(/\.meta\.json/, "");
+            const cache_key = decodeURIComponent(cached_item.replace(/\.meta\.json/, ""));
 
             const trim_key = await trimCacheKey({
                 key: cache_key,
