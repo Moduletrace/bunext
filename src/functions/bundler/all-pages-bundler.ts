@@ -12,7 +12,8 @@ import type { BundlerCTXMap } from "../../types";
 import { execSync } from "child_process";
 import grabConstants from "../../utils/grab-constants";
 
-const { HYDRATION_DST_DIR, PAGES_DIR } = grabDirNames();
+const { HYDRATION_DST_DIR, PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } =
+    grabDirNames();
 
 const tailwindPlugin: esbuild.Plugin = {
     name: "tailwindcss",
@@ -151,11 +152,16 @@ export default async function allPagesBundler(params?: Params) {
 
                 console.timeEnd("build");
 
+                writeFileSync(
+                    HYDRATION_DST_DIR_MAP_JSON_FILE,
+                    JSON.stringify(artifacts),
+                );
+
                 if (params?.exit_after_first_build) {
-                    console.log(
-                        "global.BUNDLER_CTX_MAP",
-                        global.BUNDLER_CTX_MAP,
-                    );
+                    // console.log(
+                    //     "global.BUNDLER_CTX_MAP",
+                    //     global.BUNDLER_CTX_MAP,
+                    // );
                     process.exit();
                 }
             });

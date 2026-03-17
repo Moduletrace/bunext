@@ -23,6 +23,12 @@ export default function () {
 
             allPagesBundler({
                 exit_after_first_build: true,
+                // async post_build_fn({ artifacts }) {
+                //     writeFileSync(
+                //         HYDRATION_DST_DIR_MAP_JSON_FILE,
+                //         JSON.stringify(artifacts),
+                //     );
+                // },
             });
         });
 }

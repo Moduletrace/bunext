@@ -4,6 +4,12 @@ import allPagesBundler from "../bundler/all-pages-bundler";
 import serverParamsGen from "./server-params-gen";
 import watcher from "./watcher";
 import serverPostBuildFn from "./server-post-build-fn";
+import grabDirNames from "../../utils/grab-dir-names";
+import EJSON from "../../utils/ejson";
+import { readFileSync } from "fs";
+import type { BundlerCTXMap } from "../../types";
+
+const { HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 
 type Params = {
     dev?: boolean;
@@ -21,6 +27,14 @@ export default async function startServer(params?: Params) {
         });
         watcher();
     } else {
+        const artifacts = EJSON.parse(
+            readFileSync(HYDRATION_DST_DIR_MAP_JSON_FILE, "utf-8"),
+        ) as BundlerCTXMap[] | undefined;
+        if (!artifacts?.[0]) {
+            console.error(`Please build first.`);
+            process.exit(1);
+        }
+        global.BUNDLER_CTX_MAP = artifacts;
         global.IS_FIRST_BUNDLE_READY = true;
     }
 
