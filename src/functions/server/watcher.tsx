@@ -1,9 +1,14 @@
-import { watch } from "fs";
+import { watch, existsSync } from "fs";
+import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import serverParamsGen from "./server-params-gen";
-// import allPagesBundler from "../bundler/all-pages-bundler";
+import allPagesBundler from "../bundler/all-pages-bundler";
+import serverPostBuildFn from "./server-post-build-fn";
+import refreshRouter from "../../utils/refresh-router";
 
 const { PAGES_DIR } = grabDirNames();
+
+const PAGE_FILE_RE = /\.(tsx?|jsx?)$/;
 
 export default function watcher() {
     watch(
@@ -13,48 +18,39 @@ export default function watcher() {
             persistent: true,
         },
         (event, filename) => {
-            // if (!filename) return;
-            // if (filename.match(/ /)) return;
-            // if (filename.match(/^node_modules\//)) return;
-            // if (filename.match(/\.bunext|\/?public\//)) return;
-            // if (!filename.match(/\.(tsx|ts|css|js|jsx)$/)) return;
+            if (!filename) return;
+            if (!PAGE_FILE_RE.test(filename)) return;
 
-            console.log("event", event);
+            // "change" events (file content modified) are already handled by
+            // esbuild's internal ctx.watch(). Only "rename" (create or delete)
+            // requires a full rebuild because entry points have changed.
+            if (event !== "rename") return;
 
             if (global.RECOMPILING) return;
+
+            const fullPath = path.join(PAGES_DIR, filename);
+            const action = existsSync(fullPath) ? "created" : "deleted";
 
             clearTimeout(global.WATCHER_TIMEOUT);
             global.WATCHER_TIMEOUT = setTimeout(async () => {
                 try {
                     global.RECOMPILING = true;
 
-                    console.log(`File Changed. Rebuilding ...`);
+                    console.log(`Page ${action}: ${filename}. Rebuilding ...`);
 
-                    // await allPagesBundler();
+                    await global.BUNDLER_CTX?.dispose();
+                    global.BUNDLER_CTX = undefined;
 
-                    // global.LAST_BUILD_TIME = Date.now();
-
-                    // for (const controller of global.HMR_CONTROLLERS) {
-                    //     try {
-                    //         controller.enqueue(
-                    //             `event: update\ndata: ${global.LAST_BUILD_TIME}\n\n`,
-                    //         );
-                    //     } catch {
-                    //         global.HMR_CONTROLLERS.delete(controller);
-                    //     }
-                    // }
+                    await allPagesBundler({
+                        watch: true,
+                        post_build_fn: serverPostBuildFn,
+                    });
                 } catch (error: any) {
-                    console.log(error);
+                    console.error(error);
                 } finally {
                     global.RECOMPILING = false;
                 }
             }, 150);
-
-            // if (filename.match(/\/pages\//)) {
-            // } else if (filename.match(/\.(js|ts|tsx|jsx)$/)) {
-            //     clearTimeout(global.WATCHER_TIMEOUT);
-            //     global.WATCHER_TIMEOUT = setTimeout(() => reloadServer(), 150);
-            // }
         },
     );
 

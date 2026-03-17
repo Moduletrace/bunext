@@ -1,6 +1,5 @@
 import grabDirNames from "../../../utils/grab-dir-names";
 import type { BundlerCTXMap, PageDistGenParams } from "../../../types";
-import grabConstants from "../../../utils/grab-constants";
 
 const { BUNX_HYDRATION_SRC_DIR } = grabDirNames();
 
@@ -9,9 +8,6 @@ type Params = {
 };
 
 export default async function ({ bundledMap }: Params) {
-    const { ClientRootElementIDName, ClientRootComponentWindowName } =
-        await grabConstants();
-
     let script = "";
 
     // script += `import React from "react";\n`;

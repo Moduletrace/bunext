@@ -215,5 +215,5 @@ export type BundlerCTXMap = {
 export type GlobalHMRControllerObject = {
     controller: ReadableStreamDefaultController<string>;
     page_url: string;
-    target_map: BundlerCTXMap;
+    target_map?: BundlerCTXMap;
 };

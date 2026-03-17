@@ -16,16 +16,19 @@ export default async function serverPostBuildFn({ artifacts }: Params) {
 
     for (let i = 0; i < global.HMR_CONTROLLERS.length; i++) {
         const controller = global.HMR_CONTROLLERS[i];
-        const target_artifact = artifacts.find(
-            (a) => controller.target_map.local_path == a.local_path,
-        );
 
-        if (!target_artifact?.local_path) continue;
+        const target_artifact = artifacts.find(
+            (a) => controller.target_map?.local_path == a.local_path,
+        );
 
         const final_artifact: Omit<GlobalHMRControllerObject, "controller"> = {
             ..._.omit(controller, ["controller"]),
             target_map: target_artifact,
         };
+
+        if (!target_artifact) {
+            delete final_artifact.target_map;
+        }
 
         try {
             controller.controller.enqueue(

@@ -25,12 +25,18 @@ export default async function grabPageComponent({
     const url = req?.url ? new URL(req.url) : undefined;
     const router = grabRouter();
 
-    const { BUNX_ROOT_500_PRESET_COMPONENT, BUNX_ROOT_404_PRESET_COMPONENT, PAGES_DIR } = grabDirNames();
+    const {
+        BUNX_ROOT_500_PRESET_COMPONENT,
+        BUNX_ROOT_404_PRESET_COMPONENT,
+        PAGES_DIR,
+    } = grabDirNames();
 
     const routeParams = req ? await grabRouteParams({ req }) : undefined;
 
     try {
         const match = url ? router.match(url.pathname) : undefined;
+
+        console.log("match", match);
 
         if (!match?.filePath && url?.pathname) {
             throw new NotFoundError(`Page ${url.pathname} not found`);
@@ -163,7 +169,9 @@ export default async function grabPageComponent({
                         justifyContent: "center",
                     }}
                 >
-                    <span>{is404 ? "404 Not Found" : "500 Internal Server Error"}</span>
+                    <span>
+                        {is404 ? "404 Not Found" : "500 Internal Server Error"}
+                    </span>
                 </div>
             );
 
