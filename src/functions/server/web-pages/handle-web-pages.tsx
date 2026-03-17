@@ -8,14 +8,23 @@ type Params = {
 
 export default async function ({ req }: Params): Promise<Response> {
     try {
-        const { component, bundledMap, module, serverRes } =
-            await grabPageComponent({ req });
+        const {
+            component,
+            bundledMap,
+            module,
+            serverRes,
+            meta,
+            head,
+            routeParams,
+        } = await grabPageComponent({ req });
 
         const html = await genWebHTML({
             component,
             pageProps: serverRes,
             bundledMap,
             module,
+            meta,
+            head,
         });
 
         const res_opts: ResponseInit = {

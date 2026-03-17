@@ -2,7 +2,11 @@ import type { FC } from "react";
 import grabDirNames from "../../../utils/grab-dir-names";
 import grabRouteParams from "../../../utils/grab-route-params";
 import grabRouter from "../../../utils/grab-router";
-import type { BunextPageModule, GrabPageComponentRes } from "../../../types";
+import type {
+    BundlerCTXMap,
+    BunextPageModule,
+    GrabPageComponentRes,
+} from "../../../types";
 import path from "path";
 import AppNames from "../../../utils/grab-app-names";
 import { existsSync } from "fs";
@@ -92,6 +96,17 @@ export default async function grabPageComponent({
             }
         })();
 
+        const meta = module.meta
+            ? typeof module.meta == "function" && routeParams
+                ? await module.meta({
+                      ctx: routeParams,
+                      serverRes,
+                  })
+                : typeof module.meta == "object"
+                  ? module.meta
+                  : undefined
+            : undefined;
+
         const Component = module.default as FC<any>;
 
         const component = RootComponent ? (
@@ -108,24 +123,51 @@ export default async function grabPageComponent({
             routeParams,
             module,
             bundledMap,
+            meta,
         };
     } catch (error: any) {
-        // console.log(`Grab page component ERROR =>`, error.message);
+        try {
+            const match = router.match("/500");
+            const filePath = match?.filePath || BUNX_ROOT_500_PRESET_COMPONENT;
 
-        const match = router.match("/500");
+            const bundledMap = match?.filePath
+                ? (global.BUNDLER_CTX_MAP?.find(
+                      (m) => m.local_path === match.filePath,
+                  ) ?? ({} as BundlerCTXMap))
+                : ({} as BundlerCTXMap);
 
-        const filePath = match?.filePath || BUNX_ROOT_500_PRESET_COMPONENT;
+            const module: BunextPageModule = await import(filePath);
+            const Component = module.default as FC<any>;
+            const component = <Component />;
 
-        const module: BunextPageModule = await import(filePath);
+            return {
+                component,
+                routeParams,
+                module,
+                bundledMap,
+            };
+        } catch {
+            const DefaultServerError: FC = () => (
+                <div
+                    style={{
+                        width: "100vw",
+                        height: "100vh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <span>500 Internal Server Error</span>
+                </div>
+            );
 
-        const Component = module.default as FC<any>;
-        const component = <Component />;
-
-        return {
-            component,
-            routeParams,
-            module,
-            bundledMap: {},
-        };
+            return {
+                component: <DefaultServerError />,
+                routeParams,
+                module: {
+                    default: DefaultServerError,
+                },
+            };
+        }
     }
 }

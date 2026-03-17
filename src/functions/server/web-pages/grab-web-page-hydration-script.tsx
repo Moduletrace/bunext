@@ -5,7 +5,7 @@ import grabConstants from "../../../utils/grab-constants";
 const { BUNX_HYDRATION_SRC_DIR } = grabDirNames();
 
 type Params = {
-    bundledMap: BundlerCTXMap;
+    bundledMap?: BundlerCTXMap;
 };
 
 export default async function ({ bundledMap }: Params) {

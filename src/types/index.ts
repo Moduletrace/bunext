@@ -128,12 +128,46 @@ export type LivePageDistGenParams = {
     head?: ReactNode;
     pageProps?: any;
     module?: BunextPageModule;
-    bundledMap: BundlerCTXMap;
+    bundledMap?: BundlerCTXMap;
+    meta?: BunextPageModuleMeta;
 };
 
 export type BunextPageModule = {
     default: FC<any>;
     server?: BunextPageServerFn;
+    meta?: BunextPageModuleMeta | BunextPageModuleMetaFn;
+};
+
+export type BunextPageModuleMetaFn = (params: {
+    ctx: BunxRouteParams;
+    serverRes?: BunextPageModuleServerReturn;
+}) => Promise<BunextPageModuleMeta>;
+
+export type BunextPageModuleMeta = {
+    title?: string;
+    description?: string;
+    keywords?: string | string[];
+    author?: string;
+    robots?: string;
+    canonical?: string;
+    themeColor?: string;
+    og?: {
+        title?: string;
+        description?: string;
+        image?: string;
+        url?: string;
+        type?: string;
+        siteName?: string;
+        locale?: string;
+    };
+    twitter?: {
+        card?: "summary" | "summary_large_image" | "app" | "player";
+        title?: string;
+        description?: string;
+        image?: string;
+        site?: string;
+        creator?: string;
+    };
 };
 
 export type BunextPageServerFn<
@@ -155,8 +189,10 @@ export type GrabPageComponentRes = {
     component: JSX.Element;
     serverRes?: BunextPageModuleServerReturn;
     routeParams?: BunxRouteParams;
-    bundledMap: BundlerCTXMap;
+    bundledMap?: BundlerCTXMap;
     module: BunextPageModule;
+    meta?: BunextPageModuleMeta;
+    head?: ReactNode;
 };
 
 export type PageFiles = {

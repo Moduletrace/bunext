@@ -1,10 +1,10 @@
 import path from "path";
 import grabContants from "../../../utils/grab-constants";
-import grabDirNames from "../../../utils/grab-dir-names";
 import EJSON from "../../../utils/ejson";
 import type { LivePageDistGenParams } from "../../../types";
 import isDevelopment from "../../../utils/is-development";
 import grabWebPageHydrationScript from "./grab-web-page-hydration-script";
+import grabWebMetaHTML from "./grab-web-meta-html";
 
 export default async function genWebHTML({
     component,
@@ -12,6 +12,7 @@ export default async function genWebHTML({
     bundledMap,
     head,
     module,
+    meta,
 }: LivePageDistGenParams) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } =
         await grabContants();
@@ -23,24 +24,27 @@ export default async function genWebHTML({
     const componentHTML = renderToString(component);
     const headHTML = head ? renderToString(head) : "";
 
-    // const SCRIPT_SRC = path.join("/public/pages", bundledMap.path);
-    // const CSS_SRC = bundledMap.css_path
-    //     ? path.join("/public/pages", bundledMap.css_path)
-    //     : undefined;
-    // const { HYDRATION_DST_DIR } = grabDirNames();
-
     let html = `<!DOCTYPE html>\n`;
     html += `<html>\n`;
     html += `    <head>\n`;
     html += `        <meta charset="utf-8" />\n`;
     html += `        <meta name="viewport" content="width=device-width, initial-scale=1.0">\n`;
-    if (bundledMap.css_path) {
+
+    if (meta) {
+        html += `        ${grabWebMetaHTML({ meta })}\n`;
+    }
+
+    if (bundledMap?.css_path) {
         html += `        <link rel="stylesheet" href="/${bundledMap.css_path}" />\n`;
     }
+
     html += `        <script>window.${ClientWindowPagePropsName} = ${
         EJSON.stringify(pageProps || {}) || "{}"
     }</script>\n`;
-    html += `        <script src="/${bundledMap.path}" type="module" defer></script>\n`;
+
+    if (bundledMap?.path) {
+        html += `        <script src="/${bundledMap.path}" type="module" defer></script>\n`;
+    }
 
     if (isDevelopment()) {
         html += `<script defer>\n${await grabWebPageHydrationScript({ bundledMap })}\n</script>\n`;
