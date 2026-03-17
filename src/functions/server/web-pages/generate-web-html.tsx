@@ -16,7 +16,7 @@ export default async function genWebHTML({
     routeParams,
 }: LivePageDistGenParams) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } =
-        await grabContants();
+        grabContants();
 
     const { renderToString } = await import(
         path.join(process.cwd(), "node_modules", "react-dom", "server")

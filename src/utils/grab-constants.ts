@@ -1,8 +1,5 @@
-import path from "path";
-import grabConfig from "../functions/grab-config";
-
-export default async function grabConstants() {
-    const config = await grabConfig();
+export default function grabConstants() {
+    const config = global.CONFIG;
     const MB_IN_BYTES = 1024 * 1024;
 
     const ClientWindowPagePropsName = "__PAGE_PROPS__";
@@ -20,5 +17,6 @@ export default async function grabConstants() {
         ServerDefaultRequestBodyLimitBytes,
         ClientRootComponentWindowName,
         MaxBundlerRebuilds,
+        config,
     } as const;
 }

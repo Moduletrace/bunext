@@ -1,9 +1,5 @@
 import type { Server } from "bun";
-import type {
-    APIResponseObject,
-    BunextServerRouteConfig,
-    BunxRouteParams,
-} from "../../types";
+import type { BunextServerRouteConfig, BunxRouteParams } from "../../types";
 import grabRouteParams from "../../utils/grab-route-params";
 import grabConstants from "../../utils/grab-constants";
 import grabRouter from "../../utils/grab-router";
@@ -13,14 +9,10 @@ type Params = {
     server: Server;
 };
 
-export default async function ({
-    req,
-    server,
-}: Params): Promise<APIResponseObject | undefined> {
+export default async function ({ req, server }: Params): Promise<Response> {
     const url = new URL(req.url);
 
-    const { MBInBytes, ServerDefaultRequestBodyLimitBytes } =
-        await grabConstants();
+    const { MBInBytes, ServerDefaultRequestBodyLimitBytes } = grabConstants();
 
     const router = grabRouter();
 
@@ -28,13 +20,19 @@ export default async function ({
 
     if (!match?.filePath) {
         const errMsg = `Route ${url.pathname} not found`;
-        // console.error(errMsg);
 
-        return {
-            success: false,
-            status: 401,
-            msg: errMsg,
-        };
+        return Response.json(
+            {
+                success: false,
+                msg: errMsg,
+            },
+            {
+                status: 401,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            },
+        );
     }
 
     const routeParams: BunxRouteParams = await grabRouteParams({ req });
@@ -52,17 +50,25 @@ export default async function ({
                 size > config.maxRequestBodyMB * MBInBytes) ||
             size > ServerDefaultRequestBodyLimitBytes
         ) {
-            return {
-                success: false,
-                status: 413,
-                msg: "Request Body Too Large!",
-            };
+            return Response.json(
+                {
+                    success: false,
+                    msg: "Request Body Too Large!",
+                },
+                {
+                    status: 413,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
         }
     }
 
-    const res: APIResponseObject = await module["default"](
-        routeParams as BunxRouteParams,
-    );
+    const res: Response = await module["default"]({
+        ...routeParams,
+        server,
+    } as BunxRouteParams);
 
     return res;
 }

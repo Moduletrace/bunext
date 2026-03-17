@@ -125,7 +125,7 @@ export default async function grabPageComponent({
             : undefined;
 
         const Component = module.default as FC<any>;
-        const Head = module.head as FC<any>;
+        const Head = module.Head as FC<any>;
 
         const component = RootComponent ? (
             <RootComponent {...serverRes}>

@@ -1,4 +1,3 @@
-import type { Server } from "bun";
 import type { BunxRouteParams } from "../types";
 import deserializeQuery from "./deserialize-query";
 
@@ -26,6 +25,7 @@ export default async function grabRouteParams({
         url,
         query,
         body,
+        server: global.SERVER,
     };
 
     return routeParams;

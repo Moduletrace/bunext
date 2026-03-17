@@ -1,7 +1,7 @@
 import { Command } from "commander";
-import grabConfig from "../../src/functions/grab-config";
-import startServer from "../../src/functions/server/start-server";
-import init from "../../src/functions/init";
+import grabConfig from "../../functions/grab-config";
+import startServer from "../../functions/server/start-server";
+import init from "../../functions/init";
 
 export default function () {
     return new Command("start")

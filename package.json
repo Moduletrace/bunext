@@ -12,9 +12,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "docker:dev": "cd envs/development && docker compose down && docker compose up --build",
-        "start": "cd envs/production && docker compose down && docker compose up -d --build",
-        "preview": "cd envs/preview && docker compose down && docker compose up -d --build"
+        "build": "tsc"
     },
     "devDependencies": {
         "@types/bun": "latest",

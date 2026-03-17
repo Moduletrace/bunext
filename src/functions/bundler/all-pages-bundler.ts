@@ -41,7 +41,7 @@ type Params = {
 export default async function allPagesBundler(params?: Params) {
     const pages = grabAllPages({ exclude_api: true });
     const { ClientRootElementIDName, ClientRootComponentWindowName } =
-        await grabConstants();
+        grabConstants();
 
     const virtualEntries: Record<string, string> = {};
     const dev = isDevelopment();

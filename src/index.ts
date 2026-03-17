@@ -8,12 +8,12 @@ import type {
     BundlerCTXMap,
     BunextConfig,
     GlobalHMRControllerObject,
-} from "./src/types";
+} from "./types";
 import type { FileSystemRouter, Server } from "bun";
-import init from "./src/functions/init";
-import grabDirNames from "./src/utils/grab-dir-names";
+import init from "./functions/init";
+import grabDirNames from "./utils/grab-dir-names";
 import build from "./commands/build";
-import type { BuildContext, BuildResult } from "esbuild";
+import type { BuildContext } from "esbuild";
 
 /**
  * # Declare Global Variables

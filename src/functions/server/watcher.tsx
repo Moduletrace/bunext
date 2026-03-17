@@ -5,8 +5,6 @@ import rebuildBundler from "./rebuild-bundler";
 
 const { SRC_DIR } = grabDirNames();
 
-const PAGE_FILE_RE = /\.(tsx?|jsx?|css)$/;
-
 export default function watcher() {
     watch(
         SRC_DIR,
@@ -16,12 +14,7 @@ export default function watcher() {
         },
         async (event, filename) => {
             if (!filename) return;
-            const file_path = path.join(SRC_DIR, filename);
-            // if (!PAGE_FILE_RE.test(filename)) return;
 
-            // "change" events (file content modified) are already handled by
-            // esbuild's internal ctx.watch(). Only "rename" (create or delete)
-            // requires a full rebuild because entry points have changed.
             if (event !== "rename") return;
 
             if (global.RECOMPILING) return;

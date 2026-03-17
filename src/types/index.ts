@@ -48,6 +48,15 @@ export type BunextConfig = {
     globalVars?: { [k: string]: any };
     port?: number;
     development?: boolean;
+    middleware?: (
+        params: BunextConfigMiddlewareParams,
+    ) => Promise<Response | undefined> | Response | undefined;
+};
+
+export type BunextConfigMiddlewareParams = {
+    req: Request;
+    url: URL;
+    server: Server;
 };
 
 export type GetRouteReturn = {
@@ -69,6 +78,7 @@ export type BunxRouteParams = {
      * Intercept and Transform the response object
      */
     resTransform?: (res: Response) => Promise<Response> | Response;
+    server?: Server;
 };
 
 export interface PostInsertReturn {
@@ -146,7 +156,7 @@ export type BunextPageModule = {
     default: FC<any>;
     server?: BunextPageServerFn;
     meta?: BunextPageModuleMeta | BunextPageModuleMetaFn;
-    head?: FC<BunextPageHeadFCProps>;
+    Head?: FC<BunextPageHeadFCProps>;
 };
 
 export type BunextPageModuleMetaFn = (params: {

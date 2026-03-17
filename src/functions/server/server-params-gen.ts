@@ -5,6 +5,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import handleWebPages from "./web-pages/handle-web-pages";
 import handleRoutes from "./handle-routes";
 import isDevelopment from "../../utils/is-development";
+import grabConstants from "../../utils/grab-constants";
 
 type Params = {
     dev?: boolean;
@@ -18,6 +19,20 @@ export default async function (params?: Params): Promise<ServeOptions> {
         async fetch(req, server) {
             try {
                 const url = new URL(req.url);
+
+                const { config } = grabConstants();
+
+                if (config?.middleware) {
+                    const middleware_res = await config.middleware({
+                        req,
+                        url,
+                        server,
+                    });
+
+                    if (typeof middleware_res == "object") {
+                        return middleware_res;
+                    }
+                }
 
                 if (url.pathname === "/__hmr" && isDevelopment()) {
                     const referer_url = new URL(
@@ -69,14 +84,7 @@ export default async function (params?: Params): Promise<ServeOptions> {
                 }
 
                 if (url.pathname.startsWith("/api/")) {
-                    const res = await handleRoutes({ req, server });
-
-                    return new Response(JSON.stringify(res), {
-                        status: res?.status,
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
+                    return await handleRoutes({ req, server });
                 }
 
                 if (url.pathname.startsWith("/public/")) {

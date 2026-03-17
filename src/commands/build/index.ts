@@ -1,8 +1,8 @@
 import { Command } from "commander";
-import grabConfig from "../../src/functions/grab-config";
-import init from "../../src/functions/init";
-import type { BunextConfig } from "../../src/types";
-import allPagesBundler from "../../src/functions/bundler/all-pages-bundler";
+import grabConfig from "../../functions/grab-config";
+import init from "../../functions/init";
+import type { BunextConfig } from "../../types";
+import allPagesBundler from "../../functions/bundler/all-pages-bundler";
 
 export default function () {
     return new Command("build")
@@ -23,12 +23,6 @@ export default function () {
 
             allPagesBundler({
                 exit_after_first_build: true,
-                // async post_build_fn({ artifacts }) {
-                //     writeFileSync(
-                //         HYDRATION_DST_DIR_MAP_JSON_FILE,
-                //         JSON.stringify(artifacts),
-                //     );
-                // },
             });
         });
 }
