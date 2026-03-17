@@ -10,6 +10,8 @@ export default async function genWebHTML({
     component,
     pageProps,
     bundledMap,
+    head,
+    module,
 }: LivePageDistGenParams) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } =
         await grabContants();
@@ -19,6 +21,7 @@ export default async function genWebHTML({
     );
 
     const componentHTML = renderToString(component);
+    const headHTML = head ? renderToString(head) : "";
 
     // const SCRIPT_SRC = path.join("/public/pages", bundledMap.path);
     // const CSS_SRC = bundledMap.css_path
@@ -30,6 +33,7 @@ export default async function genWebHTML({
     html += `<html>\n`;
     html += `    <head>\n`;
     html += `        <meta charset="utf-8" />\n`;
+    html += `        <meta name="viewport" content="width=device-width, initial-scale=1.0">\n`;
     if (bundledMap.css_path) {
         html += `        <link rel="stylesheet" href="/${bundledMap.css_path}" />\n`;
     }
@@ -40,6 +44,10 @@ export default async function genWebHTML({
 
     if (isDevelopment()) {
         html += `<script defer>\n${await grabWebPageHydrationScript({ bundledMap })}\n</script>\n`;
+    }
+
+    if (headHTML) {
+        html += `    ${headHTML}\n`;
     }
 
     html += `    </head>\n`;
