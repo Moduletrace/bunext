@@ -11,6 +11,8 @@ import path from "path";
 import AppNames from "../../../utils/grab-app-names";
 import { existsSync } from "fs";
 
+class NotFoundError extends Error {}
+
 type Params = {
     req?: Request;
     file_path?: string;
@@ -23,7 +25,7 @@ export default async function grabPageComponent({
     const url = req?.url ? new URL(req.url) : undefined;
     const router = grabRouter();
 
-    const { BUNX_ROOT_500_PRESET_COMPONENT, PAGES_DIR } = grabDirNames();
+    const { BUNX_ROOT_500_PRESET_COMPONENT, BUNX_ROOT_404_PRESET_COMPONENT, PAGES_DIR } = grabDirNames();
 
     const routeParams = req ? await grabRouteParams({ req }) : undefined;
 
@@ -31,9 +33,7 @@ export default async function grabPageComponent({
         const match = url ? router.match(url.pathname) : undefined;
 
         if (!match?.filePath && url?.pathname) {
-            const errMsg = `Page ${url.pathname} not found`;
-            // console.error(errMsg);
-            throw new Error(errMsg);
+            throw new NotFoundError(`Page ${url.pathname} not found`);
         }
 
         const file_path = match?.filePath || passed_file_path;
@@ -126,9 +126,15 @@ export default async function grabPageComponent({
             meta,
         };
     } catch (error: any) {
+        const is404 = error instanceof NotFoundError;
+        const errorRoute = is404 ? "/404" : "/500";
+        const presetComponent = is404
+            ? BUNX_ROOT_404_PRESET_COMPONENT
+            : BUNX_ROOT_500_PRESET_COMPONENT;
+
         try {
-            const match = router.match("/500");
-            const filePath = match?.filePath || BUNX_ROOT_500_PRESET_COMPONENT;
+            const match = router.match(errorRoute);
+            const filePath = match?.filePath || presetComponent;
 
             const bundledMap = match?.filePath
                 ? (global.BUNDLER_CTX_MAP?.find(
@@ -147,7 +153,7 @@ export default async function grabPageComponent({
                 bundledMap,
             };
         } catch {
-            const DefaultServerError: FC = () => (
+            const DefaultNotFound: FC = () => (
                 <div
                     style={{
                         width: "100vw",
@@ -157,16 +163,15 @@ export default async function grabPageComponent({
                         justifyContent: "center",
                     }}
                 >
-                    <span>500 Internal Server Error</span>
+                    <span>{is404 ? "404 Not Found" : "500 Internal Server Error"}</span>
                 </div>
             );
 
             return {
-                component: <DefaultServerError />,
+                component: <DefaultNotFound />,
                 routeParams,
-                module: {
-                    default: DefaultServerError,
-                },
+                module: { default: DefaultNotFound },
+                bundledMap: {} as BundlerCTXMap,
             };
         }
     }

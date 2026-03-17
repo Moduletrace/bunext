@@ -30,6 +30,12 @@ export default function grabDirNames() {
         `${BUNX_ROOT_500_FILE_NAME}.tsx`,
     );
 
+    const BUNX_ROOT_404_FILE_NAME = `not-found`;
+    const BUNX_ROOT_404_PRESET_COMPONENT = path.join(
+        BUNX_ROOT_PRESETS_DIR,
+        `${BUNX_ROOT_404_FILE_NAME}.tsx`,
+    );
+
     return {
         ROOT_DIR,
         SRC_DIR,
@@ -45,6 +51,8 @@ export default function grabDirNames() {
         BUNX_ROOT_PRESETS_DIR,
         BUNX_ROOT_500_PRESET_COMPONENT,
         BUNX_ROOT_500_FILE_NAME,
+        BUNX_ROOT_404_PRESET_COMPONENT,
+        BUNX_ROOT_404_FILE_NAME,
         HYDRATION_DST_DIR_MAP_JSON_FILE,
     };
 }
