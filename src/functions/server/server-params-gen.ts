@@ -6,6 +6,7 @@ import handleWebPages from "./web-pages/handle-web-pages";
 import handleRoutes from "./handle-routes";
 import isDevelopment from "../../utils/is-development";
 import grabConstants from "../../utils/grab-constants";
+import { AppData } from "../../data/app-data";
 
 type Params = {
     dev?: boolean;
@@ -14,6 +15,8 @@ type Params = {
 export default async function (params?: Params): Promise<ServeOptions> {
     const port = grabAppPort();
     const { PUBLIC_DIR } = grabDirNames();
+
+    const is_dev = isDevelopment();
 
     return {
         async fetch(req, server) {
@@ -34,7 +37,7 @@ export default async function (params?: Params): Promise<ServeOptions> {
                     }
                 }
 
-                if (url.pathname === "/__hmr" && isDevelopment()) {
+                if (url.pathname === "/__hmr" && is_dev) {
                     const referer_url = new URL(
                         req.headers.get("referer") || "",
                     );
@@ -95,7 +98,15 @@ export default async function (params?: Params): Promise<ServeOptions> {
                         ),
                     );
 
-                    return new Response(file);
+                    let res_opts: ResponseInit = {};
+
+                    if (!is_dev && url.pathname.match(/__bunext/)) {
+                        res_opts.headers = {
+                            "Cache-Control": `public, max-age=${AppData["BunextStaticFilesCacheExpiry"]}, must-revalidate`,
+                        };
+                    }
+
+                    return new Response(file, res_opts);
                 }
 
                 if (url.pathname.startsWith("/favicon.")) {

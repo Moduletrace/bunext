@@ -26,7 +26,7 @@ A Next.js-style full-stack meta-framework built on [Bun](https://bun.sh) and Rea
 - [Error Pages](#error-pages)
 - [Static Files](#static-files)
 - [Configuration](#configuration)
-  - [Middleware](#middleware)
+    - [Middleware](#middleware)
 - [Environment Variables](#environment-variables)
 - [How It Works](#how-it-works)
     - [Development Server](#development-server)
@@ -402,7 +402,10 @@ The `ctx` parameter has the same shape as the page `server` function context —
 Export a `config` object to override the per-route request body limit (default: 10 MB):
 
 ```ts
-import type { BunextServerRouteConfig, BunxRouteParams } from "bunext/src/types";
+import type {
+    BunextServerRouteConfig,
+    BunxRouteParams,
+} from "bunext/src/types";
 
 export const config: BunextServerRouteConfig = {
     maxRequestBodyMB: 50, // allow up to 50 MB
@@ -482,15 +485,15 @@ const config: BunextConfig = {
 export default config;
 ```
 
-| Option         | Type                                                                 | Default          | Description                                        |
-| -------------- | -------------------------------------------------------------------- | ---------------- | -------------------------------------------------- |
-| `port`         | `number`                                                             | `7000`           | HTTP server port                                   |
-| `origin`       | `string`                                                             | —                | Canonical origin URL                               |
-| `distDir`      | `string`                                                             | `.bunext`        | Internal artifact directory                        |
-| `assetsPrefix` | `string`                                                             | `_bunext/static` | URL prefix for static assets                       |
-| `globalVars`   | `{ [k: string]: any }`                                               | —                | Variables injected globally at build time          |
-| `development`  | `boolean`                                                            | —                | Overridden to `true` by `bunext dev` automatically |
-| `middleware`   | `(params: BunextConfigMiddlewareParams) => Response \| undefined \| Promise<...>` | —   | Global middleware — see [Middleware](#middleware)  |
+| Option         | Type                                                                              | Default          | Description                                        |
+| -------------- | --------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------- |
+| `port`         | `number`                                                                          | `7000`           | HTTP server port                                   |
+| `origin`       | `string`                                                                          | —                | Canonical origin URL                               |
+| `distDir`      | `string`                                                                          | `.bunext`        | Internal artifact directory                        |
+| `assetsPrefix` | `string`                                                                          | `_bunext/static` | URL prefix for static assets                       |
+| `globalVars`   | `{ [k: string]: any }`                                                            | —                | Variables injected globally at build time          |
+| `development`  | `boolean`                                                                         | —                | Overridden to `true` by `bunext dev` automatically |
+| `middleware`   | `(params: BunextConfigMiddlewareParams) => Response \| undefined \| Promise<...>` | —                | Global middleware — see [Middleware](#middleware)  |
 
 ### Middleware
 
@@ -501,7 +504,10 @@ Middleware runs on every request before any routing. Define it in `bunext.config
 
 ```ts
 // bunext.config.ts
-import type { BunextConfig, BunextConfigMiddlewareParams } from "bunext/src/types";
+import type {
+    BunextConfig,
+    BunextConfigMiddlewareParams,
+} from "bunext/src/types";
 
 const config: BunextConfig = {
     middleware: async ({ req, url, server }) => {
@@ -631,6 +637,6 @@ Request
 Server-rendered HTML includes:
 
 - `window.__PAGE_PROPS__` — the serialized server function return value, read by `hydrateRoot` on the client.
-- A `<script type="module" defer>` tag pointing to the page's bundled client script.
+- A `<script type="module" async>` tag pointing to the page's bundled client script.
 - A `<link rel="stylesheet">` tag if the bundler emitted a CSS file for the page.
 - In development: the HMR client script.

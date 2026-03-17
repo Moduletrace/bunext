@@ -51,6 +51,7 @@ export type BunextConfig = {
     middleware?: (
         params: BunextConfigMiddlewareParams,
     ) => Promise<Response | undefined> | Response | undefined;
+    defaultCacheExpiry?: number;
 };
 
 export type BunextConfigMiddlewareParams = {
@@ -157,6 +158,7 @@ export type BunextPageModule = {
     server?: BunextPageServerFn;
     meta?: BunextPageModuleMeta | BunextPageModuleMetaFn;
     Head?: FC<BunextPageHeadFCProps>;
+    config?: BunextRouteConfig;
 };
 
 export type BunextPageModuleMetaFn = (params: {
@@ -197,6 +199,14 @@ export type BunextPageServerFn<
     ctx: Omit<BunxRouteParams, "body">,
 ) => Promise<BunextPageModuleServerReturn<T>>;
 
+export type BunextRouteConfig = {
+    cachePage?: boolean;
+    /**
+     * Expiry time of the cache in seconds
+     */
+    cacheExpiry?: number;
+};
+
 export type BunextPageModuleServerReturn<
     T extends { [k: string]: any } = { [k: string]: any },
     Q extends { [k: string]: any } = { [k: string]: any },
@@ -205,6 +215,11 @@ export type BunextPageModuleServerReturn<
     query?: Q;
     redirect?: BunextPageModuleServerRedirect;
     responseOptions?: ResponseInit;
+    cachePage?: boolean;
+    /**
+     * Expiry time of the cache in seconds
+     */
+    cacheExpiry?: number;
 };
 
 export type BunextPageModuleServerRedirect = {
@@ -249,4 +264,10 @@ export type GlobalHMRControllerObject = {
     controller: ReadableStreamDefaultController<string>;
     page_url: string;
     target_map?: BundlerCTXMap;
+};
+
+export type BunextCacheFileMeta = {
+    date_created: number;
+    paradigm: "html" | "json";
+    expiry_seconds?: number;
 };

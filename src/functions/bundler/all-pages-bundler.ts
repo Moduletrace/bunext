@@ -165,7 +165,7 @@ export default async function allPagesBundler(params?: Params) {
         entryPoints: Object.keys(virtualEntries).map((k) => `virtual:${k}`),
         outdir: HYDRATION_DST_DIR,
         bundle: true,
-        minify: !dev,
+        minify: true,
         format: "esm",
         target: "es2020",
         platform: "browser",
@@ -178,6 +178,7 @@ export default async function allPagesBundler(params?: Params) {
         metafile: true,
         plugins: [tailwindPlugin, virtualPlugin, artifactTracker],
         jsx: "automatic",
+        splitting: true,
     });
 
     await ctx.rebuild();

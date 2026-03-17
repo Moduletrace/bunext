@@ -2,6 +2,7 @@
     "name": "bunext",
     "module": "index.ts",
     "type": "module",
+    "version": "1.0.0",
     "bin": {
         "bunext": "dist/index.js"
     },

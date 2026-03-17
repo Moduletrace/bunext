@@ -8,6 +8,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import EJSON from "../../utils/ejson";
 import { readFileSync } from "fs";
 import type { BundlerCTXMap } from "../../types";
+import cron from "./cron";
 
 const { HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 
@@ -36,6 +37,7 @@ export default async function startServer(params?: Params) {
         }
         global.BUNDLER_CTX_MAP = artifacts;
         global.IS_FIRST_BUNDLE_READY = true;
+        cron();
     }
 
     let bundle_ready_retries = 0;

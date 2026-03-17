@@ -6,7 +6,9 @@ export default function grabDirNames() {
     const PAGES_DIR = path.join(SRC_DIR, "pages");
     const API_DIR = path.join(PAGES_DIR, "api");
     const PUBLIC_DIR = path.join(ROOT_DIR, "public");
-    const HYDRATION_DST_DIR = path.join(PUBLIC_DIR, "pages");
+    const BUNEXT_PUBLIC_DIR = path.join(PUBLIC_DIR, "__bunext");
+    const HYDRATION_DST_DIR = path.join(BUNEXT_PUBLIC_DIR, "pages");
+    const BUNEXT_CACHE_DIR = path.join(BUNEXT_PUBLIC_DIR, "cache");
     const HYDRATION_DST_DIR_MAP_JSON_FILE = path.join(
         HYDRATION_DST_DIR,
         "map.json",
@@ -54,5 +56,6 @@ export default function grabDirNames() {
         BUNX_ROOT_404_PRESET_COMPONENT,
         BUNX_ROOT_404_FILE_NAME,
         HYDRATION_DST_DIR_MAP_JSON_FILE,
+        BUNEXT_CACHE_DIR,
     };
 }

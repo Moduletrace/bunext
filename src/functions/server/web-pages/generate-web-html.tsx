@@ -46,7 +46,7 @@ export default async function genWebHTML({
     }</script>\n`;
 
     if (bundledMap?.path) {
-        html += `        <script src="/${bundledMap.path}" type="module" defer></script>\n`;
+        html += `        <script src="/${bundledMap.path}" type="module" async></script>\n`;
     }
 
     if (isDevelopment()) {

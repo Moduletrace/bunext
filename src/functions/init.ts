@@ -1,8 +1,11 @@
 import { existsSync, mkdirSync, statSync, writeFileSync } from "fs";
 import grabDirNames from "../utils/grab-dir-names";
+import { execSync } from "child_process";
 
 export default async function () {
     const dirNames = grabDirNames();
+
+    execSync(`rm -rf ${dirNames.BUNEXT_CACHE_DIR}`);
 
     const keys = Object.keys(dirNames) as (keyof ReturnType<
         typeof grabDirNames
