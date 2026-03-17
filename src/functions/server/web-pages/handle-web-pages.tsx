@@ -36,11 +36,23 @@ async function generateRes({
         module,
         meta,
         head,
+        routeParams,
     });
 
+    if (serverRes?.redirect?.destination) {
+        return Response.redirect(
+            serverRes.redirect.destination,
+            serverRes.redirect.permanent
+                ? 301
+                : serverRes.redirect.status_code || 302,
+        );
+    }
+
     const res_opts: ResponseInit = {
+        ...serverRes?.responseOptions,
         headers: {
             "Content-Type": "text/html",
+            ...serverRes?.responseOptions?.headers,
         },
     };
 
@@ -54,6 +66,10 @@ async function generateRes({
     }
 
     const res = new Response(html, res_opts);
+
+    if (routeParams?.resTransform) {
+        return await routeParams.resTransform(res);
+    }
 
     return res;
 }

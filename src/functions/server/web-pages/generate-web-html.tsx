@@ -10,9 +10,10 @@ export default async function genWebHTML({
     component,
     pageProps,
     bundledMap,
-    head,
+    head: Head,
     module,
     meta,
+    routeParams,
 }: LivePageDistGenParams) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } =
         await grabContants();
@@ -22,7 +23,9 @@ export default async function genWebHTML({
     );
 
     const componentHTML = renderToString(component);
-    const headHTML = head ? renderToString(head) : "";
+    const headHTML = Head
+        ? renderToString(<Head serverRes={pageProps} ctx={routeParams} />)
+        : "";
 
     let html = `<!DOCTYPE html>\n`;
     html += `<html>\n`;

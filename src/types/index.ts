@@ -65,6 +65,10 @@ export type BunxRouteParams = {
     url: URL;
     body?: any;
     query?: any;
+    /**
+     * Intercept and Transform the response object
+     */
+    resTransform?: (res: Response) => Promise<Response> | Response;
 };
 
 export interface PostInsertReturn {
@@ -125,17 +129,24 @@ export type PageDistGenParams = {
 
 export type LivePageDistGenParams = {
     component: ReactNode;
-    head?: ReactNode;
+    head?: FC<BunextPageHeadFCProps>;
     pageProps?: any;
     module?: BunextPageModule;
     bundledMap?: BundlerCTXMap;
     meta?: BunextPageModuleMeta;
+    routeParams?: BunxRouteParams;
+};
+
+export type BunextPageHeadFCProps = {
+    serverRes: BunextPageModuleServerReturn;
+    ctx?: BunxRouteParams;
 };
 
 export type BunextPageModule = {
     default: FC<any>;
     server?: BunextPageServerFn;
     meta?: BunextPageModuleMeta | BunextPageModuleMetaFn;
+    head?: FC<BunextPageHeadFCProps>;
 };
 
 export type BunextPageModuleMetaFn = (params: {
@@ -172,7 +183,9 @@ export type BunextPageModuleMeta = {
 
 export type BunextPageServerFn<
     T extends { [k: string]: any } = { [k: string]: any },
-> = (routeParams: BunxRouteParams) => Promise<BunextPageModuleServerReturn<T>>;
+> = (
+    ctx: Omit<BunxRouteParams, "body">,
+) => Promise<BunextPageModuleServerReturn<T>>;
 
 export type BunextPageModuleServerReturn<
     T extends { [k: string]: any } = { [k: string]: any },
@@ -180,6 +193,14 @@ export type BunextPageModuleServerReturn<
 > = {
     props?: T;
     query?: Q;
+    redirect?: BunextPageModuleServerRedirect;
+    responseOptions?: ResponseInit;
+};
+
+export type BunextPageModuleServerRedirect = {
+    destination: string;
+    permanent?: boolean;
+    status_code?: number;
 };
 
 export type BunextPageModuleMetadata = {
@@ -194,7 +215,7 @@ export type GrabPageComponentRes = {
     bundledMap?: BundlerCTXMap;
     module: BunextPageModule;
     meta?: BunextPageModuleMeta;
-    head?: ReactNode;
+    head?: FC<BunextPageHeadFCProps>;
 };
 
 export type PageFiles = {

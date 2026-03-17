@@ -125,6 +125,7 @@ export default async function grabPageComponent({
             : undefined;
 
         const Component = module.default as FC<any>;
+        const Head = module.head as FC<any>;
 
         const component = RootComponent ? (
             <RootComponent {...serverRes}>
@@ -141,6 +142,7 @@ export default async function grabPageComponent({
             module,
             bundledMap,
             meta,
+            head: Head,
         };
     } catch (error: any) {
         return await grabPageErrorComponent({
