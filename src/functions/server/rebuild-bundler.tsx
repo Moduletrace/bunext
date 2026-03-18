@@ -1,5 +1,6 @@
 import allPagesBundler from "../bundler/all-pages-bundler";
 import serverPostBuildFn from "./server-post-build-fn";
+import { log } from "../../utils/log";
 
 export default async function rebuildBundler() {
     try {
@@ -13,6 +14,6 @@ export default async function rebuildBundler() {
             post_build_fn: serverPostBuildFn,
         });
     } catch (error: any) {
-        console.error(error);
+        log.error(error);
     }
 }

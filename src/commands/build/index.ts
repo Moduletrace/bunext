@@ -3,12 +3,14 @@ import grabConfig from "../../functions/grab-config";
 import init from "../../functions/init";
 import type { BunextConfig } from "../../types";
 import allPagesBundler from "../../functions/bundler/all-pages-bundler";
+import { log } from "../../utils/log";
 
 export default function () {
     return new Command("build")
         .description("Build Project")
         .action(async () => {
-            console.log(`Building Project ...`);
+            log.banner();
+            log.build("Building Project ...");
 
             process.env.NODE_ENV = "production";
 

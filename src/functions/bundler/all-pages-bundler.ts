@@ -11,6 +11,7 @@ import isDevelopment from "../../utils/is-development";
 import type { BundlerCTXMap } from "../../types";
 import { execSync } from "child_process";
 import grabConstants from "../../utils/grab-constants";
+import { log } from "../../utils/log";
 
 const { HYDRATION_DST_DIR, PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } =
     grabDirNames();
@@ -94,8 +95,10 @@ export default async function allPagesBundler(params?: Params) {
     const artifactTracker: esbuild.Plugin = {
         name: "artifact-tracker",
         setup(build) {
+            let buildStart = 0;
+
             build.onStart(() => {
-                console.time("build");
+                buildStart = performance.now();
             });
 
             build.onEnd((result) => {
@@ -150,7 +153,8 @@ export default async function allPagesBundler(params?: Params) {
                     );
                 }
 
-                console.timeEnd("build");
+                const elapsed = (performance.now() - buildStart).toFixed(0);
+                log.success(`Built in ${elapsed}ms`);
 
                 if (params?.exit_after_first_build) {
                     process.exit();

@@ -1,5 +1,6 @@
 import _ from "lodash";
 import AppNames from "../../utils/grab-app-names";
+import { log } from "../../utils/log";
 import allPagesBundler from "../bundler/all-pages-bundler";
 import serverParamsGen from "./server-params-gen";
 import watcher from "./watcher";
@@ -32,7 +33,7 @@ export default async function startServer(params?: Params) {
             readFileSync(HYDRATION_DST_DIR_MAP_JSON_FILE, "utf-8"),
         ) as BundlerCTXMap[] | undefined;
         if (!artifacts?.[0]) {
-            console.error(`Please build first.`);
+            log.error("Please build first.");
             process.exit(1);
         }
         global.BUNDLER_CTX_MAP = artifacts;
@@ -45,7 +46,7 @@ export default async function startServer(params?: Params) {
 
     while (!global.IS_FIRST_BUNDLE_READY) {
         if (bundle_ready_retries > MAX_BUNDLE_READY_RETRIES) {
-            console.error(`Couldn't grab first bundle for dev environment`);
+            log.error("Couldn't grab first bundle for dev environment");
             process.exit(1);
         }
         bundle_ready_retries++;
@@ -56,9 +57,7 @@ export default async function startServer(params?: Params) {
 
     global.SERVER = server;
 
-    console.log(
-        `${name} Server Running on  http://localhost:${server.port} ...`,
-    );
+    log.server(`http://localhost:${server.port}`);
 
     return server;
 }

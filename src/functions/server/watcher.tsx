@@ -2,6 +2,7 @@ import { watch, existsSync } from "fs";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import rebuildBundler from "./rebuild-bundler";
+import { log } from "../../utils/log";
 
 const { SRC_DIR } = grabDirNames();
 
@@ -25,11 +26,11 @@ export default function watcher() {
             try {
                 global.RECOMPILING = true;
 
-                console.log(`Page ${action}: ${filename}. Rebuilding ...`);
+                log.watch(`Page ${action}: ${filename}. Rebuilding ...`);
 
                 await rebuildBundler();
             } catch (error: any) {
-                console.error(error);
+                log.error(error);
             } finally {
                 global.RECOMPILING = false;
             }
