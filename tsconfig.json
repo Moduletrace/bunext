@@ -17,6 +17,6 @@
         "noPropertyAccessFromIndexSignature": false,
         "outDir": "dist"
     },
-    "include": ["src", "commands", "src/index.ts"],
+    "include": ["src"],
     "exclude": ["node_modules", "dist"]
 }
