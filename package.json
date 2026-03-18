@@ -1,8 +1,8 @@
 {
-    "name": "bunext",
+    "name": "@moduletrace/bunext",
     "module": "index.ts",
     "type": "module",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "bin": {
         "bunext": "dist/index.js"
     },
@@ -29,6 +29,9 @@
         "typescript": "^5.0.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
     },
     "dependencies": {
         "@tailwindcss/postcss": "^4.2.1",
