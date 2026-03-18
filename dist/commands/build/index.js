@@ -1,0 +1,21 @@
+import { Command } from "commander";
+import grabConfig from "../../functions/grab-config";
+import init from "../../functions/init";
+import allPagesBundler from "../../functions/bundler/all-pages-bundler";
+export default function () {
+    return new Command("build")
+        .description("Build Project")
+        .action(async () => {
+        console.log(`Building Project ...`);
+        process.env.NODE_ENV = "production";
+        await init();
+        const config = (await grabConfig()) || {};
+        global.CONFIG = {
+            ...config,
+            development: true,
+        };
+        allPagesBundler({
+            exit_after_first_build: true,
+        });
+    });
+}
