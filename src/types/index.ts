@@ -220,7 +220,10 @@ export type BunextPageModuleServerReturn<
      * Expiry time of the cache in seconds
      */
     cacheExpiry?: number;
+    url: BunextPageModuleServerReturnURLObject;
 };
+
+export type BunextPageModuleServerReturnURLObject = URL & {};
 
 export type BunextPageModuleServerRedirect = {
     destination: string;

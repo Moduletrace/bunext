@@ -12,6 +12,7 @@ import AppNames from "../../../utils/grab-app-names";
 import { existsSync } from "fs";
 import grabPageErrorComponent from "./grab-page-error-component";
 import grabPageBundledReactComponent from "./grab-page-bundled-react-component";
+import _ from "lodash";
 
 class NotFoundError extends Error {}
 
@@ -84,20 +85,40 @@ export default async function grabPageComponent({
         const module: BunextPageModule = await import(file_path);
 
         const serverRes: BunextPageModuleServerReturn = await (async () => {
+            const default_props: BunextPageModuleServerReturn = {
+                url: {
+                    ...(_.pick<URL, keyof URL>(url!, [
+                        "host",
+                        "hostname",
+                        "pathname",
+                        "origin",
+                        "port",
+                        "search",
+                        "searchParams",
+                        "hash",
+                        "href",
+                        "password",
+                        "protocol",
+                        "username",
+                    ]) as any),
+                },
+                query: match?.query,
+            };
+
             try {
                 if (routeParams) {
                     const serverData = await module["server"]?.(routeParams);
                     return {
                         ...serverData,
-                        query: match?.query,
+                        ...default_props,
                     };
                 }
                 return {
-                    query: match?.query,
+                    ...default_props,
                 };
             } catch (error) {
                 return {
-                    query: match?.query,
+                    ...default_props,
                 };
             }
         })();

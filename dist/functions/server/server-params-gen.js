@@ -6,6 +6,7 @@ import handleRoutes from "./handle-routes";
 import isDevelopment from "../../utils/is-development";
 import grabConstants from "../../utils/grab-constants";
 import { AppData } from "../../data/app-data";
+import { existsSync } from "fs";
 export default async function (params) {
     const port = grabAppPort();
     const { PUBLIC_DIR } = grabDirNames();
@@ -61,18 +62,43 @@ export default async function (params) {
                     return await handleRoutes({ req, server });
                 }
                 if (url.pathname.startsWith("/public/")) {
-                    const file = Bun.file(path.join(PUBLIC_DIR, url.pathname.replace(/^\/public/, "")));
-                    let res_opts = {};
-                    if (!is_dev && url.pathname.match(/__bunext/)) {
-                        res_opts.headers = {
-                            "Cache-Control": `public, max-age=${AppData["BunextStaticFilesCacheExpiry"]}, must-revalidate`,
-                        };
+                    try {
+                        const file_path = path.join(PUBLIC_DIR, url.pathname.replace(/^\/public/, ""));
+                        if (!existsSync(file_path)) {
+                            return new Response(`Public File Doesn't Exist`, {
+                                status: 404,
+                            });
+                        }
+                        const file = Bun.file(file_path);
+                        let res_opts = {};
+                        if (!is_dev && url.pathname.match(/__bunext/)) {
+                            res_opts.headers = {
+                                "Cache-Control": `public, max-age=${AppData["BunextStaticFilesCacheExpiry"]}, must-revalidate`,
+                            };
+                        }
+                        return new Response(file, res_opts);
                     }
-                    return new Response(file, res_opts);
+                    catch (error) {
+                        return new Response(`Public File Not Found`, {
+                            status: 404,
+                        });
+                    }
                 }
-                if (url.pathname.startsWith("/favicon.")) {
-                    const file = Bun.file(path.join(PUBLIC_DIR, url.pathname));
-                    return new Response(file);
+                // if (url.pathname.startsWith("/favicon.") ) {
+                if (url.pathname.match(/\..*$/)) {
+                    try {
+                        const file_path = path.join(PUBLIC_DIR, url.pathname);
+                        if (!existsSync(file_path)) {
+                            return new Response(`File Doesn't Exist`, {
+                                status: 404,
+                            });
+                        }
+                        const file = Bun.file(file_path);
+                        return new Response(file);
+                    }
+                    catch (error) {
+                        return new Response(`File Not Found`, { status: 404 });
+                    }
                 }
                 return await handleWebPages({ req });
             }

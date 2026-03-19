@@ -5,6 +5,7 @@ import AppNames from "../../../utils/grab-app-names";
 import { existsSync } from "fs";
 import grabPageErrorComponent from "./grab-page-error-component";
 import grabPageBundledReactComponent from "./grab-page-bundled-react-component";
+import _ from "lodash";
 class NotFoundError extends Error {
 }
 export default async function grabPageComponent({ req, file_path: passed_file_path, }) {
@@ -50,21 +51,40 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         const now = Date.now();
         const module = await import(file_path);
         const serverRes = await (async () => {
+            const default_props = {
+                url: {
+                    ..._.pick(url, [
+                        "host",
+                        "hostname",
+                        "pathname",
+                        "origin",
+                        "port",
+                        "search",
+                        "searchParams",
+                        "hash",
+                        "href",
+                        "password",
+                        "protocol",
+                        "username",
+                    ]),
+                },
+                query: match?.query,
+            };
             try {
                 if (routeParams) {
                     const serverData = await module["server"]?.(routeParams);
                     return {
                         ...serverData,
-                        query: match?.query,
+                        ...default_props,
                     };
                 }
                 return {
-                    query: match?.query,
+                    ...default_props,
                 };
             }
             catch (error) {
                 return {
-                    query: match?.query,
+                    ...default_props,
                 };
             }
         })();
