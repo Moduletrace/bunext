@@ -9,5 +9,11 @@ export default function DefaultServerErrorPage({ children, }) {
             justifyContent: "center",
             flexDirection: "column",
             gap: "20px",
-        }, children: [_jsx("h1", { children: "500 Internal Server Error" }), _jsx("span", { children: children })] }));
+        }, children: [_jsx("h1", { children: "500 Internal Server Error" }), _jsx("div", { style: {
+                    maxWidth: "800px",
+                    overflowWrap: "break-word",
+                    wordBreak: "break-all",
+                    maxHeight: "80vh",
+                    overflowY: "auto",
+                }, children: children })] }));
 }

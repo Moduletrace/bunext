@@ -1,4 +1,5 @@
+import { log } from "./log";
 export default function exitWithError(msg, code) {
-    console.error(msg);
+    log.error(msg);
     process.exit(code || 1);
 }

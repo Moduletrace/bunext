@@ -1,5 +1,6 @@
 import allPagesBundler from "../bundler/all-pages-bundler";
 import serverPostBuildFn from "./server-post-build-fn";
+import { log } from "../../utils/log";
 export default async function rebuildBundler() {
     try {
         global.ROUTER.reload();
@@ -11,6 +12,6 @@ export default async function rebuildBundler() {
         });
     }
     catch (error) {
-        console.error(error);
+        log.error(error);
     }
 }

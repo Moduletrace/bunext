@@ -10,6 +10,7 @@ import AppNames from "../../utils/grab-app-names";
 import isDevelopment from "../../utils/is-development";
 import { execSync } from "child_process";
 import grabConstants from "../../utils/grab-constants";
+import { log } from "../../utils/log";
 const { HYDRATION_DST_DIR, PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 const tailwindPlugin = {
     name: "tailwindcss",
@@ -69,8 +70,9 @@ export default async function allPagesBundler(params) {
     const artifactTracker = {
         name: "artifact-tracker",
         setup(build) {
+            let buildStart = 0;
             build.onStart(() => {
-                console.time("build");
+                buildStart = performance.now();
             });
             build.onEnd((result) => {
                 if (result.errors.length > 0)
@@ -105,7 +107,8 @@ export default async function allPagesBundler(params) {
                     params?.post_build_fn?.({ artifacts: final_artifacts });
                     writeFileSync(HYDRATION_DST_DIR_MAP_JSON_FILE, JSON.stringify(artifacts));
                 }
-                console.timeEnd("build");
+                const elapsed = (performance.now() - buildStart).toFixed(0);
+                log.success(`Built in ${elapsed}ms`);
                 if (params?.exit_after_first_build) {
                     process.exit();
                 }
