@@ -2,7 +2,7 @@
     "name": "@moduletrace/bunext",
     "module": "index.ts",
     "type": "module",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "bin": {
         "bunext": "dist/index.js"
     },
