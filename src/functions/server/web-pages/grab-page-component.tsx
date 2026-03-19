@@ -11,6 +11,7 @@ import path from "path";
 import AppNames from "../../../utils/grab-app-names";
 import { existsSync } from "fs";
 import grabPageErrorComponent from "./grab-page-error-component";
+import grabPageBundledReactComponent from "./grab-page-bundled-react-component";
 
 class NotFoundError extends Error {}
 
@@ -63,8 +64,6 @@ export default async function grabPageComponent({
             throw new Error(errMsg);
         }
 
-        // const pageName = grabPageName({ path: file_path });
-
         const root_pages_component_ts_file = `${path.join(PAGES_DIR, AppNames["RootPagesComponentName"])}.ts`;
         const root_pages_component_tsx_file = `${path.join(PAGES_DIR, AppNames["RootPagesComponentName"])}.tsx`;
         const root_pages_component_js_file = `${path.join(PAGES_DIR, AppNames["RootPagesComponentName"])}.js`;
@@ -82,17 +81,7 @@ export default async function grabPageComponent({
 
         const now = Date.now();
 
-        const root_module = root_file
-            ? await import(`${root_file}?t=${now}`)
-            : undefined;
-
-        const RootComponent = root_module?.default as FC<any> | undefined;
-
-        // const component_file_path = root_module
-        //     ? `${file_path}`
-        //     : `${file_path}?t=${global.LAST_BUILD_TIME ?? 0}`;
-
-        const module: BunextPageModule = await import(`${file_path}?t=${now}`);
+        const module: BunextPageModule = await import(file_path);
 
         const serverRes: BunextPageModuleServerReturn = await (async () => {
             try {
@@ -124,16 +113,18 @@ export default async function grabPageComponent({
                   : undefined
             : undefined;
 
-        const Component = module.default as FC<any>;
         const Head = module.Head as FC<any>;
 
-        const component = RootComponent ? (
-            <RootComponent {...serverRes}>
-                <Component {...serverRes} />
-            </RootComponent>
-        ) : (
-            <Component {...serverRes} />
-        );
+        const { component } =
+            (await grabPageBundledReactComponent({
+                file_path,
+                root_file,
+                server_res: serverRes,
+            })) || {};
+
+        if (!component) {
+            throw new Error(`Couldn't grab page component`);
+        }
 
         return {
             component,
@@ -152,3 +143,34 @@ export default async function grabPageComponent({
         });
     }
 }
+
+// let root_module: any;
+
+// if (root_file) {
+//     if (isDevelopment()) {
+//         root_module = await grabFilePathModule({
+//             file_path: root_file,
+//         });
+//     } else {
+//         root_module = root_file ? await import(root_file) : undefined;
+//     }
+// }
+
+// const RootComponent = root_module?.default as FC<any> | undefined;
+
+// let module: BunextPageModule;
+
+// if (isDevelopment()) {
+//     module = await grabFilePathModule({ file_path });
+// } else {
+//     module = await import(file_path);
+// }
+
+// const Component = main_module.default as FC<any>;
+// const component = RootComponent ? (
+//     <RootComponent {...serverRes}>
+//         <Component {...serverRes} />
+//     </RootComponent>
+// ) : (
+//     <Component {...serverRes} />
+// );

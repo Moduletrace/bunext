@@ -17,7 +17,17 @@ export default function DefaultServerErrorPage({
             }}
         >
             <h1>500 Internal Server Error</h1>
-            <span>{children}</span>
+            <div
+                style={{
+                    maxWidth: "800px",
+                    overflowWrap: "break-word",
+                    wordBreak: "break-all",
+                    maxHeight: "80vh",
+                    overflowY: "auto",
+                }}
+            >
+                {children}
+            </div>
         </div>
     );
 }

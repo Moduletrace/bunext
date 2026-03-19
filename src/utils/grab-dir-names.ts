@@ -16,6 +16,10 @@ export default function grabDirNames() {
     const CONFIG_FILE = path.join(ROOT_DIR, "bunext.config.ts");
 
     const BUNX_CWD_DIR = path.resolve(ROOT_DIR, ".bunext");
+    const BUNX_CWD_MODULE_CACHE_DIR = path.resolve(
+        BUNX_CWD_DIR,
+        "module-cache",
+    );
     const BUNX_TMP_DIR = path.resolve(BUNX_CWD_DIR, ".tmp");
     const BUNX_HYDRATION_SRC_DIR = path.resolve(
         BUNX_CWD_DIR,
@@ -57,5 +61,6 @@ export default function grabDirNames() {
         BUNX_ROOT_404_FILE_NAME,
         HYDRATION_DST_DIR_MAP_JSON_FILE,
         BUNEXT_CACHE_DIR,
+        BUNX_CWD_MODULE_CACHE_DIR,
     };
 }

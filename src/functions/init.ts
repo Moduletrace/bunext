@@ -6,6 +6,7 @@ export default async function () {
     const dirNames = grabDirNames();
 
     execSync(`rm -rf ${dirNames.BUNEXT_CACHE_DIR}`);
+    execSync(`rm -rf ${dirNames.BUNX_CWD_MODULE_CACHE_DIR}`);
 
     const keys = Object.keys(dirNames) as (keyof ReturnType<
         typeof grabDirNames

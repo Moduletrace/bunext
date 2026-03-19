@@ -243,6 +243,11 @@ export type GrabPageComponentRes = {
     head?: FC<BunextPageHeadFCProps>;
 };
 
+export type GrabPageReactBundledComponentRes = {
+    component: JSX.Element;
+    server_res?: BunextPageModuleServerReturn;
+};
+
 export type PageFiles = {
     local_path: string;
     url_path: string;
