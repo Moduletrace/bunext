@@ -1,6 +1,15 @@
 # Bunext
 
-A Next.js-style full-stack meta-framework built on [Bun](https://bun.sh) and React 19. Bunext provides server-side rendering, file-system based routing, Hot Module Replacement (HMR), and client-side hydration — using ESBuild to bundle client assets and Bun's native HTTP server (`Bun.serve`) to handle requests.
+A server-rendering framework for React, built on [Bun](https://bun.sh). Bunext handles file-system routing, SSR, HMR, and client hydration — using ESBuild to bundle client assets and `Bun.serve` as the HTTP server.
+
+## Philosophy
+
+Bunext is focused on **server-side rendering and processing**. Every page is rendered on the server on every request. The framework deliberately does not implement client-side navigation, SPA routing, or client-side state management — those concerns belong in client-side libraries and are orthogonal to what Bunext is solving.
+
+The goal is a framework that is:
+- Fast — Bun's runtime speed and ESBuild's bundling make the full dev loop snappy
+- Transparent — the entire request pipeline is readable and debugable
+- Standard — server functions and API handlers use native Web APIs (`Request`, `Response`, `URL`) with no custom wrappers
 
 ---
 
@@ -15,6 +24,7 @@ A Next.js-style full-stack meta-framework built on [Bun](https://bun.sh) and Rea
 - [Pages](#pages)
     - [Basic Page](#basic-page)
     - [Server Function](#server-function)
+    - [Default Server Props](#default-server-props)
     - [Redirects from Server](#redirects-from-server)
     - [Custom Response Options](#custom-response-options)
     - [SEO Metadata](#seo-metadata)
@@ -192,6 +202,7 @@ import type { BunextPageServerFn } from "bunext/src/types";
 type Props = {
     props?: { username: string; bio: string };
     query?: Record<string, string>;
+    url?: URL;
 };
 
 export const server: BunextPageServerFn<{
@@ -211,11 +222,12 @@ export const server: BunextPageServerFn<{
     };
 };
 
-export default function ProfilePage({ props }: Props) {
+export default function ProfilePage({ props, url }: Props) {
     return (
         <div>
             <h1>{props?.username}</h1>
             <p>{props?.bio}</p>
+            <p>Current path: {url?.pathname}</p>
         </div>
     );
 }
@@ -230,6 +242,45 @@ The server function receives a `ctx` object (type `BunxRouteParams`) with:
 | `body`         | `any`                                            | Parsed request body                        |
 | `query`        | `any`                                            | Query string parameters                    |
 | `resTransform` | `(res: Response) => Promise<Response>\|Response` | Intercept and transform the final response |
+
+### Default Server Props
+
+Every page component automatically receives a `url` prop — a copy of the request URL object — even if no `server` function is exported. This means you can always read URL data (pathname, search params, origin, etc.) directly from component props without writing a `server` function.
+
+```tsx
+// src/pages/index.tsx
+import type { BunextPageModuleServerReturnURLObject } from "bunext/src/types";
+
+type Props = {
+    url?: BunextPageModuleServerReturnURLObject;
+};
+
+export default function HomePage({ url }: Props) {
+    return (
+        <div>
+            <p>Visiting: {url?.pathname}</p>
+            <p>Origin: {url?.origin}</p>
+        </div>
+    );
+}
+```
+
+The `url` prop exposes the following fields from the standard Web `URL` interface:
+
+| Field          | Type             | Example                          |
+| -------------- | ---------------- | -------------------------------- |
+| `href`         | `string`         | `"https://example.com/blog?q=1"` |
+| `origin`       | `string`         | `"https://example.com"`          |
+| `protocol`     | `string`         | `"https:"`                       |
+| `host`         | `string`         | `"example.com"`                  |
+| `hostname`     | `string`         | `"example.com"`                  |
+| `port`         | `string`         | `""`                             |
+| `pathname`     | `string`         | `"/blog"`                        |
+| `search`       | `string`         | `"?q=1"`                         |
+| `searchParams` | `URLSearchParams` | `URLSearchParams { q: "1" }`    |
+| `hash`         | `string`         | `""`                             |
+| `username`     | `string`         | `""`                             |
+| `password`     | `string`         | `""`                             |
 
 ### Redirects from Server
 
@@ -620,10 +671,7 @@ middleware: async ({ req, url }) => {
         return new Response("Down for maintenance", { status: 503 });
     }
 
-    // Add CORS headers to all API responses
-    if (url.pathname.startsWith("/api/")) {
-        // Let the request proceed, but transform the response via resTransform on individual routes
-    }
+    // For API routes, return undefined to continue — the handler controls its own Response directly
 },
 ```
 
@@ -679,7 +727,14 @@ Output files are named `[dir]/[name]/[hash]` so filenames change when content ch
 
 ### Hot Module Replacement
 
-In development, Bunext injects a script into every HTML page that opens a **Server-Sent Events (SSE)** connection to `/__hmr`. When a rebuild completes and the bundle hash for a page changes, the server pushes an event through the SSE stream and the client reloads the page automatically.
+In development, Bunext injects a script into every HTML page that opens a **Server-Sent Events (SSE)** connection to `/__hmr`. When a rebuild completes and the bundle hash for a page changes, the server pushes an `update` event through the stream containing the new artifact metadata. The client then performs a **true in-place HMR update** — no full page reload:
+
+1. If the page has a CSS bundle, the old `<link rel="stylesheet">` is replaced with a new one pointing to the updated CSS file (cache-busted with `?t=<timestamp>`).
+2. The existing client hydration `<script>` (identified by `id="bunext-client-hydration-script"`) is removed from the DOM.
+3. A new `<script type="module">` is injected pointing to the freshly rebuilt JS bundle (also cache-busted).
+4. The new bundle calls `window.__BUNEXT_RERENDER__(NewComponent)` if the root is already mounted, otherwise falls back to a fresh `hydrateRoot`.
+
+The endpoint `/__bunext_client_hmr__?href=<page-url>` handles on-demand HMR bundle generation: it re-bundles the target page's component on every request so the freshly injected script always reflects the latest source.
 
 The SSE controller for each connected client is tracked in `global.HMR_CONTROLLERS`, keyed by the page URL and its bundled artifact map entry. On disconnect, the controller is removed from the list.
 
@@ -694,7 +749,9 @@ Request
   │     Returns Response? → short-circuit, send response immediately
   │     Returns undefined → continue
   │
-  ├── GET /__hmr          → Open SSE stream for HMR (dev only)
+  ├── GET /__hmr                        → Open SSE stream for HMR (dev only)
+  │
+  ├── GET /__bunext_client_hmr__?href=  → On-demand HMR bundle for the given page URL (dev only)
   │
   ├── /api/*              → API route handler
   │     Matches src/pages/api/<path>.ts

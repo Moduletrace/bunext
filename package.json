@@ -2,7 +2,7 @@
     "name": "@moduletrace/bunext",
     "module": "index.ts",
     "type": "module",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "bin": {
         "bunext": "dist/index.js"
     },
@@ -13,7 +13,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update HMR. Make it true HMR. Add URL to page server props' && git push",
+        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update documentaion.' && git push",
         "build": "tsc"
     },
     "devDependencies": {
