@@ -76,6 +76,7 @@ This report compares the two on their overlapping surface — server-side render
 | Dynamic routes `[param]`                     | ✅     | ✅              | ✅                   |
 | Catch-all routes `[...slug]`                 | ✅     | ✅              | ✅                   |
 | Optional catch-all `[[...slug]]`             | ✅     | ✅              | ✅                   |
+| Non-routed co-location directories           | ✅     | ❌              | ✅ (file-naming model) |
 | Route groups `(group)`                       | ❌     | ❌              | ✅                   |
 | Parallel routes `@slot`                      | ❌     | ❌              | ✅                   |
 | Intercepting routes `(..)`                   | ❌     | ❌              | ✅                   |
@@ -149,6 +150,20 @@ This report compares the two on their overlapping surface — server-side render
 **Bunext** uses `Bun.FileSystemRouter` with Next.js-style conventions. Pages in `src/pages/` are automatically mapped to URL routes. Dynamic segments work via `[param].tsx`. The router handles basic wildcard matching and query parameter parsing natively.
 
 Catch-all routes (`[...slug].tsx`) and optional catch-all routes (`[[...slug]].tsx`) are supported natively by `Bun.FileSystemRouter` and work in Bunext — the test project confirms this with `src/pages/blog/[[...all]]/index.tsx`.
+
+Any directory inside `src/pages/` whose name contains `--` or a parenthesis (`(` or `)`) is **completely ignored by the router**. This lets developers co-locate helper components, hooks, and utilities directly alongside the routes that use them without any routing side effects:
+
+```
+src/pages/
+├── blog/
+│   ├── (components)/    ← Not a route — co-location directory
+│   │   ├── PostCard.tsx
+│   │   └── PostList.tsx
+│   ├── index.tsx        ← Route: /blog
+│   └── [slug].tsx       ← Route: /blog/:slug
+```
+
+Next.js Pages Router has no equivalent — every `.tsx` file in `pages/` becomes a route, so helper components must live outside the `pages/` tree entirely. Next.js App Router handles this differently via file-naming convention: only files named `page.tsx` or `route.ts` are routes, so any other file can already be co-located freely. Bunext's explicit directory-level marker (`(dir)` or `--dir--`) provides the same benefit on top of a Pages Router-style filesystem convention.
 
 **Gaps:**
 - No route groups — every folder directly contributes to the URL structure.
@@ -590,6 +605,12 @@ This model also composes naturally with runtime decisions: the `server` function
 ### Default URL Prop
 
 Every page component automatically receives a `url` prop (a copy of the request `URL` object) even without a `server` function. In Next.js's Pages Router, `getServerSideProps` must be exported just to access the request URL. The App Router exposes `params` and `searchParams` but not a full `URL` object.
+
+### Co-Location Directories
+
+Bunext's router ignores any directory inside `src/pages/` whose name contains `--` or a parenthesis. This lets helper components, hooks, and utilities live right next to the routes that use them — named `(components)`, `--utils--`, or similar — without any routing side effects.
+
+Next.js Pages Router has no equivalent. Every file in `pages/` becomes a route; helpers must live in a separate root-level directory (`components/`, `lib/`, etc.) rather than alongside the pages that use them. Next.js App Router handles co-location via file-naming convention (only `page.tsx`/`route.ts` are routes), so the problem doesn't arise — but it provides no explicit directory-level exclusion marker.
 
 ---
 

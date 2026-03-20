@@ -18,6 +18,7 @@ export default function watcher() {
 
             if (event !== "rename") return;
             if (!filename.match(/^pages\//)) return;
+            if (filename.match(/\/(--|\()/)) return;
 
             if (global.RECOMPILING) return;
 

@@ -21,6 +21,7 @@ The goal is a framework that is:
 - [CLI Commands](#cli-commands)
 - [Project Structure](#project-structure)
 - [File-System Routing](#file-system-routing)
+    - [Non-Routed Directories](#non-routed-directories)
 - [Pages](#pages)
     - [Basic Page](#basic-page)
     - [Server Function](#server-function)
@@ -175,6 +176,27 @@ Bunext uses `Bun.FileSystemRouter` with Next.js-style routing. Pages live in `sr
 | `src/pages/api/users.ts`         | `/api/users`  |
 
 Dynamic route parameters (e.g. `[slug]`) are available in the `server` function via `ctx.req.url` or from the `query` field in the server response.
+
+### Non-Routed Directories
+
+Directories whose name contains `--` or a parenthesis (`(` or `)`) are completely ignored by the router. Use this to co-locate helper components, utilities, or shared logic directly inside `src/pages/` alongside the routes that use them, without them becoming routes.
+
+| Naming pattern | Effect |
+| --- | --- |
+| `(components)/` | Ignored — not routed |
+| `--utils--/` | Ignored — not routed |
+| `--lib/` | Ignored — not routed |
+
+```
+src/pages/
+├── blog/
+│   ├── (components)/       # Not a route — co-location directory
+│   │   ├── PostCard.tsx    # Used by index.tsx and [slug].tsx
+│   │   └── PostList.tsx
+│   ├── index.tsx           # Route: /blog
+│   └── [slug].tsx          # Route: /blog/:slug
+└── index.tsx               # Route: /
+```
 
 ---
 
@@ -592,7 +614,7 @@ The cron job checks all cache entries every 30 seconds and deletes any whose age
 - **Cold start required.** The cache is populated on the first request; there is no pre-warming step.
 - **Immutable within the expiry window.** Once a page is cached, `writeCache` skips all subsequent write attempts for that key until the cron job deletes the expired entry. There is no manual invalidation API.
 - **Cache is not cleared on rebuild.** Deploying a new build does not automatically flush `public/__bunext/cache/`. Stale HTML files referencing old JS bundles can be served until they expire. Clear the cache directory as part of your deploy process if needed.
-- **Key collision with dashes.** Cache keys are derived by replacing every `/` in the URL path with `-`. This means `/foo/bar` and `/foo-bar` produce the same cache filename and will share a cache entry. Avoid enabling `cachePage` on routes where a nested path and a dash-separated path could collide.
+- **No key collision.** Cache keys are generated via `encodeURIComponent()` on the URL path. `/foo/bar` encodes to `%2Ffoo%2Fbar` and `/foo-bar` to `%2Ffoo-bar` — distinct filenames with no collision risk.
 
 ---
 

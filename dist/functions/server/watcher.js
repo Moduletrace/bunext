@@ -15,6 +15,8 @@ export default function watcher() {
             return;
         if (!filename.match(/^pages\//))
             return;
+        if (filename.match(/\/(--|\()/))
+            return;
         if (global.RECOMPILING)
             return;
         const fullPath = path.join(SRC_DIR, filename);
