@@ -1,8 +1,5 @@
 import isDevelopment from "../../../utils/is-development";
 import * as esbuild from "esbuild";
-import postcss from "postcss";
-import tailwindcss from "@tailwindcss/postcss";
-import { readFile } from "fs/promises";
 import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
 import tailwindEsbuildPlugin from "./tailwind-esbuild-plugin";

@@ -3,8 +3,9 @@
     "module": "index.ts",
     "type": "module",
     "version": "1.0.5",
+    "main": "dist/index.js",
     "bin": {
-        "bunext": "dist/index.js"
+        "bunext": "dist/commands/index.js"
     },
     "files": [
         "dist",
@@ -13,7 +14,8 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update documentaion.' && git push",
+        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update Package.json.' && git push",
+        "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext",
         "build": "tsc"
     },
     "devDependencies": {
@@ -35,11 +37,12 @@
         "registry": "https://npm.pkg.github.com"
     },
     "dependencies": {
-        "@tailwindcss/postcss": "^4.2.1",
+        "@tailwindcss/postcss": "^4.2.2",
         "bun-plugin-tailwind": "^0.1.2",
         "chalk": "^5.6.2",
         "commander": "^14.0.2",
         "esbuild": "^0.27.4",
+        "lightningcss-wasm": "^1.32.0",
         "lodash": "^4.17.23",
         "micromatch": "^4.0.8",
         "ora": "^9.0.0",
