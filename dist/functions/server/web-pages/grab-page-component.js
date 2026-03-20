@@ -1,17 +1,14 @@
-import grabDirNames from "../../../utils/grab-dir-names";
 import grabRouteParams from "../../../utils/grab-route-params";
-import path from "path";
-import AppNames from "../../../utils/grab-app-names";
-import { existsSync } from "fs";
 import grabPageErrorComponent from "./grab-page-error-component";
 import grabPageBundledReactComponent from "./grab-page-bundled-react-component";
 import _ from "lodash";
+import { log } from "../../../utils/log";
+import grabRootFile from "./grab-root-file";
 class NotFoundError extends Error {
 }
-export default async function grabPageComponent({ req, file_path: passed_file_path, }) {
+export default async function grabPageComponent({ req, file_path: passed_file_path, debug, }) {
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
-    const { PAGES_DIR } = grabDirNames();
     let routeParams = undefined;
     try {
         routeParams = req ? await grabRouteParams({ req }) : undefined;
@@ -19,11 +16,17 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         if (url_path && url?.search) {
             url_path += url.search;
         }
+        if (debug) {
+            log.info(`url_path:`, url_path);
+        }
         const match = url_path ? router.match(url_path) : undefined;
         if (!match?.filePath && url?.pathname) {
             throw new NotFoundError(`Page ${url.pathname} not found`);
         }
         const file_path = match?.filePath || passed_file_path;
+        if (debug) {
+            log.info(`file_path:`, file_path);
+        }
         if (!file_path) {
             const errMsg = `No File Path (\`file_path\`) or Request Object (\`req\`) provided not found`;
             // console.error(errMsg);
@@ -35,21 +38,14 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             console.error(errMsg);
             throw new Error(errMsg);
         }
-        const root_pages_component_ts_file = `${path.join(PAGES_DIR, AppNames["RootPagesComponentName"])}.ts`;
-        const root_pages_component_tsx_file = `${path.join(PAGES_DIR, AppNames["RootPagesComponentName"])}.tsx`;
-        const root_pages_component_js_file = `${path.join(PAGES_DIR, AppNames["RootPagesComponentName"])}.js`;
-        const root_pages_component_jsx_file = `${path.join(PAGES_DIR, AppNames["RootPagesComponentName"])}.jsx`;
-        const root_file = existsSync(root_pages_component_tsx_file)
-            ? root_pages_component_tsx_file
-            : existsSync(root_pages_component_ts_file)
-                ? root_pages_component_ts_file
-                : existsSync(root_pages_component_jsx_file)
-                    ? root_pages_component_jsx_file
-                    : existsSync(root_pages_component_js_file)
-                        ? root_pages_component_js_file
-                        : undefined;
-        const now = Date.now();
+        if (debug) {
+            log.info(`bundledMap:`, bundledMap);
+        }
+        const { root_file } = grabRootFile();
         const module = await import(file_path);
+        if (debug) {
+            log.info(`module:`, module);
+        }
         const serverRes = await (async () => {
             const default_props = {
                 url: {
@@ -88,6 +84,9 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
                 };
             }
         })();
+        if (debug) {
+            log.info(`serverRes:`, serverRes);
+        }
         const meta = module.meta
             ? typeof module.meta == "function" && routeParams
                 ? await module.meta({
@@ -98,6 +97,9 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
                     ? module.meta
                     : undefined
             : undefined;
+        if (debug) {
+            log.info(`meta:`, meta);
+        }
         const Head = module.Head;
         const { component } = (await grabPageBundledReactComponent({
             file_path,
@@ -106,6 +108,9 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         })) || {};
         if (!component) {
             throw new Error(`Couldn't grab page component`);
+        }
+        if (debug) {
+            log.info(`component:`, component);
         }
         return {
             component,
@@ -118,6 +123,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         };
     }
     catch (error) {
+        console.error(`Error Grabbing Page Component: ${error.message}`);
         return await grabPageErrorComponent({
             error,
             routeParams,

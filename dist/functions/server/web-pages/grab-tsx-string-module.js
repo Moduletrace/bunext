@@ -6,21 +6,7 @@ import { readFile } from "fs/promises";
 import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
 import { execSync } from "child_process";
-const tailwindPlugin = {
-    name: "tailwindcss",
-    setup(build) {
-        build.onLoad({ filter: /\.css$/ }, async (args) => {
-            const source = await readFile(args.path, "utf-8");
-            const result = await postcss([tailwindcss()]).process(source, {
-                from: args.path,
-            });
-            return {
-                contents: result.css,
-                loader: "css",
-            };
-        });
-    },
-};
+import tailwindEsbuildPlugin from "./tailwind-esbuild-plugin";
 export default async function grabTsxStringModule({ tsx, file_path, }) {
     const dev = isDevelopment();
     const { BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
@@ -44,7 +30,7 @@ export default async function grabTsxStringModule({ tsx, file_path, }) {
             "process.env.NODE_ENV": JSON.stringify(dev ? "development" : "production"),
         },
         metafile: true,
-        plugins: [tailwindPlugin],
+        plugins: [tailwindEsbuildPlugin],
         jsx: "automatic",
         write: true,
         outfile: out_file_path,

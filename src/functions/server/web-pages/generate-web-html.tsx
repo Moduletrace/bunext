@@ -5,6 +5,8 @@ import type { LivePageDistGenParams } from "../../../types";
 import isDevelopment from "../../../utils/is-development";
 import grabWebPageHydrationScript from "./grab-web-page-hydration-script";
 import grabWebMetaHTML from "./grab-web-meta-html";
+import { log } from "../../../utils/log";
+import { AppData } from "../../../data/app-data";
 
 export default async function genWebHTML({
     component,
@@ -14,6 +16,7 @@ export default async function genWebHTML({
     module,
     meta,
     routeParams,
+    debug,
 }: LivePageDistGenParams) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } =
         grabContants();
@@ -22,7 +25,16 @@ export default async function genWebHTML({
         path.join(process.cwd(), "node_modules", "react-dom", "server")
     );
 
+    if (debug) {
+        log.info("component", component);
+    }
+
     const componentHTML = renderToString(component);
+
+    if (debug) {
+        log.info("componentHTML", componentHTML);
+    }
+
     const headHTML = Head
         ? renderToString(<Head serverRes={pageProps} ctx={routeParams} />)
         : "";
@@ -46,7 +58,7 @@ export default async function genWebHTML({
     }</script>\n`;
 
     if (bundledMap?.path) {
-        html += `        <script src="/${bundledMap.path}" type="module" async></script>\n`;
+        html += `        <script src="/${bundledMap.path}" type="module" id="${AppData["BunextClientHydrationScriptID"]}" async></script>\n`;
     }
 
     if (isDevelopment()) {

@@ -6,27 +6,11 @@ import { readFile } from "fs/promises";
 import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
 import { execSync } from "child_process";
+import tailwindEsbuildPlugin from "./tailwind-esbuild-plugin";
 
 type Params = {
     tsx: string;
     file_path: string;
-};
-
-const tailwindPlugin: esbuild.Plugin = {
-    name: "tailwindcss",
-    setup(build) {
-        build.onLoad({ filter: /\.css$/ }, async (args) => {
-            const source = await readFile(args.path, "utf-8");
-            const result = await postcss([tailwindcss()]).process(source, {
-                from: args.path,
-            });
-
-            return {
-                contents: result.css,
-                loader: "css",
-            };
-        });
-    },
 };
 
 export default async function grabTsxStringModule<T extends any = any>({
@@ -63,7 +47,7 @@ export default async function grabTsxStringModule<T extends any = any>({
             ),
         },
         metafile: true,
-        plugins: [tailwindPlugin],
+        plugins: [tailwindEsbuildPlugin],
         jsx: "automatic",
         write: true,
         outfile: out_file_path,

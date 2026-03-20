@@ -7,7 +7,7 @@ import { log } from "../../utils/log";
 const { SRC_DIR } = grabDirNames();
 
 export default function watcher() {
-    watch(
+    const pages_src_watcher = watch(
         SRC_DIR,
         {
             recursive: true,
@@ -17,6 +17,7 @@ export default function watcher() {
             if (!filename) return;
 
             if (event !== "rename") return;
+            if (!filename.match(/^pages\//)) return;
 
             if (global.RECOMPILING) return;
 
@@ -34,6 +35,13 @@ export default function watcher() {
             } finally {
                 global.RECOMPILING = false;
             }
+
+            if (global.PAGES_SRC_WATCHER) {
+                global.PAGES_SRC_WATCHER.close();
+                watcher();
+            }
         },
     );
+
+    global.PAGES_SRC_WATCHER = pages_src_watcher;
 }

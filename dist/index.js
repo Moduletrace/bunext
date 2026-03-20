@@ -11,6 +11,7 @@ global.ORA_SPINNER.clear();
 global.HMR_CONTROLLERS = [];
 global.IS_FIRST_BUNDLE_READY = false;
 global.BUNDLER_REBUILDS = 0;
+global.PAGE_FILES = [];
 await init();
 const { PAGES_DIR } = grabDirNames();
 const router = new Bun.FileSystemRouter({

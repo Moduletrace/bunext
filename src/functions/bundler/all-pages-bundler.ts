@@ -1,37 +1,16 @@
-import { existsSync, writeFileSync } from "fs";
-import path from "path";
+import { writeFileSync } from "fs";
 import * as esbuild from "esbuild";
-import postcss from "postcss";
-import tailwindcss from "@tailwindcss/postcss";
-import { readFile } from "fs/promises";
 import grabAllPages from "../../utils/grab-all-pages";
 import grabDirNames from "../../utils/grab-dir-names";
-import AppNames from "../../utils/grab-app-names";
 import isDevelopment from "../../utils/is-development";
 import type { BundlerCTXMap } from "../../types";
 import { execSync } from "child_process";
-import grabConstants from "../../utils/grab-constants";
 import { log } from "../../utils/log";
+import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
+import grabClientHydrationScript from "./grab-client-hydration-script";
+import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-result";
 
-const { HYDRATION_DST_DIR, PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } =
-    grabDirNames();
-
-const tailwindPlugin: esbuild.Plugin = {
-    name: "tailwindcss",
-    setup(build) {
-        build.onLoad({ filter: /\.css$/ }, async (args) => {
-            const source = await readFile(args.path, "utf-8");
-            const result = await postcss([tailwindcss()]).process(source, {
-                from: args.path,
-            });
-
-            return {
-                contents: result.css,
-                loader: "css",
-            };
-        });
-    },
-};
+const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 
 type Params = {
     watch?: boolean;
@@ -41,37 +20,16 @@ type Params = {
 
 export default async function allPagesBundler(params?: Params) {
     const pages = grabAllPages({ exclude_api: true });
-    const { ClientRootElementIDName, ClientRootComponentWindowName } =
-        grabConstants();
 
     const virtualEntries: Record<string, string> = {};
     const dev = isDevelopment();
 
-    const root_component_path = path.join(
-        PAGES_DIR,
-        `${AppNames["RootPagesComponentName"]}.tsx`,
-    );
-
-    const does_root_exist = existsSync(root_component_path);
-
     for (const page of pages) {
         const key = page.local_path;
 
-        let txt = ``;
-        txt += `import { hydrateRoot } from "react-dom/client";\n`;
-        if (does_root_exist) {
-            txt += `import Root from "${root_component_path}";\n`;
-        }
-        txt += `import Page from "${page.local_path}";\n\n`;
-        txt += `const pageProps = window.__PAGE_PROPS__ || {};\n`;
-
-        if (does_root_exist) {
-            txt += `const component = <Root {...pageProps}><Page {...pageProps} /></Root>\n`;
-        } else {
-            txt += `const component = <Page {...pageProps} />\n`;
-        }
-        txt += `const root = hydrateRoot(document.getElementById("${ClientRootElementIDName}"), component);\n\n`;
-        txt += `window.${ClientRootComponentWindowName} = root;\n`;
+        const txt = grabClientHydrationScript({
+            page_local_path: page.local_path,
+        });
 
         virtualEntries[key] = txt;
     }
@@ -104,48 +62,15 @@ export default async function allPagesBundler(params?: Params) {
             build.onEnd((result) => {
                 if (result.errors.length > 0) return;
 
-                const artifacts: (BundlerCTXMap | undefined)[] = Object.entries(
-                    result.metafile!.outputs,
-                )
-                    .filter(([, meta]) => meta.entryPoint)
-                    .map(([outputPath, meta]) => {
-                        const target_page = pages.find((p) => {
-                            return (
-                                meta.entryPoint === `virtual:${p.local_path}`
-                            );
-                        });
+                const artifacts = grabArtifactsFromBundledResults({
+                    pages,
+                    result,
+                });
 
-                        if (!target_page || !meta.entryPoint) {
-                            return undefined;
-                        }
-
-                        const { file_name, local_path, url_path } = target_page;
-
-                        const cssPath = meta.cssBundle || undefined;
-
-                        return {
-                            path: outputPath,
-                            hash: path.basename(
-                                outputPath,
-                                path.extname(outputPath),
-                            ),
-                            type: outputPath.endsWith(".css")
-                                ? "text/css"
-                                : "text/javascript",
-                            entrypoint: meta.entryPoint,
-                            css_path: cssPath,
-                            file_name,
-                            local_path,
-                            url_path,
-                        };
-                    });
-
-                if (artifacts.length > 0) {
-                    const final_artifacts = artifacts.filter((a) =>
-                        Boolean(a?.entrypoint),
-                    ) as BundlerCTXMap[];
-                    global.BUNDLER_CTX_MAP = final_artifacts;
-                    params?.post_build_fn?.({ artifacts: final_artifacts });
+                if (artifacts?.[0] && artifacts.length > 0) {
+                    global.BUNDLER_CTX_MAP = artifacts;
+                    global.PAGE_FILES = pages;
+                    params?.post_build_fn?.({ artifacts });
 
                     writeFileSync(
                         HYDRATION_DST_DIR_MAP_JSON_FILE,
@@ -154,7 +79,7 @@ export default async function allPagesBundler(params?: Params) {
                 }
 
                 const elapsed = (performance.now() - buildStart).toFixed(0);
-                log.success(`Built in ${elapsed}ms`);
+                log.success(`[Built] in ${elapsed}ms`);
 
                 if (params?.exit_after_first_build) {
                     process.exit();
@@ -180,9 +105,10 @@ export default async function allPagesBundler(params?: Params) {
         },
         entryNames: "[dir]/[name]/[hash]",
         metafile: true,
-        plugins: [tailwindPlugin, virtualPlugin, artifactTracker],
+        plugins: [tailwindEsbuildPlugin, virtualPlugin, artifactTracker],
         jsx: "automatic",
         splitting: true,
+        logLevel: "silent",
     });
 
     await ctx.rebuild();

@@ -30,9 +30,9 @@ export default async function grabPageBundledReactComponent({
         tsx += `const props = JSON.parse("${server_res_json}")\n\n`;
         tsx += `    return (\n`;
         if (root_file) {
-            tsx += `        <Root {...props}><Page {...props} /></Root>\n`;
+            tsx += `        <Root suppressHydrationWarning={true} {...props}><Page {...props} /></Root>\n`;
         } else {
-            tsx += `        <Page {...props} />\n`;
+            tsx += `        <Page suppressHydrationWarning={true} {...props} />\n`;
         }
         tsx += `    )\n`;
         tsx += `}\n`;
@@ -44,6 +44,7 @@ export default async function grabPageBundledReactComponent({
         return {
             component,
             server_res,
+            tsx,
         };
     } catch (error: any) {
         return undefined;

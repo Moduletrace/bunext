@@ -8,12 +8,14 @@ import type {
     BundlerCTXMap,
     BunextConfig,
     GlobalHMRControllerObject,
+    PageFiles,
 } from "./types";
 import type { FileSystemRouter, Server } from "bun";
 import init from "./functions/init";
 import grabDirNames from "./utils/grab-dir-names";
 import build from "./commands/build";
 import type { BuildContext } from "esbuild";
+import type { FSWatcher } from "fs";
 
 /**
  * # Declare Global Variables
@@ -31,6 +33,9 @@ declare global {
     var BUNDLER_CTX_MAP: BundlerCTXMap[] | undefined;
     var IS_FIRST_BUNDLE_READY: boolean;
     var BUNDLER_REBUILDS: 0;
+    var PAGES_SRC_WATCHER: FSWatcher | undefined;
+    var CURRENT_VERSION: string | undefined;
+    var PAGE_FILES: PageFiles[];
 }
 
 global.ORA_SPINNER = ora();
@@ -38,6 +43,7 @@ global.ORA_SPINNER.clear();
 global.HMR_CONTROLLERS = [];
 global.IS_FIRST_BUNDLE_READY = false;
 global.BUNDLER_REBUILDS = 0;
+global.PAGE_FILES = [];
 
 await init();
 

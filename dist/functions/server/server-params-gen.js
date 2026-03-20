@@ -1,21 +1,22 @@
-import path from "path";
 import grabAppPort from "../../utils/grab-app-port";
-import grabDirNames from "../../utils/grab-dir-names";
 import handleWebPages from "./web-pages/handle-web-pages";
 import handleRoutes from "./handle-routes";
 import isDevelopment from "../../utils/is-development";
 import grabConstants from "../../utils/grab-constants";
 import { AppData } from "../../data/app-data";
-import { existsSync } from "fs";
+import handleHmr from "./handle-hmr";
+import handleHmrUpdate from "./handle-hmr-update";
+import handlePublic from "./handle-public";
+import handleFiles from "./handle-files";
 export default async function (params) {
     const port = grabAppPort();
-    const { PUBLIC_DIR } = grabDirNames();
     const is_dev = isDevelopment();
     return {
         async fetch(req, server) {
             try {
                 const url = new URL(req.url);
                 const { config } = grabConstants();
+                let response = undefined;
                 if (config?.middleware) {
                     const middleware_res = await config.middleware({
                         req,
@@ -26,81 +27,31 @@ export default async function (params) {
                         return middleware_res;
                     }
                 }
-                if (url.pathname === "/__hmr" && is_dev) {
-                    const referer_url = new URL(req.headers.get("referer") || "");
-                    const match = global.ROUTER.match(referer_url.pathname);
-                    const target_map = match?.filePath
-                        ? global.BUNDLER_CTX_MAP?.find((m) => m.local_path == match.filePath)
-                        : undefined;
-                    let controller;
-                    const stream = new ReadableStream({
-                        start(c) {
-                            controller = c;
-                            global.HMR_CONTROLLERS.push({
-                                controller: c,
-                                page_url: referer_url.href,
-                                target_map,
-                            });
-                        },
-                        cancel() {
-                            const targetControllerIndex = global.HMR_CONTROLLERS.findIndex((c) => c.controller == controller);
-                            if (typeof targetControllerIndex == "number" &&
-                                targetControllerIndex >= 0) {
-                                global.HMR_CONTROLLERS.splice(targetControllerIndex, 1);
-                            }
-                        },
-                    });
-                    return new Response(stream, {
-                        headers: {
-                            "Content-Type": "text/event-stream",
-                            "Cache-Control": "no-cache",
-                            Connection: "keep-alive",
-                        },
-                    });
+                if (url.pathname == `/${AppData["ClientHMRPath"]}`) {
+                    response = await handleHmrUpdate({ req, server });
                 }
-                if (url.pathname.startsWith("/api/")) {
-                    return await handleRoutes({ req, server });
+                else if (url.pathname === "/__hmr" && is_dev) {
+                    response = await handleHmr({ req, server });
                 }
-                if (url.pathname.startsWith("/public/")) {
-                    try {
-                        const file_path = path.join(PUBLIC_DIR, url.pathname.replace(/^\/public/, ""));
-                        if (!existsSync(file_path)) {
-                            return new Response(`Public File Doesn't Exist`, {
-                                status: 404,
-                            });
-                        }
-                        const file = Bun.file(file_path);
-                        let res_opts = {};
-                        if (!is_dev && url.pathname.match(/__bunext/)) {
-                            res_opts.headers = {
-                                "Cache-Control": `public, max-age=${AppData["BunextStaticFilesCacheExpiry"]}, must-revalidate`,
-                            };
-                        }
-                        return new Response(file, res_opts);
-                    }
-                    catch (error) {
-                        return new Response(`Public File Not Found`, {
-                            status: 404,
-                        });
-                    }
+                else if (url.pathname.startsWith("/api/")) {
+                    response = await handleRoutes({ req, server });
                 }
-                // if (url.pathname.startsWith("/favicon.") ) {
-                if (url.pathname.match(/\..*$/)) {
-                    try {
-                        const file_path = path.join(PUBLIC_DIR, url.pathname);
-                        if (!existsSync(file_path)) {
-                            return new Response(`File Doesn't Exist`, {
-                                status: 404,
-                            });
-                        }
-                        const file = Bun.file(file_path);
-                        return new Response(file);
-                    }
-                    catch (error) {
-                        return new Response(`File Not Found`, { status: 404 });
-                    }
+                else if (url.pathname.startsWith("/public/")) {
+                    response = await handlePublic({ req, server });
                 }
-                return await handleWebPages({ req });
+                else if (url.pathname.match(/\..*$/)) {
+                    response = await handleFiles({ req, server });
+                }
+                else {
+                    response = await handleWebPages({ req });
+                }
+                if (!response) {
+                    throw new Error(`No Response generated`);
+                }
+                if (is_dev) {
+                    response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+                }
+                return response;
             }
             catch (error) {
                 return new Response(`Server Error: ${error.message}`, {

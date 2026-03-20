@@ -5,10 +5,18 @@ import EJSON from "../../../utils/ejson";
 import isDevelopment from "../../../utils/is-development";
 import grabWebPageHydrationScript from "./grab-web-page-hydration-script";
 import grabWebMetaHTML from "./grab-web-meta-html";
-export default async function genWebHTML({ component, pageProps, bundledMap, head: Head, module, meta, routeParams, }) {
+import { log } from "../../../utils/log";
+import { AppData } from "../../../data/app-data";
+export default async function genWebHTML({ component, pageProps, bundledMap, head: Head, module, meta, routeParams, debug, }) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } = grabContants();
     const { renderToString } = await import(path.join(process.cwd(), "node_modules", "react-dom", "server"));
+    if (debug) {
+        log.info("component", component);
+    }
     const componentHTML = renderToString(component);
+    if (debug) {
+        log.info("componentHTML", componentHTML);
+    }
     const headHTML = Head
         ? renderToString(_jsx(Head, { serverRes: pageProps, ctx: routeParams }))
         : "";
@@ -25,7 +33,7 @@ export default async function genWebHTML({ component, pageProps, bundledMap, hea
     }
     html += `        <script>window.${ClientWindowPagePropsName} = ${EJSON.stringify(pageProps || {}) || "{}"}</script>\n`;
     if (bundledMap?.path) {
-        html += `        <script src="/${bundledMap.path}" type="module" async></script>\n`;
+        html += `        <script src="/${bundledMap.path}" type="module" id="${AppData["BunextClientHydrationScriptID"]}" async></script>\n`;
     }
     if (isDevelopment()) {
         html += `<script defer>\n${await grabWebPageHydrationScript({ bundledMap })}\n</script>\n`;

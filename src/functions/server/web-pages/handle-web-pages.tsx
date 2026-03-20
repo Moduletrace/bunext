@@ -1,8 +1,6 @@
-import type { GrabPageComponentRes } from "../../../types";
 import isDevelopment from "../../../utils/is-development";
 import getCache from "../../cache/get-cache";
-import writeCache from "../../cache/write-cache";
-import genWebHTML from "./generate-web-html";
+import generateWebPageResponseFromComponentReturn from "./generate-web-page-response-from-component-return";
 import grabPageComponent from "./grab-page-component";
 import grabPageErrorComponent from "./grab-page-error-component";
 
@@ -32,78 +30,20 @@ export default async function handleWebPages({
             }
         }
 
-        const componentRes = await grabPageComponent({ req });
-        return await generateRes(componentRes);
-    } catch (error: any) {
-        const componentRes = await grabPageErrorComponent({ error });
-        return await generateRes(componentRes);
-    }
-}
-
-async function generateRes({
-    component,
-    module,
-    bundledMap,
-    head,
-    meta,
-    routeParams,
-    serverRes,
-}: GrabPageComponentRes) {
-    const html = await genWebHTML({
-        component,
-        pageProps: serverRes,
-        bundledMap,
-        module,
-        meta,
-        head,
-        routeParams,
-    });
-
-    if (serverRes?.redirect?.destination) {
-        return Response.redirect(
-            serverRes.redirect.destination,
-            serverRes.redirect.permanent
-                ? 301
-                : serverRes.redirect.status_code || 302,
-        );
-    }
-
-    const res_opts: ResponseInit = {
-        ...serverRes?.responseOptions,
-        headers: {
-            "Content-Type": "text/html",
-            ...serverRes?.responseOptions?.headers,
-        },
-    };
-
-    if (isDevelopment()) {
-        res_opts.headers = {
-            ...res_opts.headers,
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-        };
-    }
-
-    const cache_page =
-        module.config?.cachePage || serverRes?.cachePage || false;
-    const expiry_seconds = module.config?.cacheExpiry || serverRes?.cacheExpiry;
-
-    if (cache_page && routeParams?.url) {
-        const key = routeParams.url.pathname + (routeParams.url.search || "");
-        writeCache({
-            key,
-            value: html,
-            paradigm: "html",
-            expiry_seconds,
+        const componentRes = await grabPageComponent({
+            req,
         });
+
+        return await generateWebPageResponseFromComponentReturn({
+            ...componentRes,
+        });
+    } catch (error: any) {
+        console.error(`Error Handling Web Page: ${error.message}`);
+
+        const componentRes = await grabPageErrorComponent({
+            error,
+        });
+
+        return await generateWebPageResponseFromComponentReturn(componentRes);
     }
-
-    const res = new Response(html, res_opts);
-
-    if (routeParams?.resTransform) {
-        return await routeParams.resTransform(res);
-    }
-
-    return res;
 }

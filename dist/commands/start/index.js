@@ -9,6 +9,7 @@ export default function () {
         .action(async () => {
         log.banner();
         log.info("Starting production server ...");
+        process.env.NODE_ENV = "production";
         await init();
         const config = await grabConfig();
         global.CONFIG = { ...config };

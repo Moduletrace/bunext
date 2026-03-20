@@ -5,37 +5,22 @@ import tailwindcss from "@tailwindcss/postcss";
 import { readFile } from "fs/promises";
 import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
+import tailwindEsbuildPlugin from "./tailwind-esbuild-plugin";
 
 type Params = {
     file_path: string;
-};
-
-const tailwindPlugin: esbuild.Plugin = {
-    name: "tailwindcss",
-    setup(build) {
-        build.onLoad({ filter: /\.css$/ }, async (args) => {
-            const source = await readFile(args.path, "utf-8");
-            const result = await postcss([tailwindcss()]).process(source, {
-                from: args.path,
-            });
-
-            return {
-                contents: result.css,
-                loader: "css",
-            };
-        });
-    },
+    out_file?: string;
 };
 
 export default async function grabFilePathModule<T extends any = any>({
     file_path,
+    out_file,
 }: Params): Promise<T> {
     const dev = isDevelopment();
     const { BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
-    const target_cache_file_path = path.join(
-        BUNX_CWD_MODULE_CACHE_DIR,
-        `${path.basename(file_path)}.js`,
-    );
+    const target_cache_file_path =
+        out_file ||
+        path.join(BUNX_CWD_MODULE_CACHE_DIR, `${path.basename(file_path)}.js`);
 
     await esbuild.build({
         entryPoints: [file_path],
@@ -51,7 +36,7 @@ export default async function grabFilePathModule<T extends any = any>({
             ),
         },
         metafile: true,
-        plugins: [tailwindPlugin],
+        plugins: [tailwindEsbuildPlugin],
         jsx: "automatic",
         outfile: target_cache_file_path,
     });

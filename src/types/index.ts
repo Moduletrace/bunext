@@ -146,6 +146,7 @@ export type LivePageDistGenParams = {
     bundledMap?: BundlerCTXMap;
     meta?: BunextPageModuleMeta;
     routeParams?: BunxRouteParams;
+    debug?: boolean;
 };
 
 export type BunextPageHeadFCProps = {
@@ -244,11 +245,13 @@ export type GrabPageComponentRes = {
     module: BunextPageModule;
     meta?: BunextPageModuleMeta;
     head?: FC<BunextPageHeadFCProps>;
+    debug?: boolean;
 };
 
 export type GrabPageReactBundledComponentRes = {
     component: JSX.Element;
     server_res?: BunextPageModuleServerReturn;
+    tsx?: string;
 };
 
 export type PageFiles = {

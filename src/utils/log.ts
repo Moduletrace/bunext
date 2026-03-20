@@ -2,7 +2,7 @@ import chalk from "chalk";
 import AppNames from "./grab-app-names";
 
 const prefix = {
-    info: chalk.cyan.bold("ℹ"),
+    info: chalk.bgCyan.bold(" ℹnfo "),
     success: chalk.green.bold("✓"),
     error: chalk.red.bold("✗"),
     warn: chalk.yellow.bold("⚠"),
@@ -11,24 +11,24 @@ const prefix = {
 };
 
 export const log = {
-    info: (msg: string) =>
-        console.log(`${prefix.info}  ${chalk.white(msg)}`),
-    success: (msg: string) =>
-        console.log(`${prefix.success}  ${chalk.green(msg)}`),
+    info: (msg: string, log?: any) => {
+        console.log(`${prefix.info}  ${chalk.white(msg)}`, log || "");
+    },
+    success: (msg: string, log?: any) => {
+        console.log(`${prefix.success}  ${chalk.green(msg)}`, log || "");
+    },
     error: (msg: string | Error) =>
         console.error(`${prefix.error}  ${chalk.red(String(msg))}`),
-    warn: (msg: string) =>
-        console.warn(`${prefix.warn}  ${chalk.yellow(msg)}`),
+    warn: (msg: string) => console.warn(`${prefix.warn}  ${chalk.yellow(msg)}`),
     build: (msg: string) =>
         console.log(`${prefix.build}  ${chalk.magenta(msg)}`),
-    watch: (msg: string) =>
-        console.log(`${prefix.watch}  ${chalk.blue(msg)}`),
+    watch: (msg: string) => console.log(`${prefix.watch}  ${chalk.blue(msg)}`),
     server: (url: string) =>
         console.log(
             `${prefix.success}  ${chalk.white("Server running on")} ${chalk.cyan.underline(url)}`,
         ),
     banner: () =>
         console.log(
-            `\n  ${chalk.cyan.bold(AppNames.name)} ${chalk.gray(`v${AppNames.version}`)}\n`,
+            `\n  ${chalk.cyan.bold(AppNames.name)} ${chalk.gray(`v${global.CURRENT_VERSION || AppNames["version"]}`)}\n`,
         ),
 };
