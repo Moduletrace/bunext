@@ -1,4 +1,4 @@
-import type { MatchedRoute, Server } from "bun";
+import type { MatchedRoute, ServeOptions, Server, WebSocketHandler } from "bun";
 import type { FC, JSX, ReactNode } from "react";
 export type ServerProps = {
     params: Record<string, string>;
@@ -46,6 +46,8 @@ export type BunextConfig = {
     development?: boolean;
     middleware?: (params: BunextConfigMiddlewareParams) => Promise<Response | undefined> | Response | undefined;
     defaultCacheExpiry?: number;
+    websocket?: WebSocketHandler<any>;
+    serverOptions?: ServeOptions;
 };
 export type BunextConfigMiddlewareParams = {
     req: Request;

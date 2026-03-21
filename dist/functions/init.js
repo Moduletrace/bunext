@@ -1,7 +1,8 @@
-import { existsSync, mkdirSync, statSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import grabDirNames from "../utils/grab-dir-names";
 import { execSync } from "child_process";
 import path from "path";
+import grabConfig from "./grab-config";
 export default async function () {
     const dirNames = grabDirNames();
     execSync(`rm -rf ${dirNames.BUNEXT_CACHE_DIR}`);
@@ -26,4 +27,9 @@ export default async function () {
             writeFileSync(dir, basicConfig);
         }
     }
+    const config = (await grabConfig()) || {};
+    global.CONFIG = {
+        ...config,
+        development: true,
+    };
 }

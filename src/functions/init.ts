@@ -1,7 +1,9 @@
-import { existsSync, mkdirSync, statSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import grabDirNames from "../utils/grab-dir-names";
 import { execSync } from "child_process";
 import path from "path";
+import grabConfig from "./grab-config";
+import type { BunextConfig } from "../types";
 
 export default async function () {
     const dirNames = grabDirNames();
@@ -39,4 +41,11 @@ export default async function () {
             writeFileSync(dir, basicConfig);
         }
     }
+
+    const config: BunextConfig = (await grabConfig()) || {};
+
+    global.CONFIG = {
+        ...config,
+        development: true,
+    };
 }

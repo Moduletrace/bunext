@@ -1,17 +1,20 @@
 import grabAppPort from "../../utils/grab-app-port";
 import isDevelopment from "../../utils/is-development";
 import bunextRequestHandler from "./bunext-req-handler";
-export default async function (params) {
+import grabConfig from "../grab-config";
+import _ from "lodash";
+export default async function () {
     const port = grabAppPort();
-    const is_dev = isDevelopment();
+    const development = isDevelopment();
+    const config = await grabConfig();
     return {
         async fetch(req, server) {
             return await bunextRequestHandler({ req });
         },
         port,
-        // idleTimeout: 0,
-        development: {
-            hmr: true,
-        },
+        idleTimeout: development ? 0 : undefined,
+        development,
+        websocket: config?.websocket,
+        ..._.omit(config?.serverOptions || {}, ["fetch"]),
     };
 }
