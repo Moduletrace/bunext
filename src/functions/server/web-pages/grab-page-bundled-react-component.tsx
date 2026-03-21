@@ -16,9 +16,8 @@ export default async function grabPageBundledReactComponent({
     try {
         let tsx = ``;
 
-        const server_res_json = EJSON.stringify(server_res || {})?.replace(
-            /"/g,
-            '\\"',
+        const server_res_json = JSON.stringify(
+            EJSON.stringify(server_res || {}) ?? "{}",
         );
 
         if (root_file) {
@@ -27,7 +26,7 @@ export default async function grabPageBundledReactComponent({
 
         tsx += `import Page from "${file_path}"\n`;
         tsx += `export default function Main() {\n\n`;
-        tsx += `const props = JSON.parse("${server_res_json}")\n\n`;
+        tsx += `const props = JSON.parse(${server_res_json})\n\n`;
         tsx += `    return (\n`;
         if (root_file) {
             tsx += `        <Root suppressHydrationWarning={true} {...props}><Page {...props} /></Root>\n`;

@@ -16,7 +16,17 @@ export default function watcher() {
         async (event, filename) => {
             if (!filename) return;
 
-            if (event !== "rename") return;
+            if (event !== "rename") {
+                if (
+                    filename.match(/\.(tsx?|jsx?|css)$/) &&
+                    global.BUNDLER_CTX
+                ) {
+                    if (global.RECOMPILING) return;
+                    global.RECOMPILING = true;
+                    await global.BUNDLER_CTX.rebuild();
+                }
+                return;
+            }
             if (!filename.match(/^pages\//)) return;
             if (filename.match(/\/(--|\()/)) return;
 

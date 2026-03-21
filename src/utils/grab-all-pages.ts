@@ -42,7 +42,7 @@ function grabPageDirRecursively({ page_dir }: { page_dir: string }) {
             continue;
         }
 
-        if (page.match(/\(|\)|--/)) {
+        if (page.match(/\(|\)|--|\/api\//)) {
             continue;
         }
 

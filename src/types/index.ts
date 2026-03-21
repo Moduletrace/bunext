@@ -221,7 +221,7 @@ export type BunextPageModuleServerReturn<
      * Expiry time of the cache in seconds
      */
     cacheExpiry?: number;
-    url: BunextPageModuleServerReturnURLObject;
+    url?: BunextPageModuleServerReturnURLObject;
 };
 
 export type BunextPageModuleServerReturnURLObject = URL & {};

@@ -27,6 +27,7 @@ export default async function grabPageComponent({
 }: Params): Promise<GrabPageComponentRes> {
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
+    const now = Date.now();
 
     let routeParams: BunxRouteParams | undefined = undefined;
 
@@ -77,7 +78,7 @@ export default async function grabPageComponent({
 
         const { root_file } = grabRootFile();
 
-        const module: BunextPageModule = await import(file_path);
+        const module: BunextPageModule = await import(`${file_path}?t=${now}`);
 
         if (debug) {
             log.info(`module:`, module);
@@ -106,7 +107,10 @@ export default async function grabPageComponent({
 
             try {
                 if (routeParams) {
-                    const serverData = await module["server"]?.(routeParams);
+                    const serverData = await module["server"]?.({
+                        ...routeParams,
+                        query: { ...routeParams.query, ...match?.query },
+                    });
                     return {
                         ...serverData,
                         ...default_props,

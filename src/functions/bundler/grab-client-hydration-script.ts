@@ -54,9 +54,9 @@ export default function grabClientHydrationScript({ page_local_path }: Params) {
     txt += `const pageProps = window.__PAGE_PROPS__ || {};\n`;
 
     if (does_root_exist) {
-        txt += `const component = <Root {...pageProps}><Page {...pageProps} /></Root>\n`;
+        txt += `const component = <Root suppressHydrationWarning={true} {...pageProps}><Page {...pageProps} /></Root>\n`;
     } else {
-        txt += `const component = <Page {...pageProps} />\n`;
+        txt += `const component = <Page suppressHydrationWarning={true} {...pageProps} />\n`;
     }
 
     txt += `if (window.${ClientRootComponentWindowName}?.render) {\n`;

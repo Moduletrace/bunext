@@ -16,7 +16,7 @@ export default async function ({ bundledMap }: Params) {
     script += `        console.log(\`HMR Changes Detected. Updating ...\`);\n`;
     script += `        try {\n`;
     script += `            const data = JSON.parse(event.data);\n`;
-    // script += `            console.log("data", data);\n`;
+    script += `            console.log("data", data);\n`;
     // script += `            const modulePath = \`/\${data.target_map.path}\`;\n\n`;
 
     // script += `            const modulePath = \`/${AppData["ClientHMRPath"]}?href=\${window.location.href}&t=\${Date.now()}\`;\n\n`;
