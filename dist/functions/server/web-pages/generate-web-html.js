@@ -36,7 +36,7 @@ export default async function genWebHTML({ component, pageProps, bundledMap, hea
         html += `        <script src="/${bundledMap.path}" type="module" id="${AppData["BunextClientHydrationScriptID"]}" async></script>\n`;
     }
     if (isDevelopment()) {
-        html += `<script defer>\n${await grabWebPageHydrationScript({ bundledMap })}\n</script>\n`;
+        html += `<script defer>\n${await grabWebPageHydrationScript()}\n</script>\n`;
     }
     if (headHTML) {
         html += `    ${headHTML}\n`;

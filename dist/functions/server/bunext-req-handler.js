@@ -1,4 +1,3 @@
-import grabAppPort from "../../utils/grab-app-port";
 import handleWebPages from "./web-pages/handle-web-pages";
 import handleRoutes from "./handle-routes";
 import isDevelopment from "../../utils/is-development";

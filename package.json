@@ -2,7 +2,7 @@
     "name": "@moduletrace/bunext",
     "module": "index.ts",
     "type": "module",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "main": "dist/index.js",
     "bin": {
         "bunext": "dist/commands/index.js"
@@ -14,7 +14,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update Package.json.' && git push",
+        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update Version' && git push",
         "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext",
         "build": "tsc"
     },
