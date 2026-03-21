@@ -7,6 +7,10 @@ export default async function importReactDomServer() {
             path.join(process.cwd(), "node_modules", "react-dom", "server")
         );
 
+        if (!reactDomServerDynamicImport.renderToString) {
+            return reactDomServer;
+        }
+
         return reactDomServerDynamicImport;
     } catch (error) {
         return reactDomServer;

@@ -1,4 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
+import { renderToString } from "react-dom/server";
 import grabContants from "../../../utils/grab-constants";
 import EJSON from "../../../utils/ejson";
 import isDevelopment from "../../../utils/is-development";
@@ -6,15 +7,11 @@ import grabWebPageHydrationScript from "./grab-web-page-hydration-script";
 import grabWebMetaHTML from "./grab-web-meta-html";
 import { log } from "../../../utils/log";
 import { AppData } from "../../../data/app-data";
-import path from "path";
-import importReactDomServer from "../../../utils/import-react-dom-server";
 export default async function genWebHTML({ component, pageProps, bundledMap, head: Head, module, meta, routeParams, debug, }) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } = grabContants();
     if (debug) {
         log.info("component", component);
     }
-    const reactDomServer = await importReactDomServer();
-    const renderToString = reactDomServer.renderToString;
     const componentHTML = renderToString(component);
     if (debug) {
         log.info("componentHTML", componentHTML);
