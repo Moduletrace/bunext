@@ -3,10 +3,9 @@ import grabDirNames from "../utils/grab-dir-names";
 import { execSync } from "child_process";
 import path from "path";
 import grabConfig from "./grab-config";
-import isDevelopment from "../utils/is-development";
 export default async function () {
     const dirNames = grabDirNames();
-    const is_dev = isDevelopment();
+    const is_dev = !Boolean(process.env.NODE_ENV == "production");
     execSync(`rm -rf ${dirNames.BUNEXT_CACHE_DIR}`);
     execSync(`rm -rf ${dirNames.BUNX_CWD_MODULE_CACHE_DIR}`);
     try {

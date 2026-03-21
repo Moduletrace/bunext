@@ -27,7 +27,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Bugfixes: update types, update imports, update init function.' && git push",
+        "git:push": "bun run test && tsc --noEmit && tsc && git add . && git commit -m 'Major Bugfix. Update init function' && git push",
         "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext",
         "build": "tsc",
         "test": "bun test --max-concurrency=1"
