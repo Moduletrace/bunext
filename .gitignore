@@ -178,3 +178,4 @@ out
 /build
 __fixtures__
 /public
+/.data

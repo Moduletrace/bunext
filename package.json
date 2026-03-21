@@ -4,6 +4,19 @@
     "type": "module",
     "version": "1.0.6",
     "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./types": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/types/index.js",
+            "default": "./dist/types/index.js"
+        }
+    },
     "bin": {
         "bunext": "dist/commands/index.js"
     },
@@ -14,7 +27,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update tests' && git push",
+        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Bugfixes: update types, update imports, update init function.' && git push",
         "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext",
         "build": "tsc",
         "test": "bun test --max-concurrency=1"

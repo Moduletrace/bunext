@@ -1,4 +1,4 @@
-import path from "path";
+import { renderToString } from "react-dom/server";
 import grabContants from "../../../utils/grab-constants";
 import EJSON from "../../../utils/ejson";
 import type { LivePageDistGenParams } from "../../../types";
@@ -20,10 +20,6 @@ export default async function genWebHTML({
 }: LivePageDistGenParams) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } =
         grabContants();
-
-    const { renderToString } = await import(
-        path.join(process.cwd(), "node_modules", "react-dom", "server")
-    );
 
     if (debug) {
         log.info("component", component);

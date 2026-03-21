@@ -4,9 +4,11 @@ import { execSync } from "child_process";
 import path from "path";
 import grabConfig from "./grab-config";
 import type { BunextConfig } from "../types";
+import isDevelopment from "../utils/is-development";
 
 export default async function () {
     const dirNames = grabDirNames();
+    const is_dev = isDevelopment();
 
     execSync(`rm -rf ${dirNames.BUNEXT_CACHE_DIR}`);
     execSync(`rm -rf ${dirNames.BUNX_CWD_MODULE_CACHE_DIR}`);
@@ -48,6 +50,6 @@ export default async function () {
 
     global.CONFIG = {
         ...config,
-        development: true,
+        development: is_dev,
     };
 }

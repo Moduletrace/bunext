@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import path from "path";
+import { renderToString } from "react-dom/server";
 import grabContants from "../../../utils/grab-constants";
 import EJSON from "../../../utils/ejson";
 import isDevelopment from "../../../utils/is-development";
@@ -9,7 +9,6 @@ import { log } from "../../../utils/log";
 import { AppData } from "../../../data/app-data";
 export default async function genWebHTML({ component, pageProps, bundledMap, head: Head, module, meta, routeParams, debug, }) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } = grabContants();
-    const { renderToString } = await import(path.join(process.cwd(), "node_modules", "react-dom", "server"));
     if (debug) {
         log.info("component", component);
     }

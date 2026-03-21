@@ -30,6 +30,9 @@ export default function watcher() {
             }
             return;
         }
+        if (!filename.match(/\.(tsx?|jsx?)$/)) {
+            return;
+        }
         if (!filename.match(/^src\/pages\//))
             return;
         if (filename.match(/\/(--|\()/))
