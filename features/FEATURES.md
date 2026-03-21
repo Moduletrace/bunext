@@ -21,7 +21,7 @@ The full return contract:
 ```ts
 // bunext.config.ts
 const config: BunextConfig = {
-    middleware: async ({ req, url, server }) => {
+    middleware: async ({ req, url }) => {
         // Inject an auth header and continue
         const token = await verifySession(req);
         if (token) {
@@ -49,11 +49,36 @@ const config: BunextConfig = {
 
 ## Custom Server
 
-**Status:** In development
+**Status:** Shipped
 
-Allow consumer projects to create and fully customize the underlying `Bun.serve()` instance. Instead of Bunext owning the server entirely, the developer can provide their own server setup and integrate Bunext's request handler into it.
+Consumer projects can create and fully customize the underlying `Bun.serve()` instance by using Bunext's exported primitives directly. Instead of Bunext owning the server, the developer provides their own `Bun.serve()` call and integrates Bunext's request handler into it.
 
-This enables use cases that require low-level server control:
+```ts
+import bunext from "bunext";
+
+await bunext.bunextInit();
+
+const server = Bun.serve({
+    routes: {
+        "/*": {
+            async GET(req) {
+                return await bunext.bunextRequestHandler({ req });
+            },
+        },
+    },
+    port: 3000,
+});
+```
+
+Exported primitives:
+
+| Export | Description |
+|--------|-------------|
+| `bunextInit()` | Initializes config, router, and bundler |
+| `bunextRequestHandler({ req })` | Main Bunext request dispatcher |
+| `bunextLog` | Framework logger |
+
+Use cases:
 - Custom WebSocket upgrade handling
 - Custom TLS/SSL configuration
 - Integrating Bunext into an existing Bun server alongside other handlers
@@ -83,31 +108,31 @@ A server is a fundamental requirement for Bunext — like WordPress, it is desig
 
 ## WebSocket Support via Config
 
-**Status:** Planned
+**Status:** Shipped
 
-Add a `websocket` parameter to `bunext.config.ts` to handle WebSocket connections without requiring a custom server. This gives most projects a zero-config path to WebSockets while the custom server feature covers advanced use cases.
+The `websocket` field in `bunext.config.ts` accepts a Bun [`WebSocketHandler`](https://bun.sh/docs/api/websockets) and passes it directly to `Bun.serve()`. This gives most projects a zero-config path to WebSockets; the custom server feature covers advanced upgrade routing.
 
-Proposed config shape:
+```ts
+// websocket.ts
+import type { WebSocketHandler } from "bun";
+
+export const BunextWebsocket: WebSocketHandler<any> = {
+    message(ws, message) {
+        console.log(`WS Message => ${message}`);
+    },
+};
+```
 
 ```ts
 // bunext.config.ts
 import type { BunextConfig } from "bunext/src/types";
+import { BunextWebsocket } from "./websocket";
 
 const config: BunextConfig = {
-    websocket: {
-        message(ws, message) {
-            ws.send(`echo: ${message}`);
-        },
-        open(ws) {
-            console.log("Client connected");
-        },
-        close(ws, code, reason) {
-            console.log("Client disconnected");
-        },
-    },
+    websocket: BunextWebsocket,
 };
 
 export default config;
 ```
 
-The `websocket` field maps directly to Bun's [`WebSocketHandler`](https://bun.sh/docs/api/websockets) interface, passed through to `Bun.serve()`. WebSocket upgrade requests are handled automatically by the framework before the normal request pipeline runs.
+A companion `serverOptions` field is also available to pass any other `Bun.serve()` options (TLS, error handler, `maxRequestBodySize`, etc.) without needing a custom server.

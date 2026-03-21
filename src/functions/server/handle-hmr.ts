@@ -17,6 +17,7 @@ export default async function ({ req }: Params): Promise<Response> {
         : undefined;
 
     let controller: ReadableStreamDefaultController<string>;
+    let heartbeat: ReturnType<typeof setInterval>;
     const stream = new ReadableStream<string>({
         start(c) {
             controller = c;
@@ -25,8 +26,16 @@ export default async function ({ req }: Params): Promise<Response> {
                 page_url: referer_url.href,
                 target_map,
             });
+            heartbeat = setInterval(() => {
+                try {
+                    c.enqueue(": keep-alive\n\n");
+                } catch {
+                    clearInterval(heartbeat);
+                }
+            }, 5000);
         },
         cancel() {
+            clearInterval(heartbeat);
             const targetControllerIndex = global.HMR_CONTROLLERS.findIndex(
                 (c) => c.controller == controller,
             );

@@ -19,11 +19,6 @@ const server = Bun.serve({
             },
         },
     },
-    /**
-     * Set this to prevent HMR timeout warnings in the
-     * browser console in development mode.
-     */
-    idleTimeout: development ? 0 : undefined,
     development,
     port,
 });

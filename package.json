@@ -14,7 +14,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update Version' && git push",
+        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Bugfixes. Documentation update.' && git push",
         "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext",
         "build": "tsc"
     },

@@ -8,6 +8,7 @@ export default async function ({ req }) {
         ? global.BUNDLER_CTX_MAP?.find((m) => m.local_path == match.filePath)
         : undefined;
     let controller;
+    let heartbeat;
     const stream = new ReadableStream({
         start(c) {
             controller = c;
@@ -16,8 +17,17 @@ export default async function ({ req }) {
                 page_url: referer_url.href,
                 target_map,
             });
+            heartbeat = setInterval(() => {
+                try {
+                    c.enqueue(": keep-alive\n\n");
+                }
+                catch {
+                    clearInterval(heartbeat);
+                }
+            }, 5000);
         },
         cancel() {
+            clearInterval(heartbeat);
             const targetControllerIndex = global.HMR_CONTROLLERS.findIndex((c) => c.controller == controller);
             if (typeof targetControllerIndex == "number" &&
                 targetControllerIndex >= 0) {

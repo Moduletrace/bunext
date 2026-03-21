@@ -43,6 +43,9 @@ The goal is a framework that is:
     - [Cache Behavior and Limitations](#cache-behavior-and-limitations)
 - [Configuration](#configuration)
     - [Middleware](#middleware)
+    - [WebSocket](#websocket)
+    - [Server Options](#server-options)
+- [Custom Server](#custom-server)
 - [Environment Variables](#environment-variables)
 - [How It Works](#how-it-works)
     - [Development Server](#development-server)
@@ -650,6 +653,8 @@ export default config;
 | `development`       | `boolean`                                                                         | —                | Overridden to `true` by `bunext dev` automatically |
 | `defaultCacheExpiry`| `number`                                                                          | `3600`           | Global page cache expiry in seconds                |
 | `middleware`        | `(params: BunextConfigMiddlewareParams) => Response \| undefined \| Promise<...>` | —                | Global middleware — see [Middleware](#middleware)   |
+| `websocket`         | `WebSocketHandler<any>`                                                            | —                | Bun WebSocket handler — see [WebSocket](#websocket) |
+| `serverOptions`     | `ServeOptions`                                                                     | —                | Extra options passed to `Bun.serve()` (excluding `fetch`) — see [Server Options](#server-options) |
 
 ### Middleware
 
@@ -666,7 +671,7 @@ import type {
 } from "bunext/src/types";
 
 const config: BunextConfig = {
-    middleware: async ({ req, url, server }) => {
+    middleware: async ({ req, url }) => {
         // Example: protect all /dashboard/* routes
         if (url.pathname.startsWith("/dashboard")) {
             const token = req.headers.get("authorization");
@@ -696,6 +701,104 @@ middleware: async ({ req, url }) => {
     // For API routes, return undefined to continue — the handler controls its own Response directly
 },
 ```
+
+### WebSocket
+
+Add a `websocket` field to `bunext.config.ts` to handle WebSocket connections. The value is passed directly to `Bun.serve()` as the `websocket` option and accepts the full [`WebSocketHandler`](https://bun.sh/docs/api/websockets) interface.
+
+Define the handler in its own file and import it into the config:
+
+```ts
+// websocket.ts
+import type { WebSocketHandler } from "bun";
+
+export const BunextWebsocket: WebSocketHandler<any> = {
+    message(ws, message) {
+        console.log(`WS Message => ${message}`);
+    },
+};
+```
+
+```ts
+// bunext.config.ts
+import type { BunextConfig } from "bunext/src/types";
+import { BunextWebsocket } from "./websocket";
+
+const config: BunextConfig = {
+    websocket: BunextWebsocket,
+};
+
+export default config;
+```
+
+### Server Options
+
+Pass additional options to the underlying `Bun.serve()` call via `serverOptions`. All standard [`ServeOptions`](https://bun.sh/docs/api/http) fields are accepted except `fetch`, which Bunext manages internally.
+
+```ts
+// bunext.config.ts
+import type { BunextConfig } from "bunext/src/types";
+
+const config: BunextConfig = {
+    serverOptions: {
+        tls: {
+            cert: Bun.file("./certs/cert.pem"),
+            key: Bun.file("./certs/key.pem"),
+        },
+        maxRequestBodySize: 64 * 1024 * 1024, // 64 MB
+        error(err) {
+            console.error("Server error:", err);
+            return new Response("Internal Server Error", { status: 500 });
+        },
+    },
+};
+
+export default config;
+```
+
+---
+
+## Custom Server
+
+For full control over the `Bun.serve()` instance — custom WebSocket upgrade logic, multi-protocol handling, or integrating Bunext alongside other handlers — you can skip `bunext dev` / `bunext start` and run your own server using Bunext's exported primitives.
+
+```ts
+// server.ts
+import bunext from "bunext";
+
+const development = process.env.NODE_ENV === "development";
+const port = process.env.PORT || 3700;
+
+await bunext.bunextInit();
+
+const server = Bun.serve({
+    routes: {
+        "/*": {
+            async GET(req) {
+                return await bunext.bunextRequestHandler({ req });
+            },
+        },
+    },
+    development,
+    port,
+});
+
+bunext.bunextLog.info(`Server running on http://localhost:${server.port} ...`);
+```
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `bunextInit()` | `() => Promise<void>` | Initializes config, router, and bundler. Must be called before handling requests. |
+| `bunextRequestHandler({ req })` | `(params: { req: Request }) => Promise<Response>` | The main Bunext request dispatcher — middleware, routing, SSR, static files. Only `req` is needed; the server instance is managed internally. |
+| `bunextLog` | Logger | Framework logger (`info`, `error`, `success`, `server`, `watch`). |
+
+Run the custom server directly with Bun:
+
+```bash
+bun run server.ts
+```
+
+> **Note:** When using a custom server, HMR and file watching are still driven by `bunextInit()`. Pass `development: true` in your `Bun.serve()` call to enable them.
 
 ---
 

@@ -28,6 +28,7 @@ export default async function (params?: Params) {
     script += `window.addEventListener("unhandledrejection", (e) => __bunext_show_error(String(e.reason?.message ?? e.reason), "", e.reason?.stack ?? ""));\n\n`;
 
     script += `const hmr = new EventSource("/__hmr");\n`;
+    script += `window.BUNEXT_HMR = hmr;\n`;
     script += `window.addEventListener("beforeunload", () => hmr.close());\n`;
     script += `hmr.addEventListener("update", async (event) => {\n`;
     script += `    if (event?.data) {\n`;

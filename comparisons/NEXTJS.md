@@ -134,6 +134,10 @@ This report compares the two on their overlapping surface — server-side render
 | Prefetching                                  | —      | ✅              | ✅                   |
 | `useRouter` / `usePathname` hooks            | —      | ✅              | ✅                   |
 | `useSearchParams` hook                       | —      | ✅              | ✅                   |
+| **Server**                                   |        |                 |                      |
+| WebSocket support                            | ✅     | ❌              | ❌                   |
+| Custom server (bring your own `Bun.serve()`) | ✅     | ✅ (custom `server.js`) | ✅            |
+| Extra server options (`tls`, `error`, etc.)  | ✅ (`serverOptions`) | ✅    | ✅                   |
 | **Deployment**                               |        |                 |                      |
 | Self-hosted (any server with runtime)        | ✅     | ✅              | ✅                   |
 | No vendor lock-in                            | ✅     | ❌ (Vercel-optimised) | ❌            |
@@ -358,7 +362,7 @@ The key distinction from SSG: Bunext's cache is **demand-driven**. A site with 1
 | `Request` | *(planned)* Replaces the request and continues through the pipeline |
 | `undefined` | Passes through unchanged |
 
-The planned `Request` return allows header injection, auth token forwarding, locale detection, or any other request mutation without terminating the pipeline — a clean, standard-API alternative to Next.js's custom `NextResponse.next({ headers: ... })` pattern.
+The planned `Request` return allows header injection, auth token forwarding, locale detection, or any other request mutation without terminating the pipeline — a clean, standard-API alternative to Next.js's custom `NextResponse.next({ headers: ... })` pattern. The middleware function receives `{ req, url }`. The server instance is managed internally and does not need to be passed explicitly.
 
 **Next.js** middleware runs per-request in a lightweight Edge Runtime (V8 isolate), with matched route patterns configured via `matcher`. It uses `NextRequest`/`NextResponse` extensions for rewriting, redirecting, and injecting headers without returning a full response.
 
@@ -426,7 +430,7 @@ Next.js provides additional type-safety features:
 
 ### Configuration
 
-**Bunext** (`bunext.config.ts`) exposes: `port`, `origin`, `distDir`, `assetsPrefix`, `globalVars`, `development`, `defaultCacheExpiry`, `middleware`.
+**Bunext** (`bunext.config.ts`) exposes: `port`, `origin`, `distDir`, `assetsPrefix`, `globalVars`, `development`, `defaultCacheExpiry`, `middleware`, `websocket`, `serverOptions`.
 
 **Next.js** (`next.config.js`) additionally supports:
 - `redirects()` — array of redirect rules evaluated at the server level.
@@ -591,6 +595,39 @@ Bunext has one rule: the `server` function runs on the server, the component run
 Bunext runs on any server where Bun is installed. There is no Vercel platform dependency, no proprietary deployment format, no ISR infrastructure that requires a managed host. `bunext build && bunext start` is the entire production deployment.
 
 Next.js is technically self-hostable but is architecturally optimised for Vercel — features like ISR, image optimisation, Edge Middleware, and Analytics are either Vercel-only or degraded outside it.
+
+### WebSocket and Custom Server
+
+Bunext ships native WebSocket support via a `websocket` field in `bunext.config.ts`. The value is a Bun `WebSocketHandler` passed directly to `Bun.serve()` — no third-party library, no adapter, no separate process. Upgrade requests are triggered from any API route — only `req` is needed, as the server instance is managed internally by the framework.
+
+Next.js has no built-in WebSocket support. Upgrading a connection requires a custom Node.js server (`server.js`) outside the Next.js framework, which loses access to Next.js's built-in routing and middleware for that connection.
+
+For projects that need full control over `Bun.serve()` — custom TLS, multi-protocol handling, integrating Bunext alongside other handlers — Bunext exports `bunextInit()` and `bunextRequestHandler()` as first-class primitives. The developer owns the server; Bunext handles the request processing:
+
+```ts
+// server.ts
+import bunext from "bunext";
+
+const development = process.env.NODE_ENV === "development";
+
+await bunext.bunextInit();
+
+const server = Bun.serve({
+    routes: {
+        "/*": {
+            async GET(req) {
+                return await bunext.bunextRequestHandler({ req });
+            },
+        },
+    },
+    development,
+    port: process.env.PORT || 3700,
+});
+
+bunext.bunextLog.info(`Server running on http://localhost:${server.port} ...`);
+```
+
+Next.js requires a `server.js` file that wraps `next()` — a documented but officially discouraged pattern that disables some platform-specific features on Vercel.
 
 ### Bun-Native APIs
 
