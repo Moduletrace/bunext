@@ -27,7 +27,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "git:push": "tsc --noEmit && tsc && git add . && git commit -m 'Update Version. Remove circular dependency.' && git push",
+        "git:push": "tsc --noEmit && tsc && git add . && git commit -m 'Update dependencies.' && git push",
         "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext --minify",
         "build": "tsc",
         "test": "bun test --max-concurrency=1"
@@ -35,12 +35,8 @@
     "devDependencies": {
         "@testing-library/dom": "^10.4.1",
         "@testing-library/react": "^16.3.2",
-        "@types/bun": "latest",
         "@types/lodash": "^4.17.24",
         "@types/micromatch": "^4.0.10",
-        "@types/node": "^24.10.0",
-        "@types/react": "^19.2.2",
-        "@types/react-dom": "^19.2.2",
         "happy-dom": "^20.8.4",
         "react": "^19.2.4",
         "react-dom": "^19.2.4"
@@ -63,6 +59,10 @@
         "lodash": "^4.17.23",
         "micromatch": "^4.0.8",
         "ora": "^9.0.0",
-        "postcss": "^8.5.8"
+        "postcss": "^8.5.8",
+        "@types/node": "^24.10.0",
+        "@types/bun": "latest",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2"
     }
 }
