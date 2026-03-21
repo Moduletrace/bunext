@@ -67,16 +67,39 @@ The goal is a framework that is:
 
 ## Installation
 
-Install Bunext directly from GitHub:
+### From the Moduletrace registry (recommended)
+
+Configure the `@moduletrace` scope to point at the registry — pick one:
+
+**`.npmrc`** (works with npm, bun, and most tools):
+
+```ini
+@moduletrace:registry=https://git.tben.me/api/packages/moduletrace/npm/
+```
+
+**`bunfig.toml`** (Bun-native):
+
+```toml
+[install.scopes]
+"@moduletrace" = { registry = "https://git.tben.me/api/packages/moduletrace/npm/" }
+```
+
+Then install:
+
+```bash
+bun add @moduletrace/bunext
+```
+
+Or globally:
+
+```bash
+bun add -g @moduletrace/bunext
+```
+
+### From GitHub (alternative)
 
 ```bash
 bun add github:moduletrace/bunext
-```
-
-Install globally:
-
-```bash
-bun add -g github:moduletrace/bunext
 ```
 
 ---
@@ -157,7 +180,7 @@ bun run start
 **Global install** — install once and use `bunext` from anywhere:
 
 ```bash
-bun add -g github:moduletrace/bunext
+bun add -g @moduletrace/bunext
 bunext dev
 bunext build
 bunext start

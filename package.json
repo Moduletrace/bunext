@@ -2,7 +2,7 @@
     "name": "@moduletrace/bunext",
     "module": "index.ts",
     "type": "module",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
@@ -28,7 +28,7 @@
     "scripts": {
         "dev": "tsc --watch",
         "git:push": "tsc --noEmit && tsc && git add . && git commit -m 'Update bundler. Handle non-existent file error.' && git push",
-        "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext",
+        "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext --minify",
         "build": "tsc",
         "test": "bun test --max-concurrency=1"
     },
@@ -54,7 +54,6 @@
         "registry": "https://npm.pkg.github.com"
     },
     "dependencies": {
-        "@moduletrace/bunext": "github:moduletrace/bunext",
         "@tailwindcss/postcss": "^4.2.2",
         "bun-plugin-tailwind": "^0.1.2",
         "chalk": "^5.6.2",
