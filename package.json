@@ -27,7 +27,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "git:push": "tsc --noEmit && tsc && git add . && git commit -m 'Update README.md' && git push",
+        "git:push": "tsc --noEmit && tsc && git add . && git commit -m 'Update watcher function. Add .css files to the rebuild pipeline' && git push",
         "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext",
         "build": "tsc",
         "test": "bun test --max-concurrency=1"

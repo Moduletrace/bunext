@@ -30,10 +30,11 @@ export default function watcher() {
             }
             return;
         }
-        if (!filename.match(target_files_match)) {
+        const is_file_of_interest = Boolean(filename.match(target_files_match));
+        if (!is_file_of_interest) {
             return;
         }
-        if (!filename.match(/^src\/pages\//))
+        if (!filename.match(/^src\/pages\/|\.css$/))
             return;
         if (filename.match(/\/(--|\()/))
             return;
@@ -41,8 +42,9 @@ export default function watcher() {
             return;
         const fullPath = path.join(ROOT_DIR, filename);
         const action = existsSync(fullPath) ? "created" : "deleted";
+        const type = filename.match(/\.css$/) ? "Sylesheet" : "Page";
         await fullRebuild({
-            msg: `Page ${action}: ${filename}. Rebuilding ...`,
+            msg: `${type} ${action}: ${filename}. Rebuilding ...`,
         });
     });
     global.PAGES_SRC_WATCHER = pages_src_watcher;

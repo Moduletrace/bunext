@@ -15,6 +15,7 @@ export default function watcher() {
         },
         async (event, filename) => {
             if (!filename) return;
+
             const excluded_match =
                 /node_modules\/|^public\/|^\.bunext\/|^\.git\/|^dist\/|bun\.lockb$/;
 
@@ -38,20 +39,25 @@ export default function watcher() {
                 return;
             }
 
-            if (!filename.match(target_files_match)) {
+            const is_file_of_interest = Boolean(
+                filename.match(target_files_match),
+            );
+
+            if (!is_file_of_interest) {
                 return;
             }
 
-            if (!filename.match(/^src\/pages\//)) return;
+            if (!filename.match(/^src\/pages\/|\.css$/)) return;
             if (filename.match(/\/(--|\()/)) return;
 
             if (global.RECOMPILING) return;
 
             const fullPath = path.join(ROOT_DIR, filename);
             const action = existsSync(fullPath) ? "created" : "deleted";
+            const type = filename.match(/\.css$/) ? "Sylesheet" : "Page";
 
             await fullRebuild({
-                msg: `Page ${action}: ${filename}. Rebuilding ...`,
+                msg: `${type} ${action}: ${filename}. Rebuilding ...`,
             });
         },
     );
