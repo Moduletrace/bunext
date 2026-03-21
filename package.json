@@ -14,17 +14,21 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update watcher function. Add tests' && git push",
+        "publish": "tsc --noEmit && tsc && git add . && git commit -m 'Update tests' && git push",
         "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext",
-        "build": "tsc"
+        "build": "tsc",
+        "test": "bun test --max-concurrency=1"
     },
     "devDependencies": {
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/react": "^16.3.2",
         "@types/bun": "latest",
         "@types/lodash": "^4.17.24",
         "@types/micromatch": "^4.0.10",
         "@types/node": "^24.10.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
+        "happy-dom": "^20.8.4",
         "react": "^19.2.4",
         "react-dom": "^19.2.4"
     },

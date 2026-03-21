@@ -176,3 +176,5 @@ out
 .bunext
 /bin
 /build
+__fixtures__
+/public

@@ -2,9 +2,7 @@ import handleWebPages from "./web-pages/handle-web-pages";
 import handleRoutes from "./handle-routes";
 import isDevelopment from "../../utils/is-development";
 import grabConstants from "../../utils/grab-constants";
-import { AppData } from "../../data/app-data";
 import handleHmr from "./handle-hmr";
-import handleHmrUpdate from "./handle-hmr-update";
 import handlePublic from "./handle-public";
 import handleFiles from "./handle-files";
 type Params = {
@@ -39,9 +37,7 @@ export default async function bunextRequestHandler({
             }
         }
 
-        if (url.pathname == `/${AppData["ClientHMRPath"]}`) {
-            response = await handleHmrUpdate({ req });
-        } else if (url.pathname === "/__hmr" && is_dev) {
+        if (url.pathname === "/__hmr" && is_dev) {
             response = await handleHmr({ req });
         } else if (url.pathname.startsWith("/api/")) {
             response = await handleRoutes({ req });

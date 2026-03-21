@@ -21,6 +21,11 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
             routeParams,
             module,
             bundledMap,
+            serverRes: {
+                responseOptions: {
+                    status: is404 ? 404 : 500
+                }
+            }
         };
     }
     catch {
@@ -37,6 +42,11 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
             routeParams,
             module: { default: DefaultNotFound },
             bundledMap: {},
+            serverRes: {
+                responseOptions: {
+                    status: is404 ? 404 : 500
+                }
+            }
         };
     }
 }

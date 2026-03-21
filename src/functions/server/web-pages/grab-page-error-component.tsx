@@ -47,6 +47,11 @@ export default async function grabPageErrorComponent({
             routeParams,
             module,
             bundledMap,
+            serverRes: {
+                responseOptions: {
+                    status: is404 ? 404 : 500
+                }
+            } as any
         };
     } catch {
         const DefaultNotFound: FC = () => (
@@ -70,6 +75,11 @@ export default async function grabPageErrorComponent({
             routeParams,
             module: { default: DefaultNotFound },
             bundledMap: {} as BundlerCTXMap,
+            serverRes: {
+                responseOptions: {
+                    status: is404 ? 404 : 500
+                }
+            } as any
         };
     }
 }
