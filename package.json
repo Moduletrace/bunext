@@ -2,7 +2,7 @@
     "name": "@moduletrace/bunext",
     "module": "index.ts",
     "type": "module",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
@@ -27,7 +27,7 @@
     ],
     "scripts": {
         "dev": "tsc --watch",
-        "git:push": "tsc --noEmit && tsc && git add . && git commit -m 'Update bundler. Handle non-existent file error.' && git push",
+        "git:push": "tsc --noEmit && tsc && git add . && git commit -m 'Update Version. Remove circular dependency.' && git push",
         "compile": "bun build ./src/commands/index.ts --compile --outfile bin/bunext --minify",
         "build": "tsc",
         "test": "bun test --max-concurrency=1"
