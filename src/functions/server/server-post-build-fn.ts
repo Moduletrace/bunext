@@ -1,5 +1,6 @@
 import _ from "lodash";
 import type { BundlerCTXMap, GlobalHMRControllerObject } from "../../types";
+import grabPageComponent from "./web-pages/grab-page-component";
 
 type Params = {
     artifacts: BundlerCTXMap[];
@@ -21,6 +22,12 @@ export default async function serverPostBuildFn({ artifacts }: Params) {
             (a) => controller.target_map?.local_path == a.local_path,
         );
 
+        const mock_req = new Request(controller.page_url);
+
+        const { serverRes } = await grabPageComponent({
+            req: mock_req,
+        });
+
         const final_artifact: Omit<GlobalHMRControllerObject, "controller"> = {
             ..._.omit(controller, ["controller"]),
             target_map: target_artifact,
@@ -28,6 +35,10 @@ export default async function serverPostBuildFn({ artifacts }: Params) {
 
         if (!target_artifact) {
             delete final_artifact.target_map;
+        }
+
+        if (serverRes) {
+            final_artifact.page_props = serverRes;
         }
 
         try {

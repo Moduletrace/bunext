@@ -229,6 +229,11 @@ export type BunextPageModuleServerReturn<
     url?: BunextPageModuleServerReturnURLObject;
 };
 
+export type BunextPageProps<
+    T extends { [k: string]: any } = { [k: string]: any },
+    Q extends { [k: string]: any } = { [k: string]: any },
+> = BunextPageModuleServerReturn<T, Q>;
+
 export type BunextPageModuleServerReturnURLObject = URL & {};
 
 export type BunextPageModuleServerRedirect = {
@@ -280,6 +285,7 @@ export type GlobalHMRControllerObject = {
     controller: ReadableStreamDefaultController<string>;
     page_url: string;
     target_map?: BundlerCTXMap;
+    page_props?: any;
 };
 
 export type BunextCacheFileMeta = {

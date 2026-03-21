@@ -11,8 +11,11 @@ type Params = {
 };
 
 export default function grabClientHydrationScript({ page_local_path }: Params) {
-    const { ClientRootElementIDName, ClientRootComponentWindowName } =
-        grabConstants();
+    const {
+        ClientRootElementIDName,
+        ClientRootComponentWindowName,
+        ClientWindowPagePropsName,
+    } = grabConstants();
 
     const root_component_path = path.join(
         PAGES_DIR,
@@ -28,7 +31,7 @@ export default function grabClientHydrationScript({ page_local_path }: Params) {
         txt += `import Root from "${root_component_path}";\n`;
     }
     txt += `import Page from "${page_local_path}";\n\n`;
-    txt += `const pageProps = window.__PAGE_PROPS__ || {};\n`;
+    txt += `const pageProps = window.${ClientWindowPagePropsName} || {};\n`;
 
     if (does_root_exist) {
         txt += `const component = <Root suppressHydrationWarning={true} {...pageProps}><Page {...pageProps} /></Root>\n`;
@@ -45,7 +48,7 @@ export default function grabClientHydrationScript({ page_local_path }: Params) {
     txt += `    window.${ClientRootComponentWindowName} = root;\n`;
 
     txt += `    window.__BUNEXT_RERENDER__ = (NewPage) => {\n`;
-    txt += `        const props = window.__PAGE_PROPS__ || {};\n`;
+    txt += `        const props = window.${ClientWindowPagePropsName} || {};\n`;
     txt += `        root.render(<NewPage {...props} />);\n`;
     txt += `    };\n`;
     txt += `}\n`;

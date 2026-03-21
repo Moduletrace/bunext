@@ -1,11 +1,14 @@
 import type { BundlerCTXMap } from "../../../types";
 import { AppData } from "../../../data/app-data";
+import grabConstants from "../../../utils/grab-constants";
 
 type Params = {
     bundledMap?: BundlerCTXMap;
 };
 
 export default async function (params?: Params) {
+    const { ClientWindowPagePropsName } = grabConstants();
+
     let script = "";
 
     script += `console.log(\`Development Environment\`);\n\n`;
@@ -37,6 +40,10 @@ export default async function (params?: Params) {
     script += `            document.getElementById("__bunext_error_overlay")?.remove();\n`;
     script += `            const data = JSON.parse(event.data);\n`;
     // script += `            console.log("data", data);\n`;
+
+    script += `            if (data.page_props) {\n`;
+    script += `                window.${ClientWindowPagePropsName} = data.page_props\n`;
+    script += `            }\n`;
 
     script += `            const oldCSSLink = document.querySelector('link[rel="stylesheet"]');\n`;
 

@@ -1,5 +1,7 @@
 import { AppData } from "../../../data/app-data";
+import grabConstants from "../../../utils/grab-constants";
 export default async function (params) {
+    const { ClientWindowPagePropsName } = grabConstants();
     let script = "";
     script += `console.log(\`Development Environment\`);\n\n`;
     script += `const _ce = console.error.bind(console);\n`;
@@ -28,6 +30,9 @@ export default async function (params) {
     script += `            document.getElementById("__bunext_error_overlay")?.remove();\n`;
     script += `            const data = JSON.parse(event.data);\n`;
     // script += `            console.log("data", data);\n`;
+    script += `            if (data.page_props) {\n`;
+    script += `                window.${ClientWindowPagePropsName} = data.page_props\n`;
+    script += `            }\n`;
     script += `            const oldCSSLink = document.querySelector('link[rel="stylesheet"]');\n`;
     script += `            if (data.target_map.css_path) {\n`;
     script += `                const newLink = document.createElement("link");\n`;
