@@ -59,5 +59,12 @@ export default async function startServer(params?: Params) {
 
     log.server(`http://localhost:${server.port}`);
 
+    /**
+     * First Rebuild to Avoid errors
+     */
+    if (params?.dev && global.BUNDLER_CTX) {
+        await global.BUNDLER_CTX.rebuild();
+    }
+
     return server;
 }
