@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import allPagesBundler from "../../functions/bundler/all-pages-bundler";
 import { log } from "../../utils/log";
+import init from "../../functions/init";
 
 export default function () {
     return new Command("build")
@@ -9,6 +10,9 @@ export default function () {
             process.env.NODE_ENV = "production";
             process.env.BUILD = "true";
 
+            await init();
+
+            log.banner();
             log.build("Building Project ...");
 
             allPagesBundler({

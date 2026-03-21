@@ -12,9 +12,11 @@ export default async function () {
     execSync(`rm -rf ${dirNames.BUNX_CWD_MODULE_CACHE_DIR}`);
 
     try {
-        const current_version = (
-            await Bun.file(path.resolve(__dirname, "../../package.json")).json()
-        ).version;
+        const package_json = await Bun.file(
+            path.resolve(__dirname, "../../package.json"),
+        ).json();
+
+        const current_version = package_json.version;
 
         global.CURRENT_VERSION = current_version;
     } catch (error) {}

@@ -7,15 +7,15 @@ import handleHmr from "./handle-hmr";
 import handleHmrUpdate from "./handle-hmr-update";
 import handlePublic from "./handle-public";
 import handleFiles from "./handle-files";
-
 type Params = {
     req: Request;
 };
 
 export default async function bunextRequestHandler({
-    req,
+    req: initial_req,
 }: Params): Promise<Response> {
     const is_dev = isDevelopment();
+    let req = initial_req.clone();
 
     try {
         const url = new URL(req.url);
@@ -26,12 +26,16 @@ export default async function bunextRequestHandler({
 
         if (config?.middleware) {
             const middleware_res = await config.middleware({
-                req,
+                req: initial_req,
                 url,
             });
 
-            if (typeof middleware_res == "object") {
+            if (middleware_res instanceof Response) {
                 return middleware_res;
+            }
+
+            if (middleware_res instanceof Request) {
+                req = middleware_res;
             }
         }
 

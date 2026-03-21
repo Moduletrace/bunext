@@ -7,19 +7,23 @@ import handleHmr from "./handle-hmr";
 import handleHmrUpdate from "./handle-hmr-update";
 import handlePublic from "./handle-public";
 import handleFiles from "./handle-files";
-export default async function bunextRequestHandler({ req, }) {
+export default async function bunextRequestHandler({ req: initial_req, }) {
     const is_dev = isDevelopment();
+    let req = initial_req.clone();
     try {
         const url = new URL(req.url);
         const { config } = grabConstants();
         let response = undefined;
         if (config?.middleware) {
             const middleware_res = await config.middleware({
-                req,
+                req: initial_req,
                 url,
             });
-            if (typeof middleware_res == "object") {
+            if (middleware_res instanceof Response) {
                 return middleware_res;
+            }
+            if (middleware_res instanceof Request) {
+                req = middleware_res;
             }
         }
         if (url.pathname == `/${AppData["ClientHMRPath"]}`) {

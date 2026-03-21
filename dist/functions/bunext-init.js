@@ -10,7 +10,6 @@ import EJSON from "../utils/ejson";
 import { log } from "../utils/log";
 import cron from "./server/cron";
 export default async function bunextInit() {
-    log.banner();
     global.ORA_SPINNER = ora();
     global.ORA_SPINNER.clear();
     global.HMR_CONTROLLERS = [];
@@ -18,6 +17,7 @@ export default async function bunextInit() {
     global.BUNDLER_REBUILDS = 0;
     global.PAGE_FILES = [];
     await init();
+    log.banner();
     const { PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
     const router = new Bun.FileSystemRouter({
         style: "nextjs",

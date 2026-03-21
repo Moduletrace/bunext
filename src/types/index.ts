@@ -50,7 +50,11 @@ export type BunextConfig = {
     development?: boolean;
     middleware?: (
         params: BunextConfigMiddlewareParams,
-    ) => Promise<Response | undefined> | Response | undefined;
+    ) =>
+        | Promise<Response | Request | undefined>
+        | Response
+        | Request
+        | undefined;
     defaultCacheExpiry?: number;
     websocket?: WebSocketHandler<any>;
     serverOptions?: ServeOptions;

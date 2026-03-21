@@ -44,7 +44,7 @@ export type BunextConfig = {
     };
     port?: number;
     development?: boolean;
-    middleware?: (params: BunextConfigMiddlewareParams) => Promise<Response | undefined> | Response | undefined;
+    middleware?: (params: BunextConfigMiddlewareParams) => Promise<Response | Request | undefined> | Response | Request | undefined;
     defaultCacheExpiry?: number;
     websocket?: WebSocketHandler<any>;
     serverOptions?: ServeOptions;

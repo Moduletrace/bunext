@@ -59,7 +59,7 @@ export default async function (params?: Params) {
     script += `            document.head.appendChild(newScript);\n\n`;
     script += `        } catch (err) {\n`;
     script += `            console.error("HMR update failed, falling back to reload:", err.message);\n`;
-    // script += `            window.location.reload();\n`;
+    script += `            window.location.reload();\n`;
     script += `        }\n`;
     script += `    }\n`;
     script += `});\n`;
