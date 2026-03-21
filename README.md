@@ -7,6 +7,7 @@ A server-rendering framework for React, built on [Bun](https://bun.sh). Bunext h
 Bunext is focused on **server-side rendering and processing**. Every page is rendered on the server on every request. The framework deliberately does not implement client-side navigation, SPA routing, or client-side state management — those concerns belong in client-side libraries and are orthogonal to what Bunext is solving.
 
 The goal is a framework that is:
+
 - Fast — Bun's runtime speed and ESBuild's bundling make the full dev loop snappy
 - Transparent — the entire request pipeline is readable and debugable
 - Standard — server functions and API handlers use native Web APIs (`Request`, `Response`, `URL`) with no custom wrappers
@@ -72,11 +73,10 @@ Install Bunext directly from GitHub:
 bun add github:moduletrace/bunext
 ```
 
-Install required peer dependencies:
+Install globally:
 
 ```bash
-bun add react react-dom
-bun add -d typescript @types/react @types/react-dom
+bun add -g github:moduletrace/bunext
 ```
 
 ---
@@ -102,13 +102,25 @@ export default function HomePage() {
 }
 ```
 
-3. Start the development server:
+3. Add scripts to your `package.json`:
 
-```bash
-bunext dev
+```json
+{
+    "scripts": {
+        "dev": "bunx bunext dev",
+        "build": "bunx bunext build",
+        "start": "bunx bunext start"
+    }
+}
 ```
 
-4. Open `http://localhost:7000` in your browser.
+4. Start the development server:
+
+```bash
+bun run dev
+```
+
+5. Open `http://localhost:7000` in your browser.
 
 ---
 
@@ -120,18 +132,38 @@ bunext dev
 | `bunext build` | Bundle all pages for production. Outputs artifacts to `public/pages/`. |
 | `bunext start` | Start the production server using pre-built artifacts.                 |
 
+### Running the CLI
+
+Bunext exposes a `bunext` binary. How you invoke it depends on how the package is installed:
+
+**Local install (recommended)** — add scripts to `package.json` and run them with `bun run`:
+
+```json
+{
+    "scripts": {
+        "dev": "bunx bunext dev",
+        "build": "bunx bunext build",
+        "start": "bunx bunext start"
+    }
+}
+```
+
 ```bash
-# Development
+bun run dev
+bun run build
+bun run start
+```
+
+**Global install** — install once and use `bunext` from anywhere:
+
+```bash
+bun add -g github:moduletrace/bunext
 bunext dev
-
-# Production build
 bunext build
-
-# Production server (must run build first)
 bunext start
 ```
 
-> **Note:** `bunext start` will exit with an error if `public/pages/map.json` does not exist. Always run `bunext build` before `bunext start`.
+> **Note:** `bunext start` will exit with an error if `public/pages/map.json` does not exist. Always run `bunext build` (or `bun run build`) before `bunext start`.
 
 ---
 
@@ -184,11 +216,11 @@ Dynamic route parameters (e.g. `[slug]`) are available in the `server` function 
 
 Directories whose name contains `--` or a parenthesis (`(` or `)`) are completely ignored by the router. Use this to co-locate helper components, utilities, or shared logic directly inside `src/pages/` alongside the routes that use them, without them becoming routes.
 
-| Naming pattern | Effect |
-| --- | --- |
+| Naming pattern  | Effect               |
+| --------------- | -------------------- |
 | `(components)/` | Ignored — not routed |
-| `--utils--/` | Ignored — not routed |
-| `--lib/` | Ignored — not routed |
+| `--utils--/`    | Ignored — not routed |
+| `--lib/`        | Ignored — not routed |
 
 ```
 src/pages/
@@ -222,7 +254,7 @@ Export a `server` function to run server-side logic before rendering. The return
 
 ```tsx
 // src/pages/profile.tsx
-import type { BunextPageServerFn } from "bunext/src/types";
+import type { BunextPageServerFn } from "@moduletrace/bunext/types";
 
 type Props = {
     props?: { username: string; bio: string };
@@ -274,7 +306,7 @@ Every page component automatically receives a `url` prop — a copy of the reque
 
 ```tsx
 // src/pages/index.tsx
-import type { BunextPageModuleServerReturnURLObject } from "bunext/src/types";
+import type { BunextPageModuleServerReturnURLObject } from "@moduletrace/bunext/types";
 
 type Props = {
     url?: BunextPageModuleServerReturnURLObject;
@@ -292,20 +324,20 @@ export default function HomePage({ url }: Props) {
 
 The `url` prop exposes the following fields from the standard Web `URL` interface:
 
-| Field          | Type             | Example                          |
-| -------------- | ---------------- | -------------------------------- |
-| `href`         | `string`         | `"https://example.com/blog?q=1"` |
-| `origin`       | `string`         | `"https://example.com"`          |
-| `protocol`     | `string`         | `"https:"`                       |
-| `host`         | `string`         | `"example.com"`                  |
-| `hostname`     | `string`         | `"example.com"`                  |
-| `port`         | `string`         | `""`                             |
-| `pathname`     | `string`         | `"/blog"`                        |
-| `search`       | `string`         | `"?q=1"`                         |
-| `searchParams` | `URLSearchParams` | `URLSearchParams { q: "1" }`    |
-| `hash`         | `string`         | `""`                             |
-| `username`     | `string`         | `""`                             |
-| `password`     | `string`         | `""`                             |
+| Field          | Type              | Example                          |
+| -------------- | ----------------- | -------------------------------- |
+| `href`         | `string`          | `"https://example.com/blog?q=1"` |
+| `origin`       | `string`          | `"https://example.com"`          |
+| `protocol`     | `string`          | `"https:"`                       |
+| `host`         | `string`          | `"example.com"`                  |
+| `hostname`     | `string`          | `"example.com"`                  |
+| `port`         | `string`          | `""`                             |
+| `pathname`     | `string`          | `"/blog"`                        |
+| `search`       | `string`          | `"?q=1"`                         |
+| `searchParams` | `URLSearchParams` | `URLSearchParams { q: "1" }`     |
+| `hash`         | `string`          | `""`                             |
+| `username`     | `string`          | `""`                             |
+| `password`     | `string`          | `""`                             |
 
 ### Redirects from Server
 
@@ -354,7 +386,7 @@ export const server: BunextPageServerFn = async (ctx) => {
 Export a `meta` object to inject SEO and Open Graph tags into the `<head>`:
 
 ```tsx
-import type { BunextPageModuleMeta } from "bunext/src/types";
+import type { BunextPageModuleMeta } from "@moduletrace/bunext/types";
 
 export const meta: BunextPageModuleMeta = {
     title: "My Page Title",
@@ -393,7 +425,7 @@ export default function AboutPage() {
 `meta` can also be an async function that receives the request context and server response:
 
 ```tsx
-import type { BunextPageModuleMetaFn } from "bunext/src/types";
+import type { BunextPageModuleMetaFn } from "@moduletrace/bunext/types";
 
 export const meta: BunextPageModuleMetaFn = async ({ ctx, serverRes }) => {
     return {
@@ -408,7 +440,7 @@ export const meta: BunextPageModuleMetaFn = async ({ ctx, serverRes }) => {
 Export a `Head` functional component to inject arbitrary HTML into `<head>`. It receives the server response and request context:
 
 ```tsx
-import type { BunextPageHeadFCProps } from "bunext/src/types";
+import type { BunextPageHeadFCProps } from "@moduletrace/bunext/types";
 
 export function Head({ serverRes, ctx }: BunextPageHeadFCProps) {
     return (
@@ -454,7 +486,7 @@ Create files under `src/pages/api/` to define API endpoints. The default export 
 
 ```ts
 // src/pages/api/hello.ts
-import type { BunxRouteParams } from "bunext/src/types";
+import type { BunxRouteParams } from "@moduletrace/bunext/types";
 
 export default async function handler(ctx: BunxRouteParams): Promise<Response> {
     return Response.json({ message: "Hello from the API" });
@@ -465,7 +497,7 @@ API routes are matched at `/api/<filename>`. Because the handler returns a plain
 
 ```ts
 // src/pages/api/users.ts
-import type { BunxRouteParams } from "bunext/src/types";
+import type { BunxRouteParams } from "@moduletrace/bunext/types";
 
 export default async function handler(ctx: BunxRouteParams): Promise<Response> {
     if (ctx.req.method !== "GET") {
@@ -488,7 +520,7 @@ Export a `config` object to override the per-route request body limit (default: 
 import type {
     BunextServerRouteConfig,
     BunxRouteParams,
-} from "bunext/src/types";
+} from "@moduletrace/bunext/types";
 
 export const config: BunextServerRouteConfig = {
     maxRequestBodyMB: 50, // allow up to 50 MB
@@ -552,10 +584,10 @@ Bunext includes a file-based HTML cache for production. Caching is **disabled in
 
 Cache files are stored in `public/__bunext/cache/`. Each cached page produces two files:
 
-| File                      | Contents                                     |
-|---------------------------|----------------------------------------------|
-| `<key>.res.html`          | The cached HTML response body                |
-| `<key>.meta.json`         | Metadata: creation timestamp, expiry, paradigm |
+| File              | Contents                                       |
+| ----------------- | ---------------------------------------------- |
+| `<key>.res.html`  | The cached HTML response body                  |
+| `<key>.meta.json` | Metadata: creation timestamp, expiry, paradigm |
 
 The cache is **cold on first request**: the first visitor triggers a full server render and writes the cache. Every subsequent request within the expiry window receives the cached HTML directly, bypassing the server function, component render, and bundler lookup. A cache hit is indicated by the response header `X-Bunext-Cache: HIT`.
 
@@ -565,7 +597,7 @@ Export a `config` object from a page file to opt that page into caching:
 
 ```tsx
 // src/pages/products.tsx
-import type { BunextRouteConfig } from "bunext/src/types";
+import type { BunextRouteConfig } from "@moduletrace/bunext/types";
 
 export const config: BunextRouteConfig = {
     cachePage: true,
@@ -582,7 +614,7 @@ export default function ProductsPage() {
 Cache settings can also be returned from the `server` function, which lets you conditionally enable caching based on request data:
 
 ```tsx
-import type { BunextPageServerFn } from "bunext/src/types";
+import type { BunextPageServerFn } from "@moduletrace/bunext/types";
 
 export const server: BunextPageServerFn = async (ctx) => {
     const data = await fetchProducts();
@@ -595,7 +627,13 @@ export const server: BunextPageServerFn = async (ctx) => {
 };
 
 export default function ProductsPage({ props }: any) {
-    return <ul>{props.data.map((p: any) => <li key={p.id}>{p.name}</li>)}</ul>;
+    return (
+        <ul>
+            {props.data.map((p: any) => (
+                <li key={p.id}>{p.name}</li>
+            ))}
+        </ul>
+    );
 }
 ```
 
@@ -627,7 +665,7 @@ Create a `bunext.config.ts` file in your project root to configure Bunext:
 
 ```ts
 // bunext.config.ts
-import type { BunextConfig } from "bunext/src/types";
+import type { BunextConfig } from "@moduletrace/bunext/types";
 
 const config: BunextConfig = {
     port: 3000, // default: 7000
@@ -643,18 +681,18 @@ const config: BunextConfig = {
 export default config;
 ```
 
-| Option         | Type                                                                              | Default          | Description                                        |
-| -------------- | --------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------- |
-| `port`         | `number`                                                                          | `7000`           | HTTP server port                                   |
-| `origin`       | `string`                                                                          | —                | Canonical origin URL                               |
-| `distDir`      | `string`                                                                          | `.bunext`        | Internal artifact directory                        |
-| `assetsPrefix` | `string`                                                                          | `_bunext/static` | URL prefix for static assets                       |
-| `globalVars`   | `{ [k: string]: any }`                                                            | —                | Variables injected globally at build time          |
-| `development`       | `boolean`                                                                         | —                | Overridden to `true` by `bunext dev` automatically |
-| `defaultCacheExpiry`| `number`                                                                          | `3600`           | Global page cache expiry in seconds                |
-| `middleware`        | `(params: BunextConfigMiddlewareParams) => Response \| undefined \| Promise<...>` | —                | Global middleware — see [Middleware](#middleware)   |
-| `websocket`         | `WebSocketHandler<any>`                                                            | —                | Bun WebSocket handler — see [WebSocket](#websocket) |
-| `serverOptions`     | `ServeOptions`                                                                     | —                | Extra options passed to `Bun.serve()` (excluding `fetch`) — see [Server Options](#server-options) |
+| Option               | Type                                                                              | Default          | Description                                                                                       |
+| -------------------- | --------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
+| `port`               | `number`                                                                          | `7000`           | HTTP server port                                                                                  |
+| `origin`             | `string`                                                                          | —                | Canonical origin URL                                                                              |
+| `distDir`            | `string`                                                                          | `.bunext`        | Internal artifact directory                                                                       |
+| `assetsPrefix`       | `string`                                                                          | `_bunext/static` | URL prefix for static assets                                                                      |
+| `globalVars`         | `{ [k: string]: any }`                                                            | —                | Variables injected globally at build time                                                         |
+| `development`        | `boolean`                                                                         | —                | Overridden to `true` by `bunext dev` automatically                                                |
+| `defaultCacheExpiry` | `number`                                                                          | `3600`           | Global page cache expiry in seconds                                                               |
+| `middleware`         | `(params: BunextConfigMiddlewareParams) => Response \| undefined \| Promise<...>` | —                | Global middleware — see [Middleware](#middleware)                                                 |
+| `websocket`          | `WebSocketHandler<any>`                                                           | —                | Bun WebSocket handler — see [WebSocket](#websocket)                                               |
+| `serverOptions`      | `ServeOptions`                                                                    | —                | Extra options passed to `Bun.serve()` (excluding `fetch`) — see [Server Options](#server-options) |
 
 ### Middleware
 
@@ -668,7 +706,7 @@ Middleware runs on every request before any routing. Define it in `bunext.config
 import type {
     BunextConfig,
     BunextConfigMiddlewareParams,
-} from "bunext/src/types";
+} from "@moduletrace/bunext/types";
 
 const config: BunextConfig = {
     middleware: async ({ req, url }) => {
@@ -721,7 +759,7 @@ export const BunextWebsocket: WebSocketHandler<any> = {
 
 ```ts
 // bunext.config.ts
-import type { BunextConfig } from "bunext/src/types";
+import type { BunextConfig } from "@moduletrace/bunext/types";
 import { BunextWebsocket } from "./websocket";
 
 const config: BunextConfig = {
@@ -737,7 +775,7 @@ Pass additional options to the underlying `Bun.serve()` call via `serverOptions`
 
 ```ts
 // bunext.config.ts
-import type { BunextConfig } from "bunext/src/types";
+import type { BunextConfig } from "@moduletrace/bunext/types";
 
 const config: BunextConfig = {
     serverOptions: {
@@ -764,7 +802,7 @@ For full control over the `Bun.serve()` instance — custom WebSocket upgrade lo
 
 ```ts
 // server.ts
-import bunext from "bunext";
+import bunext from "@moduletrace/bunext";
 
 const development = process.env.NODE_ENV === "development";
 const port = process.env.PORT || 3700;
@@ -786,11 +824,11 @@ const server = Bun.serve({
 bunext.bunextLog.info(`Server running on http://localhost:${server.port} ...`);
 ```
 
-| Export | Type | Description |
-|--------|------|-------------|
-| `bunextInit()` | `() => Promise<void>` | Initializes config, router, and bundler. Must be called before handling requests. |
+| Export                          | Type                                              | Description                                                                                                                                   |
+| ------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bunextInit()`                  | `() => Promise<void>`                             | Initializes config, router, and bundler. Must be called before handling requests.                                                             |
 | `bunextRequestHandler({ req })` | `(params: { req: Request }) => Promise<Response>` | The main Bunext request dispatcher — middleware, routing, SSR, static files. Only `req` is needed; the server instance is managed internally. |
-| `bunextLog` | Logger | Framework logger (`info`, `error`, `success`, `server`, `watch`). |
+| `bunextLog`                     | Logger                                            | Framework logger (`info`, `error`, `success`, `server`, `watch`).                                                                             |
 
 Run the custom server directly with Bun:
 
