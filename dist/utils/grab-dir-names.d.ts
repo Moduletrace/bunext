@@ -1,0 +1,21 @@
+export default function grabDirNames(): {
+    ROOT_DIR: string;
+    SRC_DIR: string;
+    PAGES_DIR: string;
+    API_DIR: string;
+    PUBLIC_DIR: string;
+    HYDRATION_DST_DIR: string;
+    BUNX_ROOT_DIR: string;
+    CONFIG_FILE: string;
+    BUNX_TMP_DIR: string;
+    BUNX_HYDRATION_SRC_DIR: string;
+    BUNX_ROOT_SRC_DIR: string;
+    BUNX_ROOT_PRESETS_DIR: string;
+    BUNX_ROOT_500_PRESET_COMPONENT: string;
+    BUNX_ROOT_500_FILE_NAME: string;
+    BUNX_ROOT_404_PRESET_COMPONENT: string;
+    BUNX_ROOT_404_FILE_NAME: string;
+    HYDRATION_DST_DIR_MAP_JSON_FILE: string;
+    BUNEXT_CACHE_DIR: string;
+    BUNX_CWD_MODULE_CACHE_DIR: string;
+};

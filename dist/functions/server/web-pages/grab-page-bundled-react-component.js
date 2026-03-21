@@ -4,13 +4,13 @@ import grabTsxStringModule from "./grab-tsx-string-module";
 export default async function grabPageBundledReactComponent({ file_path, root_file, server_res, }) {
     try {
         let tsx = ``;
-        const server_res_json = EJSON.stringify(server_res || {})?.replace(/"/g, '\\"');
+        const server_res_json = JSON.stringify(EJSON.stringify(server_res || {}) ?? "{}");
         if (root_file) {
             tsx += `import Root from "${root_file}"\n`;
         }
         tsx += `import Page from "${file_path}"\n`;
         tsx += `export default function Main() {\n\n`;
-        tsx += `const props = JSON.parse("${server_res_json}")\n\n`;
+        tsx += `const props = JSON.parse(${server_res_json})\n\n`;
         tsx += `    return (\n`;
         if (root_file) {
             tsx += `        <Root suppressHydrationWarning={true} {...props}><Page {...props} /></Root>\n`;

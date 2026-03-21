@@ -4,8 +4,8 @@ import path from "path";
 import grabRootFile from "./web-pages/grab-root-file";
 import grabPageBundledReactComponent from "./web-pages/grab-page-bundled-react-component";
 import writeHMRTsxModule from "./web-pages/write-hmr-tsx-module";
-const { PUBLIC_DIR, BUNX_HYDRATION_SRC_DIR } = grabDirNames();
-export default async function ({ req, server }) {
+const { BUNX_HYDRATION_SRC_DIR } = grabDirNames();
+export default async function ({ req }) {
     try {
         const url = new URL(req.url);
         const target_href = url.searchParams.get("href");

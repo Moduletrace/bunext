@@ -62,7 +62,7 @@ export default async function genWebHTML({
     }
 
     if (isDevelopment()) {
-        html += `<script defer>\n${await grabWebPageHydrationScript({ bundledMap })}\n</script>\n`;
+        html += `<script defer>\n${await grabWebPageHydrationScript()}\n</script>\n`;
     }
 
     if (headHTML) {

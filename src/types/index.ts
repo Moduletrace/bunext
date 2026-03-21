@@ -57,7 +57,6 @@ export type BunextConfig = {
 export type BunextConfigMiddlewareParams = {
     req: Request;
     url: URL;
-    server: Server;
 };
 
 export type GetRouteReturn = {

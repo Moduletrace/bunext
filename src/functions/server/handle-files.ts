@@ -1,4 +1,3 @@
-import type { Server } from "bun";
 import grabDirNames from "../../utils/grab-dir-names";
 import path from "path";
 import isDevelopment from "../../utils/is-development";
@@ -8,10 +7,9 @@ const { PUBLIC_DIR } = grabDirNames();
 
 type Params = {
     req: Request;
-    server: Server;
 };
 
-export default async function ({ req, server }: Params): Promise<Response> {
+export default async function ({ req }: Params): Promise<Response> {
     try {
         const is_dev = isDevelopment();
         const url = new URL(req.url);

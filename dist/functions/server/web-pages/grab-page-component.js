@@ -9,6 +9,7 @@ class NotFoundError extends Error {
 export default async function grabPageComponent({ req, file_path: passed_file_path, debug, }) {
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
+    const now = Date.now();
     let routeParams = undefined;
     try {
         routeParams = req ? await grabRouteParams({ req }) : undefined;
@@ -42,7 +43,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             log.info(`bundledMap:`, bundledMap);
         }
         const { root_file } = grabRootFile();
-        const module = await import(file_path);
+        const module = await import(`${file_path}?t=${now}`);
         if (debug) {
             log.info(`module:`, module);
         }
@@ -68,7 +69,10 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             };
             try {
                 if (routeParams) {
-                    const serverData = await module["server"]?.(routeParams);
+                    const serverData = await module["server"]?.({
+                        ...routeParams,
+                        query: { ...routeParams.query, ...match?.query },
+                    });
                     return {
                         ...serverData,
                         ...default_props,

@@ -1,4 +1,3 @@
-import type { Server } from "bun";
 import grabDirNames from "../../utils/grab-dir-names";
 import { AppData } from "../../data/app-data";
 import path from "path";
@@ -6,14 +5,13 @@ import grabRootFile from "./web-pages/grab-root-file";
 import grabPageBundledReactComponent from "./web-pages/grab-page-bundled-react-component";
 import writeHMRTsxModule from "./web-pages/write-hmr-tsx-module";
 
-const { PUBLIC_DIR, BUNX_HYDRATION_SRC_DIR } = grabDirNames();
+const { BUNX_HYDRATION_SRC_DIR } = grabDirNames();
 
 type Params = {
     req: Request;
-    server: Server;
 };
 
-export default async function ({ req, server }: Params): Promise<Response> {
+export default async function ({ req }: Params): Promise<Response> {
     try {
         const url = new URL(req.url);
 

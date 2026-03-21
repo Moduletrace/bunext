@@ -1,0 +1,7 @@
+export declare const AppData: {
+    readonly DefaultCacheExpiryTimeSeconds: number;
+    readonly DefaultCronInterval: 30000;
+    readonly BunextStaticFilesCacheExpiry: number;
+    readonly ClientHMRPath: "__bunext_client_hmr__";
+    readonly BunextClientHydrationScriptID: "bunext-client-hydration-script";
+};

@@ -26,7 +26,7 @@ function grabPageDirRecursively({ page_dir }) {
         if (page.match(new RegExp(`${AppNames["RootPagesComponentName"]}`))) {
             continue;
         }
-        if (page.match(/\(|\)|--/)) {
+        if (page.match(/\(|\)|--|\/api\//)) {
             continue;
         }
         const page_stat = statSync(full_page_path);

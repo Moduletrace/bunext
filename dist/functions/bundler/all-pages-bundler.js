@@ -56,6 +56,7 @@ export default async function allPagesBundler(params) {
                 }
                 const elapsed = (performance.now() - buildStart).toFixed(0);
                 log.success(`[Built] in ${elapsed}ms`);
+                global.RECOMPILING = false;
                 if (params?.exit_after_first_build) {
                     process.exit();
                 }
@@ -84,6 +85,6 @@ export default async function allPagesBundler(params) {
     await ctx.rebuild();
     if (params?.watch) {
         global.BUNDLER_CTX = ctx;
-        global.BUNDLER_CTX.watch();
+        // global.BUNDLER_CTX.watch();
     }
 }

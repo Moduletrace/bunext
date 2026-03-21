@@ -3,8 +3,9 @@ export default async function ({ bundledMap }) {
     let script = "";
     script += `console.log(\`Development Environment\`);\n\n`;
     script += `const hmr = new EventSource("/__hmr");\n`;
+    script += `window.addEventListener("beforeunload", () => hmr.close());\n`;
     script += `hmr.addEventListener("update", async (event) => {\n`;
-    script += `    if (event.data) {\n`;
+    script += `    if (event?.data) {\n`;
     script += `        console.log(\`HMR Changes Detected. Updating ...\`);\n`;
     script += `        try {\n`;
     script += `            const data = JSON.parse(event.data);\n`;

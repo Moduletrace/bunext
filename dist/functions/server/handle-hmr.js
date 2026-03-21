@@ -1,7 +1,7 @@
 import grabRouteParams from "../../utils/grab-route-params";
 import grabConstants from "../../utils/grab-constants";
 import grabRouter from "../../utils/grab-router";
-export default async function ({ req, server }) {
+export default async function ({ req }) {
     const referer_url = new URL(req.headers.get("referer") || "");
     const match = global.ROUTER.match(referer_url.pathname);
     const target_map = match?.filePath

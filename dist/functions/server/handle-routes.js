@@ -1,8 +1,10 @@
 import grabRouteParams from "../../utils/grab-route-params";
 import grabConstants from "../../utils/grab-constants";
 import grabRouter from "../../utils/grab-router";
-export default async function ({ req, server }) {
+import isDevelopment from "../../utils/is-development";
+export default async function ({ req }) {
     const url = new URL(req.url);
+    const is_dev = isDevelopment();
     const { MBInBytes, ServerDefaultRequestBodyLimitBytes } = grabConstants();
     const router = grabRouter();
     const match = router.match(url.pathname);
@@ -19,7 +21,9 @@ export default async function ({ req, server }) {
         });
     }
     const routeParams = await grabRouteParams({ req });
-    const module = await import(match.filePath);
+    const now = Date.now();
+    const import_path = is_dev ? `${match.filePath}?t=${now}` : match.filePath;
+    const module = await import(import_path);
     const config = module.config;
     const contentLength = req.headers.get("content-length");
     if (contentLength) {
@@ -40,7 +44,9 @@ export default async function ({ req, server }) {
     }
     const res = await module["default"]({
         ...routeParams,
-        server,
     });
+    if (is_dev) {
+        res.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+    }
     return res;
 }

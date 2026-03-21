@@ -7,10 +7,9 @@ import isDevelopment from "../../utils/is-development";
 
 type Params = {
     req: Request;
-    server: Server;
 };
 
-export default async function ({ req, server }: Params): Promise<Response> {
+export default async function ({ req }: Params): Promise<Response> {
     const url = new URL(req.url);
     const is_dev = isDevelopment();
 
@@ -72,7 +71,6 @@ export default async function ({ req, server }: Params): Promise<Response> {
 
     const res: Response = await module["default"]({
         ...routeParams,
-        server,
     } as BunxRouteParams);
 
     if (is_dev) {

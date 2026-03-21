@@ -63,10 +63,10 @@ The goal is a framework that is:
 
 ## Installation
 
-Install Bunext as a dependency in your project:
+Install Bunext directly from GitHub:
 
 ```bash
-bun add bunext
+bun add github:moduletrace/bunext
 ```
 
 Install required peer dependencies:

@@ -3,7 +3,7 @@ import path from "path";
 import isDevelopment from "../../utils/is-development";
 import { existsSync } from "fs";
 const { PUBLIC_DIR } = grabDirNames();
-export default async function ({ req, server }) {
+export default async function ({ req }) {
     try {
         const is_dev = isDevelopment();
         const url = new URL(req.url);

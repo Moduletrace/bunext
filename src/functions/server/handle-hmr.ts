@@ -6,10 +6,9 @@ import grabRouter from "../../utils/grab-router";
 
 type Params = {
     req: Request;
-    server: Server;
 };
 
-export default async function ({ req, server }: Params): Promise<Response> {
+export default async function ({ req }: Params): Promise<Response> {
     const referer_url = new URL(req.headers.get("referer") || "");
     const match = global.ROUTER.match(referer_url.pathname);
 
