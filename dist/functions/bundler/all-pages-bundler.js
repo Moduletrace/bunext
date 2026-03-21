@@ -1,4 +1,4 @@
-import { writeFileSync } from "fs";
+import { existsSync, statSync, writeFileSync } from "fs";
 import * as esbuild from "esbuild";
 import grabAllPages from "../../utils/grab-all-pages";
 import grabDirNames from "../../utils/grab-dir-names";
@@ -8,7 +8,10 @@ import { log } from "../../utils/log";
 import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-result";
-const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
+import path from "path";
+const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE, ROOT_DIR } = grabDirNames();
+let build_starts = 0;
+const MAX_BUILD_STARTS = 10;
 export default async function allPagesBundler(params) {
     const pages = grabAllPages({ exclude_api: true });
     const virtualEntries = {};
@@ -39,11 +42,25 @@ export default async function allPagesBundler(params) {
         setup(build) {
             let buildStart = 0;
             build.onStart(() => {
+                build_starts++;
                 buildStart = performance.now();
+                if (build_starts == MAX_BUILD_STARTS) {
+                    const error_msg = `Build Failed. Please check all your components and imports.`;
+                    log.error(error_msg);
+                    // process.exit(1);
+                }
             });
             build.onEnd((result) => {
-                if (result.errors.length > 0)
+                if (result.errors.length > 0) {
+                    for (const error of result.errors) {
+                        const loc = error.location;
+                        const location = loc
+                            ? ` ${loc.file}:${loc.line}:${loc.column}`
+                            : "";
+                        log.error(`[Build]${location} ${error.text}`);
+                    }
                     return;
+                }
                 const artifacts = grabArtifactsFromBundledResults({
                     pages,
                     result,
@@ -60,6 +77,7 @@ export default async function allPagesBundler(params) {
                 if (params?.exit_after_first_build) {
                     process.exit();
                 }
+                build_starts = 0;
             });
         },
     };

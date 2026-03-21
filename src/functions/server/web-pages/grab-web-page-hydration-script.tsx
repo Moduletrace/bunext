@@ -36,14 +36,18 @@ export default async function (params?: Params) {
     script += `        try {\n`;
     script += `            document.getElementById("__bunext_error_overlay")?.remove();\n`;
     script += `            const data = JSON.parse(event.data);\n`;
+    // script += `            console.log("data", data);\n`;
+
+    script += `            const oldCSSLink = document.querySelector('link[rel="stylesheet"]');\n`;
 
     script += `            if (data.target_map.css_path) {\n`;
-    script += `                const oldLink = document.querySelector('link[rel="stylesheet"]');\n`;
     script += `                const newLink = document.createElement("link");\n`;
     script += `                newLink.rel = "stylesheet";\n`;
     script += `                newLink.href = \`/\${data.target_map.css_path}?t=\${Date.now()}\`;\n`;
-    script += `                newLink.onload = () => oldLink?.remove();\n`;
+    script += `                newLink.onload = () => oldCSSLink?.remove();\n`;
     script += `                document.head.appendChild(newLink);\n`;
+    script += `            } else if (oldCSSLink) {\n`;
+    script += `                oldCSSLink.remove();\n`;
     script += `            }\n`;
 
     script += `            const newScriptPath = \`/\${data.target_map.path}?t=\${Date.now()}\`;\n\n`;

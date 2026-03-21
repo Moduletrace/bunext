@@ -58,7 +58,7 @@ export default async function grabPageComponent({
 
         if (!file_path) {
             const errMsg = `No File Path (\`file_path\`) or Request Object (\`req\`) provided not found`;
-            // console.error(errMsg);
+            // log.error(errMsg);
             throw new Error(errMsg);
         }
 
@@ -68,7 +68,7 @@ export default async function grabPageComponent({
 
         if (!bundledMap?.path) {
             const errMsg = `No Bundled File Path for this request path!`;
-            console.error(errMsg);
+            log.error(errMsg);
             throw new Error(errMsg);
         }
 
@@ -172,7 +172,7 @@ export default async function grabPageComponent({
             head: Head,
         };
     } catch (error: any) {
-        console.error(`Error Grabbing Page Component: ${error.message}`);
+        log.error(`Error Grabbing Page Component: ${error.message}`);
 
         return await grabPageErrorComponent({
             error,

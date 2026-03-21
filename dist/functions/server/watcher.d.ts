@@ -1,1 +1,1 @@
-export default function watcher(): void;
+export default function watcher(): Promise<void>;

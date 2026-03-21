@@ -1,16 +1,26 @@
-import { watch, existsSync } from "fs";
+import { watch, existsSync, statSync } from "fs";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import rebuildBundler from "./rebuild-bundler";
 import { log } from "../../utils/log";
 const { ROOT_DIR } = grabDirNames();
-export default function watcher() {
+export default async function watcher() {
+    await Bun.sleep(1000);
     const pages_src_watcher = watch(ROOT_DIR, {
         recursive: true,
         persistent: true,
     }, async (event, filename) => {
         if (!filename)
             return;
+        const full_file_path = path.join(ROOT_DIR, filename);
+        if (full_file_path.match(/\/styles$/)) {
+            global.RECOMPILING = true;
+            await Bun.sleep(1000);
+            await fullRebuild({
+                msg: `Detected new \`styles\` directory. Rebuilding ...`,
+            });
+            return;
+        }
         const excluded_match = /node_modules\/|^public\/|^\.bunext\/|^\.git\/|^dist\/|bun\.lockb$/;
         if (filename.match(excluded_match))
             return;
@@ -40,8 +50,7 @@ export default function watcher() {
             return;
         if (global.RECOMPILING)
             return;
-        const fullPath = path.join(ROOT_DIR, filename);
-        const action = existsSync(fullPath) ? "created" : "deleted";
+        const action = existsSync(full_file_path) ? "created" : "deleted";
         const type = filename.match(/\.css$/) ? "Sylesheet" : "Page";
         await fullRebuild({
             msg: `${type} ${action}: ${filename}. Rebuilding ...`,

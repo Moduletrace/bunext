@@ -1,4 +1,5 @@
 import isDevelopment from "../../../utils/is-development";
+import { log } from "../../../utils/log";
 import getCache from "../../cache/get-cache";
 import generateWebPageResponseFromComponentReturn from "./generate-web-page-response-from-component-return";
 import grabPageComponent from "./grab-page-component";
@@ -38,7 +39,7 @@ export default async function handleWebPages({
             ...componentRes,
         });
     } catch (error: any) {
-        console.error(`Error Handling Web Page: ${error.message}`);
+        log.error(`Error Handling Web Page: ${error.message}`);
 
         const componentRes = await grabPageErrorComponent({
             error,

@@ -3,6 +3,7 @@ import { program } from "commander";
 import start from "./start";
 import dev from "./dev";
 import build from "./build";
+import { log } from "../utils/log";
 /**
  * # Describe Program
  */
@@ -20,7 +21,9 @@ program.addCommand(build());
  * # Handle Unavailable Commands
  */
 program.on("command:*", () => {
-    console.error("Invalid command: %s\nSee --help for a list of available commands.", program.args.join(" "));
+    log.error("Invalid command: %s\nSee --help for a list of available commands." +
+        " " +
+        program.args.join(" "));
     process.exit(1);
 });
 /**
