@@ -27,11 +27,10 @@ export default function watcher() {
                 return;
             }
 
+            const target_files_match = /\.(tsx?|jsx?|css)$/;
+
             if (event !== "rename") {
-                if (
-                    filename.match(/\.(tsx?|jsx?|css)$/) &&
-                    global.BUNDLER_CTX
-                ) {
+                if (filename.match(target_files_match) && global.BUNDLER_CTX) {
                     if (global.RECOMPILING) return;
                     global.RECOMPILING = true;
                     await global.BUNDLER_CTX.rebuild();
@@ -39,7 +38,7 @@ export default function watcher() {
                 return;
             }
 
-            if (!filename.match(/\.(tsx?|jsx?)$/)) {
+            if (!filename.match(target_files_match)) {
                 return;
             }
 
