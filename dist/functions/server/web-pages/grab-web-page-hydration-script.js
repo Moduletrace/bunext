@@ -28,7 +28,7 @@ export default async function (params) {
     script += `        try {\n`;
     script += `            document.getElementById("__bunext_error_overlay")?.remove();\n`;
     script += `            const data = JSON.parse(event.data);\n`;
-    script += `            console.log("data", data);\n`;
+    // script += `            console.log("data", data);\n`;
     script += `            if (data.reload) {\n`;
     script += `                console.log(\`Root Changes Detected. Reloading Page ...\`);\n`;
     script += `                window.location.reload();\n`;
