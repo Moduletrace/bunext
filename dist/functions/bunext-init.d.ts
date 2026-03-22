@@ -1,7 +1,6 @@
 import { type Ora } from "ora";
 import type { BundlerCTXMap, BunextConfig, GlobalHMRControllerObject, PageFiles } from "../types";
 import type { FileSystemRouter, Server } from "bun";
-import type { BuildContext } from "esbuild";
 import { type FSWatcher } from "fs";
 /**
  * # Declare Global Variables
@@ -15,9 +14,9 @@ declare global {
     var ROUTER: FileSystemRouter;
     var HMR_CONTROLLERS: GlobalHMRControllerObject[];
     var LAST_BUILD_TIME: number;
-    var BUNDLER_CTX: BuildContext | undefined;
-    var BUNDLER_CTX_MAP: BundlerCTXMap[] | undefined;
-    var IS_FIRST_BUNDLE_READY: boolean;
+    var BUNDLER_CTX_MAP: {
+        [k: string]: BundlerCTXMap;
+    };
     var BUNDLER_REBUILDS: 0;
     var PAGES_SRC_WATCHER: FSWatcher | undefined;
     var CURRENT_VERSION: string | undefined;

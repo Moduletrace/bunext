@@ -1,23 +1,28 @@
-import { readFileSync, writeFileSync } from "fs";
 import * as esbuild from "esbuild";
 import grabAllPages from "../../utils/grab-all-pages";
 import grabDirNames from "../../utils/grab-dir-names";
 import isDevelopment from "../../utils/is-development";
-import { execSync } from "child_process";
 import { log } from "../../utils/log";
 import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-result";
-import stripServerSideLogic from "./strip-server-side-logic";
-const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE, ROOT_DIR } = grabDirNames();
+import { writeFileSync } from "fs";
+const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 let build_starts = 0;
 const MAX_BUILD_STARTS = 10;
 export default async function allPagesBundler(params) {
+    const { page_file_paths } = params || {};
     const pages = grabAllPages({ exclude_api: true });
+    const target_pages = page_file_paths?.[0]
+        ? pages.filter((p) => page_file_paths.includes(p.local_path))
+        : pages;
+    if (!page_file_paths) {
+        global.PAGE_FILES = pages;
+    }
     const virtualEntries = {};
     const dev = isDevelopment();
-    for (const page of pages) {
-        const key = page.local_path;
+    for (const page of target_pages) {
+        const key = page.transformed_path;
         const txt = await grabClientHydrationScript({
             page_local_path: page.local_path,
         });
@@ -37,22 +42,6 @@ export default async function allPagesBundler(params) {
                 loader: "tsx",
                 resolveDir: process.cwd(),
             }));
-            build.onLoad({ filter: /\.tsx$/ }, (args) => {
-                if (args.path.includes("node_modules"))
-                    return;
-                const source = readFileSync(args.path, "utf8");
-                if (!source.includes("server")) {
-                    return { contents: source, loader: "tsx" };
-                }
-                const strippedCode = stripServerSideLogic({
-                    txt_code: source,
-                    file_path: args.path,
-                });
-                return {
-                    contents: strippedCode,
-                    loader: "tsx",
-                };
-            });
         },
     };
     const artifactTracker = {
@@ -65,6 +54,7 @@ export default async function allPagesBundler(params) {
                 if (build_starts == MAX_BUILD_STARTS) {
                     const error_msg = `Build Failed. Please check all your components and imports.`;
                     log.error(error_msg);
+                    process.exit(1);
                 }
             });
             build.onEnd((result) => {
@@ -79,28 +69,27 @@ export default async function allPagesBundler(params) {
                     return;
                 }
                 const artifacts = grabArtifactsFromBundledResults({
-                    pages,
+                    pages: target_pages,
                     result,
                 });
                 if (artifacts?.[0] && artifacts.length > 0) {
-                    global.BUNDLER_CTX_MAP = artifacts;
-                    global.PAGE_FILES = pages;
-                    params?.post_build_fn?.({ artifacts });
+                    for (let i = 0; i < artifacts.length; i++) {
+                        const artifact = artifacts[i];
+                        global.BUNDLER_CTX_MAP[artifact.local_path] = artifact;
+                    }
+                    // params?.post_build_fn?.({ artifacts });
                     writeFileSync(HYDRATION_DST_DIR_MAP_JSON_FILE, JSON.stringify(artifacts));
                 }
                 const elapsed = (performance.now() - buildStart).toFixed(0);
                 log.success(`[Built] in ${elapsed}ms`);
                 global.RECOMPILING = false;
-                if (params?.exit_after_first_build) {
-                    process.exit();
-                }
                 build_starts = 0;
             });
         },
     };
-    execSync(`rm -rf ${HYDRATION_DST_DIR}`);
-    const ctx = await esbuild.context({
-        entryPoints: Object.keys(virtualEntries).map((k) => `virtual:${k}`),
+    const entryPoints = Object.keys(virtualEntries).map((k) => `virtual:${k}`);
+    await esbuild.build({
+        entryPoints,
         outdir: HYDRATION_DST_DIR,
         bundle: true,
         minify: true,
@@ -115,11 +104,6 @@ export default async function allPagesBundler(params) {
         plugins: [tailwindEsbuildPlugin, virtualPlugin, artifactTracker],
         jsx: "automatic",
         splitting: true,
-        logLevel: "silent",
+        // logLevel: "silent",
     });
-    await ctx.rebuild();
-    if (params?.watch) {
-        global.BUNDLER_CTX = ctx;
-        // global.BUNDLER_CTX.watch();
-    }
 }

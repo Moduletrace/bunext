@@ -2,25 +2,24 @@ import _ from "lodash";
 import type { BundlerCTXMap, GlobalHMRControllerObject } from "../../types";
 import grabPageComponent from "./web-pages/grab-page-component";
 
-type Params = {
-    artifacts: BundlerCTXMap[];
-};
+export default async function serverPostBuildFn() {
+    // if (!global.IS_FIRST_BUNDLE_READY) {
+    //     global.IS_FIRST_BUNDLE_READY = true;
+    // }
 
-export default async function serverPostBuildFn({ artifacts }: Params) {
-    if (!global.IS_FIRST_BUNDLE_READY) {
-        global.IS_FIRST_BUNDLE_READY = true;
-    }
-
-    if (!global.HMR_CONTROLLERS?.[0]) {
+    if (!global.HMR_CONTROLLERS?.[0] || !global.BUNDLER_CTX_MAP) {
         return;
     }
 
     for (let i = 0; i < global.HMR_CONTROLLERS.length; i++) {
         const controller = global.HMR_CONTROLLERS[i];
 
-        const target_artifact = artifacts.find(
-            (a) => controller.target_map?.local_path == a.local_path,
-        );
+        if (!controller.target_map?.local_path) {
+            continue;
+        }
+
+        const target_artifact =
+            global.BUNDLER_CTX_MAP[controller.target_map.local_path];
 
         const mock_req = new Request(controller.page_url);
 

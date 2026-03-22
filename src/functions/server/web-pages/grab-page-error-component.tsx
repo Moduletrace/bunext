@@ -33,9 +33,7 @@ export default async function grabPageErrorComponent({
         const filePath = match?.filePath || presetComponent;
 
         const bundledMap = match?.filePath
-            ? (global.BUNDLER_CTX_MAP?.find(
-                  (m) => m.local_path === match.filePath,
-              ) ?? ({} as BundlerCTXMap))
+            ? global.BUNDLER_CTX_MAP[match.filePath]
             : ({} as BundlerCTXMap);
 
         const module: BunextPageModule = await import(filePath);
@@ -49,9 +47,9 @@ export default async function grabPageErrorComponent({
             bundledMap,
             serverRes: {
                 responseOptions: {
-                    status: is404 ? 404 : 500
-                }
-            } as any
+                    status: is404 ? 404 : 500,
+                },
+            } as any,
         };
     } catch {
         const DefaultNotFound: FC = () => (
@@ -77,9 +75,9 @@ export default async function grabPageErrorComponent({
             bundledMap: {} as BundlerCTXMap,
             serverRes: {
                 responseOptions: {
-                    status: is404 ? 404 : 500
-                }
-            } as any
+                    status: is404 ? 404 : 500,
+                },
+            } as any,
         };
     }
 }

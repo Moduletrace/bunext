@@ -12,6 +12,7 @@ export default async function (params?: Params) {
     let script = "";
 
     script += `console.log(\`Development Environment\`);\n\n`;
+
     script += `const _ce = console.error.bind(console);\n`;
     script += `console.error = (...args) => {\n`;
     script += `    if (typeof args[0] === "string" && args[0].includes("hydrat")) return;\n`;
@@ -27,7 +28,9 @@ export default async function (params?: Params) {
     script += `    overlay.innerHTML = \`<div style="max-width:900px;margin:0 auto"><div style="font-size:18px;font-weight:bold;margin-bottom:12px;color:#ff4444">Runtime Error</div><div style="color:#fff;margin-bottom:16px">\${message}</div>\${source ? \`<div style="color:#888;margin-bottom:16px">\${source}</div>\` : ""}\${stack ? \`<pre style="background:#111;padding:16px;border-radius:6px;overflow:auto;color:#ffa07a;white-space:pre-wrap">\${stack}</pre>\` : ""}<button onclick="this.closest('#__bunext_error_overlay').remove()" style="margin-top:16px;padding:8px 16px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer">Dismiss</button></div>\`;\n`;
     script += `    document.body.appendChild(overlay);\n`;
     script += `}\n\n`;
-    script += `window.addEventListener("error", (e) => __bunext_show_error(e.message, e.filename ? e.filename + ":" + e.lineno + ":" + e.colno : "", e.error?.stack ?? ""));\n`;
+    script += `window.addEventListener("error", (e) => {\n`;
+    script += `    __bunext_show_error(e.message, e.filename ? e.filename + ":" + e.lineno + ":" + e.colno : "", e.error?.stack ?? "");\n`;
+    script += `});\n`;
     script += `window.addEventListener("unhandledrejection", (e) => __bunext_show_error(String(e.reason?.message ?? e.reason), "", e.reason?.stack ?? ""));\n\n`;
 
     script += `const hmr = new EventSource("/__hmr");\n`;
@@ -73,6 +76,9 @@ export default async function (params?: Params) {
     script += `            newScript.id = "${AppData["BunextClientHydrationScriptID"]}";\n`;
     script += `            newScript.type = "module";\n`;
     script += `            newScript.src = newScriptPath;\n`;
+    // script += `            newScript.onerror  = (e) => {\n`;
+    // script += `               window.location.reload();\n`;
+    // script += `            }\n`;
     // script += `            console.log("newScript", newScript);\n`;
     script += `            document.head.appendChild(newScript);\n\n`;
     script += `        } catch (err) {\n`;

@@ -1,11 +1,8 @@
-import grabRouteParams from "../../utils/grab-route-params";
-import grabConstants from "../../utils/grab-constants";
-import grabRouter from "../../utils/grab-router";
 export default async function ({ req }) {
     const referer_url = new URL(req.headers.get("referer") || "");
     const match = global.ROUTER.match(referer_url.pathname);
     const target_map = match?.filePath
-        ? global.BUNDLER_CTX_MAP?.find((m) => m.local_path == match.filePath)
+        ? global.BUNDLER_CTX_MAP[match.filePath]
         : undefined;
     let controller;
     let heartbeat;

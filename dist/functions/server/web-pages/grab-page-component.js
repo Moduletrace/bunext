@@ -3,7 +3,7 @@ import grabPageErrorComponent from "./grab-page-error-component";
 import grabPageBundledReactComponent from "./grab-page-bundled-react-component";
 import _ from "lodash";
 import { log } from "../../../utils/log";
-import grabRootFile from "./grab-root-file";
+import grabRootFilePath from "./grab-root-file-path";
 class NotFoundError extends Error {
 }
 export default async function grabPageComponent({ req, file_path: passed_file_path, debug, }) {
@@ -33,7 +33,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             // log.error(errMsg);
             throw new Error(errMsg);
         }
-        const bundledMap = global.BUNDLER_CTX_MAP?.find((m) => m.local_path == file_path);
+        const bundledMap = global.BUNDLER_CTX_MAP[file_path];
         if (!bundledMap?.path) {
             const errMsg = `No Bundled File Path for this request path!`;
             log.error(errMsg);
@@ -42,7 +42,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         if (debug) {
             log.info(`bundledMap:`, bundledMap);
         }
-        const { root_file } = grabRootFile();
+        const { root_file_path } = grabRootFilePath();
         const module = await import(`${file_path}?t=${now}`);
         if (debug) {
             log.info(`module:`, module);
@@ -107,7 +107,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         const Head = module.Head;
         const { component } = (await grabPageBundledReactComponent({
             file_path,
-            root_file,
+            root_file_path,
             server_res: serverRes,
         })) || {};
         if (!component) {

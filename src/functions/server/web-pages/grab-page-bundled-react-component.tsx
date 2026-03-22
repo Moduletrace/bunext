@@ -4,19 +4,19 @@ import grabTsxStringModule from "./grab-tsx-string-module";
 
 type Params = {
     file_path: string;
-    root_file?: string;
+    root_file_path?: string;
     server_res?: any;
 };
 
 export default async function grabPageBundledReactComponent({
     file_path,
-    root_file,
+    root_file_path,
     server_res,
 }: Params): Promise<GrabPageReactBundledComponentRes | undefined> {
     try {
         let tsx = grabPageReactComponentString({
             file_path,
-            root_file,
+            root_file_path,
             server_res,
         });
 

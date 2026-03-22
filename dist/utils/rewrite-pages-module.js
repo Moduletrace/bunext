@@ -2,10 +2,12 @@ import grabAllPages from "./grab-all-pages";
 import pagePathTransform from "./page-path-transform";
 import stripServerSideLogic from "../functions/bundler/strip-server-side-logic";
 export default async function rewritePagesModule(params) {
-    const { page_url } = params || {};
+    const { page_file_path } = params || {};
     let target_pages;
-    if (page_url) {
-        target_pages = Array.isArray(page_url) ? page_url : [page_url];
+    if (page_file_path) {
+        target_pages = Array.isArray(page_file_path)
+            ? page_file_path
+            : [page_file_path];
     }
     else {
         const pages = grabAllPages({ exclude_api: true });

@@ -1,9 +1,3 @@
-import type { Server } from "bun";
-import type { BunextServerRouteConfig, BunxRouteParams } from "../../types";
-import grabRouteParams from "../../utils/grab-route-params";
-import grabConstants from "../../utils/grab-constants";
-import grabRouter from "../../utils/grab-router";
-
 type Params = {
     req: Request;
 };
@@ -13,7 +7,7 @@ export default async function ({ req }: Params): Promise<Response> {
     const match = global.ROUTER.match(referer_url.pathname);
 
     const target_map = match?.filePath
-        ? global.BUNDLER_CTX_MAP?.find((m) => m.local_path == match.filePath)
+        ? global.BUNDLER_CTX_MAP[match.filePath]
         : undefined;
 
     let controller: ReadableStreamDefaultController<string>;

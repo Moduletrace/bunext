@@ -3,13 +3,13 @@ import pagePathTransform from "../../../utils/page-path-transform";
 
 type Params = {
     file_path: string;
-    root_file?: string;
+    root_file_path?: string;
     server_res?: any;
 };
 
 export default function grabPageReactComponentString({
     file_path,
-    root_file,
+    root_file_path,
     server_res,
 }: Params): string | undefined {
     try {
@@ -20,15 +20,15 @@ export default function grabPageReactComponentString({
             EJSON.stringify(server_res || {}) ?? "{}",
         );
 
-        if (root_file) {
-            tsx += `import Root from "${root_file}"\n`;
+        if (root_file_path) {
+            tsx += `import Root from "${root_file_path}"\n`;
         }
 
         tsx += `import Page from "${target_path}"\n`;
         tsx += `export default function Main() {\n\n`;
         tsx += `const props = JSON.parse(${server_res_json})\n\n`;
         tsx += `    return (\n`;
-        if (root_file) {
+        if (root_file_path) {
             tsx += `        <Root suppressHydrationWarning={true} {...props}><Page {...props} /></Root>\n`;
         } else {
             tsx += `        <Page suppressHydrationWarning={true} {...props} />\n`;

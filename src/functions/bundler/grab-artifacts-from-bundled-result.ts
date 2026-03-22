@@ -19,14 +19,15 @@ export default function grabArtifactsFromBundledResults({
         .filter(([, meta]) => meta.entryPoint)
         .map(([outputPath, meta]) => {
             const target_page = pages.find((p) => {
-                return meta.entryPoint === `virtual:${p.local_path}`;
+                return meta.entryPoint === `virtual:${p.transformed_path}`;
             });
 
             if (!target_page || !meta.entryPoint) {
                 return undefined;
             }
 
-            const { file_name, local_path, url_path } = target_page;
+            const { file_name, local_path, url_path, transformed_path } =
+                target_page;
 
             const cssPath = meta.cssBundle || undefined;
 
@@ -41,6 +42,7 @@ export default function grabArtifactsFromBundledResults({
                 file_name,
                 local_path,
                 url_path,
+                transformed_path,
             };
         });
 

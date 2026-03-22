@@ -3,6 +3,7 @@ import grabDirNames from "./grab-dir-names";
 import path from "path";
 import type { PageFiles } from "../types";
 import AppNames from "./grab-app-names";
+import pagePathTransform from "./page-path-transform";
 
 type Params = {
     exclude_api?: boolean;
@@ -80,8 +81,11 @@ function grabPageFileObject({
     let file_name = url_path.split("/").pop();
     if (!file_name) return;
 
+    const transformed_path = pagePathTransform({ page_path: file_path });
+
     return {
         local_path: file_path,
+        transformed_path,
         url_path,
         file_name,
     };

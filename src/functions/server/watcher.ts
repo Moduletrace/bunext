@@ -1,4 +1,4 @@
-import { watch, existsSync, statSync } from "fs";
+import { watch, existsSync } from "fs";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import rebuildBundler from "./rebuild-bundler";
@@ -45,17 +45,10 @@ export default async function watcher() {
             const target_files_match = /\.(tsx?|jsx?|css)$/;
 
             if (event !== "rename") {
-                if (filename.match(target_files_match) && global.BUNDLER_CTX) {
+                if (filename.match(target_files_match)) {
                     if (global.RECOMPILING) return;
                     global.RECOMPILING = true;
-
-                    if (full_file_path.match(/\_\_root\.tsx?$/)) {
-                        // log.watch(`__root.tsx file updated. Reloading window.`);
-                        global.ROOT_FILE_UPDATED = true;
-                    }
-
-                    await rewritePagesModule({ page_url: full_file_path });
-                    await global.BUNDLER_CTX.rebuild();
+                    await fullRebuild();
                 }
                 return;
             }
@@ -85,15 +78,23 @@ export default async function watcher() {
     global.PAGES_SRC_WATCHER = pages_src_watcher;
 }
 
-async function fullRebuild({ msg }: { msg?: string }) {
+async function fullRebuild(params?: { msg?: string }) {
     try {
+        const { msg } = params || {};
+
         global.RECOMPILING = true;
+
+        const target_file_paths = global.HMR_CONTROLLERS.map(
+            (hmr) => hmr.target_map?.local_path,
+        ).filter((f) => typeof f == "string");
+
+        await rewritePagesModule({ page_file_path: target_file_paths });
 
         if (msg) {
             log.watch(msg);
         }
 
-        await rebuildBundler();
+        await rebuildBundler({ target_file_paths });
     } catch (error: any) {
         log.error(error);
     } finally {

@@ -11,7 +11,7 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
         const match = router.match(errorRoute);
         const filePath = match?.filePath || presetComponent;
         const bundledMap = match?.filePath
-            ? (global.BUNDLER_CTX_MAP?.find((m) => m.local_path === match.filePath) ?? {})
+            ? global.BUNDLER_CTX_MAP[match.filePath]
             : {};
         const module = await import(filePath);
         const Component = module.default;
@@ -23,9 +23,9 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
             bundledMap,
             serverRes: {
                 responseOptions: {
-                    status: is404 ? 404 : 500
-                }
-            }
+                    status: is404 ? 404 : 500,
+                },
+            },
         };
     }
     catch {
@@ -44,9 +44,9 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
             bundledMap: {},
             serverRes: {
                 responseOptions: {
-                    status: is404 ? 404 : 500
-                }
-            }
+                    status: is404 ? 404 : 500,
+                },
+            },
         };
     }
 }

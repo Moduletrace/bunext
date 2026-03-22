@@ -3,15 +3,17 @@ import pagePathTransform from "./page-path-transform";
 import stripServerSideLogic from "../functions/bundler/strip-server-side-logic";
 
 type Params = {
-    page_url?: string | string[];
+    page_file_path?: string | string[];
 };
 
 export default async function rewritePagesModule(params?: Params) {
-    const { page_url } = params || {};
+    const { page_file_path } = params || {};
     let target_pages: string[] | undefined;
 
-    if (page_url) {
-        target_pages = Array.isArray(page_url) ? page_url : [page_url];
+    if (page_file_path) {
+        target_pages = Array.isArray(page_file_path)
+            ? page_file_path
+            : [page_file_path];
     } else {
         const pages = grabAllPages({ exclude_api: true });
         target_pages = pages.map((p) => p.local_path);

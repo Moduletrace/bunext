@@ -1,15 +1,18 @@
 import _ from "lodash";
 import grabPageComponent from "./web-pages/grab-page-component";
-export default async function serverPostBuildFn({ artifacts }) {
-    if (!global.IS_FIRST_BUNDLE_READY) {
-        global.IS_FIRST_BUNDLE_READY = true;
-    }
-    if (!global.HMR_CONTROLLERS?.[0]) {
+export default async function serverPostBuildFn() {
+    // if (!global.IS_FIRST_BUNDLE_READY) {
+    //     global.IS_FIRST_BUNDLE_READY = true;
+    // }
+    if (!global.HMR_CONTROLLERS?.[0] || !global.BUNDLER_CTX_MAP) {
         return;
     }
     for (let i = 0; i < global.HMR_CONTROLLERS.length; i++) {
         const controller = global.HMR_CONTROLLERS[i];
-        const target_artifact = artifacts.find((a) => controller.target_map?.local_path == a.local_path);
+        if (!controller.target_map?.local_path) {
+            continue;
+        }
+        const target_artifact = global.BUNDLER_CTX_MAP[controller.target_map.local_path];
         const mock_req = new Request(controller.page_url);
         const { serverRes } = await grabPageComponent({
             req: mock_req,

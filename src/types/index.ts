@@ -266,6 +266,7 @@ export type GrabPageReactBundledComponentRes = {
 
 export type PageFiles = {
     local_path: string;
+    transformed_path: string;
     url_path: string;
     file_name: string;
 };
