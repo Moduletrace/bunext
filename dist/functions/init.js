@@ -18,6 +18,8 @@ export default async function () {
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const dir = dirNames[key];
+        if (!dir.match(/\//))
+            continue;
         if (!existsSync(dir) && !dir.match(/\.\w+$/)) {
             mkdirSync(dir, { recursive: true });
             continue;
