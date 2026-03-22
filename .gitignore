@@ -178,4 +178,6 @@ out
 /build
 __fixtures__
 /public
-/.*
+/.data
+/.dump
+/.vscode

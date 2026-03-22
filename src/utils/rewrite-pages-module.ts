@@ -24,6 +24,7 @@ export default async function rewritePagesModule(params?: Params) {
         const origin_page_content = await Bun.file(page_path).text();
         const dst_page_content = stripServerSideLogic({
             txt_code: origin_page_content,
+            file_path: page_path,
         });
 
         await Bun.write(dst_path, dst_page_content, {

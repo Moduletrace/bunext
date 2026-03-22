@@ -1,78 +1,101 @@
+import path from "path";
 import ts from "typescript";
 
 type Params = {
     txt_code: string;
+    file_path: string;
 };
 
-export default function stripServerSideLogic({ txt_code }: Params) {
+export default function stripServerSideLogic({ txt_code, file_path }: Params) {
     const sourceFile = ts.createSourceFile(
-        "temp.tsx",
+        "file.tsx",
         txt_code,
         ts.ScriptTarget.Latest,
         true,
         ts.ScriptKind.TSX,
     );
+    const printer = ts.createPrinter();
+    const file_fir_name = path.dirname(file_path);
 
-    const transformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
-        return (rootNode) => {
+    const transformer: ts.TransformerFactory<ts.SourceFile> =
+        (context) => (rootNode) => {
             const visitor = (node: ts.Node): ts.Node | undefined => {
+                // 1. Strip the 'server' export
                 if (
                     ts.isVariableStatement(node) &&
                     node.modifiers?.some(
                         (m) => m.kind === ts.SyntaxKind.ExportKeyword,
                     )
                 ) {
-                    const isServerExport =
-                        node.declarationList.declarations.some(
-                            (d) =>
-                                ts.isIdentifier(d.name) &&
-                                d.name.text === "server",
-                        );
-                    if (isServerExport) return undefined; // Remove it
+                    const isServer = node.declarationList.declarations.some(
+                        (d) =>
+                            ts.isIdentifier(d.name) && d.name.text === "server",
+                    );
+                    if (isServer) return undefined;
                 }
+
+                // 2. Convert relative imports to absolute imports
+                if (ts.isImportDeclaration(node)) {
+                    const moduleSpecifier = node.moduleSpecifier;
+                    if (
+                        ts.isStringLiteral(moduleSpecifier) &&
+                        moduleSpecifier.text.startsWith(".")
+                    ) {
+                        // Resolve the relative path to an absolute filesystem path
+                        const absolutePath = path.resolve(
+                            file_fir_name,
+                            moduleSpecifier.text,
+                        );
+
+                        return ts.factory.updateImportDeclaration(
+                            node,
+                            node.modifiers,
+                            node.importClause,
+                            ts.factory.createStringLiteral(absolutePath),
+                            node.attributes,
+                        );
+                    }
+                }
+
                 return ts.visitEachChild(node, visitor, context);
             };
             return ts.visitNode(rootNode, visitor) as ts.SourceFile;
         };
-    };
 
     const result = ts.transform(sourceFile, [transformer]);
-    const printer = ts.createPrinter();
-    const strippedCode = printer.printFile(result.transformed[0]);
+    const intermediate = printer.printFile(result.transformed[0]);
 
-    const cleanSourceFile = ts.createSourceFile(
+    // Pass 2: Cleanup unused imports (Same logic as before)
+    const cleanSource = ts.createSourceFile(
         "clean.tsx",
-        strippedCode,
+        intermediate,
         ts.ScriptTarget.Latest,
         true,
         ts.ScriptKind.TSX,
     );
-
-    // Simple reference check: if a named import isn't found in the text, drop it
-    const cleanupTransformer: ts.TransformerFactory<ts.SourceFile> = (
-        context,
-    ) => {
-        return (rootNode) => {
+    const cleanup: ts.TransformerFactory<ts.SourceFile> =
+        (context) => (rootNode) => {
             const visitor = (node: ts.Node): ts.Node | undefined => {
                 if (ts.isImportDeclaration(node)) {
                     const clause = node.importClause;
                     if (!clause) return node;
 
-                    // Handle named imports like { BunextPageProps, BunextPageServerFn }
                     if (
                         clause.namedBindings &&
                         ts.isNamedImports(clause.namedBindings)
                     ) {
-                        const activeElements =
-                            clause.namedBindings.elements.filter((el) => {
-                                const name = el.name.text;
-                                // Check if the name appears anywhere else in the file
-                                const regex = new RegExp(`\\b${name}\\b`, "g");
-                                const matches = strippedCode.match(regex);
-                                return matches && matches.length > 1; // 1 for the import itself, >1 for usage
-                            });
-
-                        if (activeElements.length === 0) return undefined;
+                        const used = clause.namedBindings.elements.filter(
+                            (el) => {
+                                const regex = new RegExp(
+                                    `\\b${el.name.text}\\b`,
+                                    "g",
+                                );
+                                return (
+                                    (intermediate.match(regex) || []).length > 1
+                                );
+                            },
+                        );
+                        if (used.length === 0) return undefined;
                         return ts.factory.updateImportDeclaration(
                             node,
                             node.modifiers,
@@ -80,27 +103,27 @@ export default function stripServerSideLogic({ txt_code }: Params) {
                                 clause,
                                 clause.isTypeOnly,
                                 clause.name,
-                                ts.factory.createNamedImports(activeElements),
+                                ts.factory.createNamedImports(used),
                             ),
                             node.moduleSpecifier,
                             node.attributes,
                         );
                     }
 
-                    // Handle default imports like 'import BunSQLite'
                     if (clause.name) {
-                        const name = clause.name.text;
-                        const regex = new RegExp(`\\b${name}\\b`, "g");
-                        const matches = strippedCode.match(regex);
-                        if (!matches || matches.length <= 1) return undefined;
+                        const regex = new RegExp(
+                            `\\b${clause.name.text}\\b`,
+                            "g",
+                        );
+                        if ((intermediate.match(regex) || []).length <= 1)
+                            return undefined;
                     }
                 }
                 return ts.visitEachChild(node, visitor, context);
             };
             return ts.visitNode(rootNode, visitor) as ts.SourceFile;
         };
-    };
 
-    const finalResult = ts.transform(cleanSourceFile, [cleanupTransformer]);
-    return printer.printFile(finalResult.transformed[0]);
+    const final = ts.transform(cleanSource, [cleanup]);
+    return printer.printFile(final.transformed[0]);
 }

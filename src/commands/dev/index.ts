@@ -2,6 +2,7 @@ import { Command } from "commander";
 import startServer from "../../functions/server/start-server";
 import { log } from "../../utils/log";
 import bunextInit from "../../functions/bunext-init";
+import rewritePagesModule from "../../utils/rewrite-pages-module";
 
 export default function () {
     return new Command("dev")
@@ -11,6 +12,7 @@ export default function () {
 
             log.info("Running development server ...");
 
+            await rewritePagesModule();
             await bunextInit();
 
             await startServer();

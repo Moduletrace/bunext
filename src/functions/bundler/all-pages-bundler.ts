@@ -64,7 +64,10 @@ export default async function allPagesBundler(params?: Params) {
                     return { contents: source, loader: "tsx" };
                 }
 
-                const strippedCode = stripServerSideLogic({ txt_code: source });
+                const strippedCode = stripServerSideLogic({
+                    txt_code: source,
+                    file_path: args.path,
+                });
 
                 return {
                     contents: strippedCode,
