@@ -28,7 +28,7 @@ export default async function handleWebPages({ req, }) {
         });
     }
     catch (error) {
-        log.error(`Error Handling Web Page: ${error.message}`);
+        log.error(`Error Handling Web Page: ${error.message}`, error);
         const componentRes = await grabPageErrorComponent({
             error,
         });
