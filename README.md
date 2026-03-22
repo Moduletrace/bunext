@@ -71,17 +71,17 @@ The goal is a framework that is:
 
 Configure the `@moduletrace` scope to point at the registry — pick one:
 
-**`.npmrc`** (works with npm, bun, and most tools):
-
-```ini
-@moduletrace:registry=https://git.tben.me/api/packages/moduletrace/npm/
-```
-
 **`bunfig.toml`** (Bun-native):
 
 ```toml
 [install.scopes]
 "@moduletrace" = { registry = "https://git.tben.me/api/packages/moduletrace/npm/" }
+```
+
+**`.npmrc`** (works with npm, bun, and most tools):
+
+```ini
+@moduletrace:registry=https://git.tben.me/api/packages/moduletrace/npm/
 ```
 
 Then install:

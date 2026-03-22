@@ -21,6 +21,10 @@ export default async function rewritePagesModule(params?: Params) {
         const page_path = target_pages[i];
         const dst_path = pagePathTransform({ page_path });
 
+        if (page_path.match(/__root\.tsx?/)) {
+            continue;
+        }
+
         const origin_page_content = await Bun.file(page_path).text();
         const dst_page_content = stripServerSideLogic({
             txt_code: origin_page_content,

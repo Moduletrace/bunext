@@ -1,25 +1,29 @@
 import path from "path";
 import ts from "typescript";
 export default function stripServerSideLogic({ txt_code, file_path }) {
+    const file_dir_name = path.dirname(file_path);
+    // 1. Initial Parse of the source
     const sourceFile = ts.createSourceFile("file.tsx", txt_code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
     const printer = ts.createPrinter();
-    const file_fir_name = path.dirname(file_path);
-    const transformer = (context) => (rootNode) => {
+    /**
+     * PASS 1: Remove 'server' export and resolve absolute paths
+     */
+    const stripTransformer = (context) => (rootNode) => {
         const visitor = (node) => {
-            // 1. Strip the 'server' export
+            // Remove 'export const server'
             if (ts.isVariableStatement(node) &&
                 node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) {
-                const isServer = node.declarationList.declarations.some((d) => ts.isIdentifier(d.name) && d.name.text === "server");
-                if (isServer)
+                if (node.declarationList.declarations.some((d) => ts.isIdentifier(d.name) &&
+                    d.name.text === "server")) {
                     return undefined;
+                }
             }
-            // 2. Convert relative imports to absolute imports
+            // Convert relative imports to absolute
             if (ts.isImportDeclaration(node)) {
-                const moduleSpecifier = node.moduleSpecifier;
-                if (ts.isStringLiteral(moduleSpecifier) &&
-                    moduleSpecifier.text.startsWith(".")) {
-                    // Resolve the relative path to an absolute filesystem path
-                    const absolutePath = path.resolve(file_fir_name, moduleSpecifier.text);
+                const specifier = node.moduleSpecifier;
+                if (ts.isStringLiteral(specifier) &&
+                    specifier.text.startsWith(".")) {
+                    const absolutePath = path.resolve(file_dir_name, specifier.text);
                     return ts.factory.updateImportDeclaration(node, node.modifiers, node.importClause, ts.factory.createStringLiteral(absolutePath), node.attributes);
                 }
             }
@@ -27,36 +31,62 @@ export default function stripServerSideLogic({ txt_code, file_path }) {
         };
         return ts.visitNode(rootNode, visitor);
     };
-    const result = ts.transform(sourceFile, [transformer]);
-    const intermediate = printer.printFile(result.transformed[0]);
-    // Pass 2: Cleanup unused imports (Same logic as before)
-    const cleanSource = ts.createSourceFile("clean.tsx", intermediate, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-    const cleanup = (context) => (rootNode) => {
+    const step1Result = ts.transform(sourceFile, [stripTransformer]);
+    const intermediateCode = printer.printFile(step1Result.transformed[0]);
+    // 2. Re-parse to get a "Clean Slate" AST
+    const cleanSource = ts.createSourceFile("clean.tsx", intermediateCode, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    /**
+     * PASS 2: Collect all used Identifiers and Prune Imports
+     */
+    const usedIdentifiers = new Set();
+    function walkAndFindUsages(node) {
+        if (ts.isIdentifier(node)) {
+            // We only care about identifiers that AREN'T the names in the import statements themselves
+            const parent = node.parent;
+            const isImportName = ts.isImportSpecifier(parent) ||
+                ts.isImportClause(parent) ||
+                ts.isNamespaceImport(parent);
+            if (!isImportName) {
+                usedIdentifiers.add(node.text);
+            }
+        }
+        ts.forEachChild(node, walkAndFindUsages);
+    }
+    walkAndFindUsages(cleanSource);
+    const cleanupTransformer = (context) => (rootNode) => {
         const visitor = (node) => {
             if (ts.isImportDeclaration(node)) {
                 const clause = node.importClause;
                 if (!clause)
                     return node;
+                // 1. Clean Named Imports: { A, B }
                 if (clause.namedBindings &&
                     ts.isNamedImports(clause.namedBindings)) {
-                    const used = clause.namedBindings.elements.filter((el) => {
-                        const regex = new RegExp(`\\b${el.name.text}\\b`, "g");
-                        return ((intermediate.match(regex) || []).length > 1);
-                    });
-                    if (used.length === 0)
+                    const activeElements = clause.namedBindings.elements.filter((el) => usedIdentifiers.has(el.name.text));
+                    // If no named imports are used and there is no default import, nix the whole line
+                    if (activeElements.length === 0 && !clause.name)
                         return undefined;
-                    return ts.factory.updateImportDeclaration(node, node.modifiers, ts.factory.updateImportClause(clause, clause.isTypeOnly, clause.name, ts.factory.createNamedImports(used)), node.moduleSpecifier, node.attributes);
+                    // If we have some named imports left, update the node
+                    return ts.factory.updateImportDeclaration(node, node.modifiers, ts.factory.updateImportClause(clause, clause.isTypeOnly, 
+                    // Only keep default import if it's used
+                    clause.name &&
+                        usedIdentifiers.has(clause.name.text)
+                        ? clause.name
+                        : undefined, ts.factory.createNamedImports(activeElements)), node.moduleSpecifier, node.attributes);
                 }
-                if (clause.name) {
-                    const regex = new RegExp(`\\b${clause.name.text}\\b`, "g");
-                    if ((intermediate.match(regex) || []).length <= 1)
+                // 2. Clean Default Imports: import X from '...'
+                if (clause.name && !usedIdentifiers.has(clause.name.text)) {
+                    // If there are no named bindings attached, nix the whole line
+                    if (!clause.namedBindings)
                         return undefined;
+                    // Otherwise, just strip the default name and keep the named bindings
+                    return ts.factory.updateImportDeclaration(node, node.modifiers, ts.factory.updateImportClause(clause, clause.isTypeOnly, undefined, clause.namedBindings), node.moduleSpecifier, node.attributes);
                 }
             }
             return ts.visitEachChild(node, visitor, context);
         };
         return ts.visitNode(rootNode, visitor);
     };
-    const final = ts.transform(cleanSource, [cleanup]);
-    return printer.printFile(final.transformed[0]);
+    const finalResult = ts.transform(cleanSource, [cleanupTransformer]);
+    return printer.printFile(finalResult.transformed[0]);
 }
