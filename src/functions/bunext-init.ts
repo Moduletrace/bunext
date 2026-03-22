@@ -24,7 +24,7 @@ import cron from "./server/cron";
 declare global {
     var ORA_SPINNER: Ora;
     var CONFIG: BunextConfig;
-    var SERVER: Server | undefined;
+    var SERVER: Server<any> | undefined;
     var RECOMPILING: boolean;
     var WATCHER_TIMEOUT: any;
     var ROUTER: FileSystemRouter;

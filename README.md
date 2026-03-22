@@ -485,12 +485,12 @@ Create `src/pages/__root.tsx` to wrap every page in a shared layout. The root co
 
 ```tsx
 // src/pages/__root.tsx
-import type { PropsWithChildren } from "react";
+import type { BunextRootComponentProps } from "@moduletrace/bunext/types";
 
 export default function RootLayout({
     children,
     props,
-}: PropsWithChildren<any>) {
+}: BunextRootComponentProps) {
     return (
         <>
             <header>My App</header>

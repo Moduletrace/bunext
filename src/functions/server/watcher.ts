@@ -3,6 +3,7 @@ import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import rebuildBundler from "./rebuild-bundler";
 import { log } from "../../utils/log";
+import rewritePagesModule from "../../utils/rewrite-pages-module";
 
 const { ROOT_DIR } = grabDirNames();
 
@@ -47,6 +48,7 @@ export default async function watcher() {
                 if (filename.match(target_files_match) && global.BUNDLER_CTX) {
                     if (global.RECOMPILING) return;
                     global.RECOMPILING = true;
+                    await rewritePagesModule({ page_url: full_file_path });
                     await global.BUNDLER_CTX.rebuild();
                 }
                 return;

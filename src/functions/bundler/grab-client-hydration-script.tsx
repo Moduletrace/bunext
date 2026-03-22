@@ -3,6 +3,7 @@ import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import AppNames from "../../utils/grab-app-names";
 import grabConstants from "../../utils/grab-constants";
+import pagePathTransform from "../../utils/page-path-transform";
 
 const { PAGES_DIR } = grabDirNames();
 
@@ -10,12 +11,16 @@ type Params = {
     page_local_path: string;
 };
 
-export default function grabClientHydrationScript({ page_local_path }: Params) {
+export default async function grabClientHydrationScript({
+    page_local_path,
+}: Params) {
     const {
         ClientRootElementIDName,
         ClientRootComponentWindowName,
         ClientWindowPagePropsName,
     } = grabConstants();
+
+    const target_path = pagePathTransform({ page_path: page_local_path });
 
     const root_component_path = path.join(
         PAGES_DIR,
@@ -30,7 +35,7 @@ export default function grabClientHydrationScript({ page_local_path }: Params) {
     if (does_root_exist) {
         txt += `import Root from "${root_component_path}";\n`;
     }
-    txt += `import Page from "${page_local_path}";\n\n`;
+    txt += `import Page from "${target_path}";\n\n`;
     txt += `const pageProps = window.${ClientWindowPagePropsName} || {};\n`;
 
     if (does_root_exist) {

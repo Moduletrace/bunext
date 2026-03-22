@@ -1,5 +1,5 @@
 import type { MatchedRoute, ServeOptions, Server, WebSocketHandler } from "bun";
-import type { FC, JSX, ReactNode } from "react";
+import type { FC, JSX, PropsWithChildren, ReactNode } from "react";
 
 export type ServerProps = {
     params: Record<string, string>;
@@ -84,7 +84,7 @@ export type BunxRouteParams = {
      * Intercept and Transform the response object
      */
     resTransform?: (res: Response) => Promise<Response> | Response;
-    server?: Server;
+    server?: Server<any>;
 };
 
 export interface PostInsertReturn {
@@ -293,3 +293,5 @@ export type BunextCacheFileMeta = {
     paradigm: "html" | "json";
     expiry_seconds?: number;
 };
+
+export type BunextRootComponentProps = PropsWithChildren & BunextPageProps;

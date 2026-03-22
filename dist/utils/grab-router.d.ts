@@ -1,1 +1,1 @@
-export default function grabRouter(): import("bun").FileSystemRouter;
+export default function grabRouter(): Bun.FileSystemRouter;

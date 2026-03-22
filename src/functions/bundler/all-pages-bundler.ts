@@ -1,4 +1,4 @@
-import { existsSync, statSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import * as esbuild from "esbuild";
 import grabAllPages from "../../utils/grab-all-pages";
 import grabDirNames from "../../utils/grab-dir-names";
@@ -9,7 +9,7 @@ import { log } from "../../utils/log";
 import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-result";
-import path from "path";
+import stripServerSideLogic from "./strip-server-side-logic";
 
 const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE, ROOT_DIR } =
     grabDirNames();
@@ -32,9 +32,11 @@ export default async function allPagesBundler(params?: Params) {
     for (const page of pages) {
         const key = page.local_path;
 
-        const txt = grabClientHydrationScript({
+        const txt = await grabClientHydrationScript({
             page_local_path: page.local_path,
         });
+
+        if (!txt) continue;
 
         virtualEntries[key] = txt;
     }
@@ -52,6 +54,23 @@ export default async function allPagesBundler(params?: Params) {
                 loader: "tsx",
                 resolveDir: process.cwd(),
             }));
+
+            build.onLoad({ filter: /\.tsx$/ }, (args) => {
+                if (args.path.includes("node_modules")) return;
+
+                const source = readFileSync(args.path, "utf8");
+
+                if (!source.includes("server")) {
+                    return { contents: source, loader: "tsx" };
+                }
+
+                const strippedCode = stripServerSideLogic({ txt_code: source });
+
+                return {
+                    contents: strippedCode,
+                    loader: "tsx",
+                };
+            });
         },
     };
 
@@ -67,7 +86,6 @@ export default async function allPagesBundler(params?: Params) {
                 if (build_starts == MAX_BUILD_STARTS) {
                     const error_msg = `Build Failed. Please check all your components and imports.`;
                     log.error(error_msg);
-                    // process.exit(1);
                 }
             });
 

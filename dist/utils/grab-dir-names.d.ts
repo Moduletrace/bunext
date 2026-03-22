@@ -5,6 +5,7 @@ export default function grabDirNames(): {
     API_DIR: string;
     PUBLIC_DIR: string;
     HYDRATION_DST_DIR: string;
+    BUNX_CWD_DIR: string;
     BUNX_ROOT_DIR: string;
     CONFIG_FILE: string;
     BUNX_TMP_DIR: string;
@@ -18,4 +19,5 @@ export default function grabDirNames(): {
     HYDRATION_DST_DIR_MAP_JSON_FILE: string;
     BUNEXT_CACHE_DIR: string;
     BUNX_CWD_MODULE_CACHE_DIR: string;
+    BUNX_CWD_PAGES_REWRITE_DIR: string;
 };

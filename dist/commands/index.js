@@ -4,6 +4,7 @@ import start from "./start";
 import dev from "./dev";
 import build from "./build";
 import { log } from "../utils/log";
+import rewritePages from "./rewrite-pages";
 /**
  * # Describe Program
  */
@@ -17,6 +18,7 @@ program
 program.addCommand(dev());
 program.addCommand(start());
 program.addCommand(build());
+program.addCommand(rewritePages());
 /**
  * # Handle Unavailable Commands
  */
