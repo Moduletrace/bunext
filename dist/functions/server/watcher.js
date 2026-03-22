@@ -38,6 +38,7 @@ export default async function watcher() {
                     return;
                 global.RECOMPILING = true;
                 if (full_file_path.match(/\_\_root\.tsx?$/)) {
+                    // log.watch(`__root.tsx file updated. Reloading window.`);
                     global.ROOT_FILE_UPDATED = true;
                 }
                 await rewritePagesModule({ page_url: full_file_path });

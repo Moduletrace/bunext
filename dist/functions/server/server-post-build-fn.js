@@ -26,7 +26,6 @@ export default async function serverPostBuildFn({ artifacts }) {
         }
         try {
             let final_data = {};
-            console.log("global.ROOT_FILE_UPDATED", global.ROOT_FILE_UPDATED);
             if (global.ROOT_FILE_UPDATED) {
                 final_data = { reload: true };
             }
