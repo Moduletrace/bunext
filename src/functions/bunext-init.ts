@@ -37,6 +37,7 @@ declare global {
     var PAGES_SRC_WATCHER: FSWatcher | undefined;
     var CURRENT_VERSION: string | undefined;
     var PAGE_FILES: PageFiles[];
+    var ROOT_FILE_UPDATED: boolean;
 }
 
 export default async function bunextInit() {

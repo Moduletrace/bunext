@@ -37,6 +37,9 @@ export default async function watcher() {
                 if (global.RECOMPILING)
                     return;
                 global.RECOMPILING = true;
+                if (full_file_path.match(/\_\_root\.tsx?$/)) {
+                    global.ROOT_FILE_UPDATED = true;
+                }
                 await rewritePagesModule({ page_url: full_file_path });
                 await global.BUNDLER_CTX.rebuild();
             }

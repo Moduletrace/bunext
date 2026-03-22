@@ -42,9 +42,21 @@ export default async function serverPostBuildFn({ artifacts }: Params) {
         }
 
         try {
+            let final_data: { [k: string]: any } = {};
+
+            console.log("global.ROOT_FILE_UPDATED", global.ROOT_FILE_UPDATED);
+
+            if (global.ROOT_FILE_UPDATED) {
+                final_data = { reload: true };
+            } else {
+                final_data = final_artifact;
+            }
+
             controller.controller.enqueue(
-                `event: update\ndata: ${JSON.stringify(final_artifact)}\n\n`,
+                `event: update\ndata: ${JSON.stringify(final_data)}\n\n`,
             );
+
+            global.ROOT_FILE_UPDATED = false;
         } catch {
             global.HMR_CONTROLLERS.splice(i, 1);
         }

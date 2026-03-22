@@ -25,7 +25,16 @@ export default async function serverPostBuildFn({ artifacts }) {
             final_artifact.page_props = serverRes;
         }
         try {
-            controller.controller.enqueue(`event: update\ndata: ${JSON.stringify(final_artifact)}\n\n`);
+            let final_data = {};
+            console.log("global.ROOT_FILE_UPDATED", global.ROOT_FILE_UPDATED);
+            if (global.ROOT_FILE_UPDATED) {
+                final_data = { reload: true };
+            }
+            else {
+                final_data = final_artifact;
+            }
+            controller.controller.enqueue(`event: update\ndata: ${JSON.stringify(final_data)}\n\n`);
+            global.ROOT_FILE_UPDATED = false;
         }
         catch {
             global.HMR_CONTROLLERS.splice(i, 1);

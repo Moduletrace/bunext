@@ -1,1 +1,1 @@
-export default function startServer(): Promise<Bun.Server<undefined>>;
+export default function startServer(): Promise<Bun.Server<any>>;

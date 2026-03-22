@@ -1,2 +1,1 @@
-import type { ServeOptions } from "bun";
-export default function (): Promise<ServeOptions>;
+export default function (): Promise<Bun.Serve.Options<any>>;

@@ -1,11 +1,10 @@
-import type { ServeOptions } from "bun";
 import grabAppPort from "../../utils/grab-app-port";
 import isDevelopment from "../../utils/is-development";
 import bunextRequestHandler from "./bunext-req-handler";
 import grabConfig from "../grab-config";
 import _ from "lodash";
 
-export default async function (): Promise<ServeOptions> {
+export default async function (): Promise<Bun.Serve.Options<any>> {
     const port = grabAppPort();
 
     const development = isDevelopment();
@@ -20,5 +19,5 @@ export default async function (): Promise<ServeOptions> {
         development,
         websocket: config?.websocket,
         ..._.omit(config?.serverOptions || {}, ["fetch"]),
-    } as ServeOptions;
+    } as Bun.Serve.Options<any>;
 }
