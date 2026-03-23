@@ -1,8 +1,8 @@
-import type { FC } from "react";
 import grabRouteParams from "../../../utils/grab-route-params";
 import type {
     BunextPageModule,
     BunextPageModuleServerReturn,
+    BunextRootModule,
     BunxRouteParams,
     GrabPageComponentRes,
 } from "../../../types";
@@ -11,6 +11,7 @@ import grabPageBundledReactComponent from "./grab-page-bundled-react-component";
 import _ from "lodash";
 import { log } from "../../../utils/log";
 import grabRootFilePath from "./grab-root-file-path";
+import grabPageServerRes from "./grab-page-server-res";
 
 class NotFoundError extends Error {}
 
@@ -65,6 +66,7 @@ export default async function grabPageComponent({
         const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
 
         if (!bundledMap?.path) {
+            console.log(global.BUNDLER_CTX_MAP);
             const errMsg = `No Bundled File Path for this request path!`;
             log.error(errMsg);
             throw new Error(errMsg);
@@ -77,52 +79,36 @@ export default async function grabPageComponent({
         const { root_file_path } = grabRootFilePath();
 
         const module: BunextPageModule = await import(`${file_path}?t=${now}`);
+        const root_module: BunextRootModule | undefined = root_file_path
+            ? await import(`${root_file_path}?t=${now}`)
+            : undefined;
 
         if (debug) {
             log.info(`module:`, module);
         }
 
-        const serverRes: BunextPageModuleServerReturn = await (async () => {
-            const default_props: BunextPageModuleServerReturn = {
-                url: {
-                    ...(_.pick<URL, keyof URL>(url!, [
-                        "host",
-                        "hostname",
-                        "pathname",
-                        "origin",
-                        "port",
-                        "search",
-                        "searchParams",
-                        "hash",
-                        "href",
-                        "password",
-                        "protocol",
-                        "username",
-                    ]) as any),
-                },
-                query: match?.query,
-            };
+        const rootServerRes: BunextPageModuleServerReturn | undefined =
+            root_module?.server
+                ? await grabPageServerRes({
+                      module: root_module,
+                      url,
+                      query: match?.query,
+                      routeParams,
+                  })
+                : undefined;
 
-            try {
-                if (routeParams) {
-                    const serverData = await module["server"]?.({
-                        ...routeParams,
-                        query: { ...routeParams.query, ...match?.query },
-                    });
-                    return {
-                        ...serverData,
-                        ...default_props,
-                    };
-                }
-                return {
-                    ...default_props,
-                };
-            } catch (error) {
-                return {
-                    ...default_props,
-                };
-            }
-        })();
+        if (debug) {
+            log.info(`rootServerRes:`, rootServerRes);
+        }
+
+        const serverRes: BunextPageModuleServerReturn = await grabPageServerRes(
+            {
+                module,
+                url,
+                query: match?.query,
+                routeParams,
+            },
+        );
 
         if (debug) {
             log.info(`serverRes:`, serverRes);
@@ -143,8 +129,6 @@ export default async function grabPageComponent({
             log.info(`meta:`, meta);
         }
 
-        const Head = module.Head as FC<any>;
-
         const { component } =
             (await grabPageBundledReactComponent({
                 file_path,
@@ -162,12 +146,11 @@ export default async function grabPageComponent({
 
         return {
             component,
-            serverRes,
+            serverRes: _.merge(rootServerRes || {}, serverRes),
             routeParams,
             module,
             bundledMap,
-            meta,
-            head: Head,
+            root_module,
         };
     } catch (error: any) {
         log.error(`Error Grabbing Page Component: ${error.message}`);

@@ -86,9 +86,7 @@ async function fullRebuild(params?: { msg?: string }) {
             (hmr) => hmr.target_map?.local_path,
         ).filter((f) => typeof f == "string");
 
-        await rewritePagesModule({
-            page_file_path: target_file_paths,
-        });
+        await rewritePagesModule();
 
         if (msg) {
             log.watch(msg);

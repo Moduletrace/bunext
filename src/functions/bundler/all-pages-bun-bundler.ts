@@ -124,7 +124,10 @@ export default async function allPagesBunBundler(params?: Params) {
     }
 
     if (artifacts?.[0]) {
-        await recordArtifacts({ artifacts });
+        await recordArtifacts({
+            artifacts,
+            page_file_paths,
+        });
     }
 
     const elapsed = (performance.now() - buildStart).toFixed(0);

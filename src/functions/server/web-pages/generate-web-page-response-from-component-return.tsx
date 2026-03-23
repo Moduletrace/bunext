@@ -8,21 +8,19 @@ export default async function generateWebPageResponseFromComponentReturn({
     component,
     module,
     bundledMap,
-    head,
-    meta,
     routeParams,
     serverRes,
     debug,
+    root_module,
 }: GrabPageComponentRes) {
     const html = await genWebHTML({
         component,
         pageProps: serverRes,
         bundledMap,
         module,
-        meta,
-        head,
         routeParams,
         debug,
+        root_module,
     });
 
     if (debug) {

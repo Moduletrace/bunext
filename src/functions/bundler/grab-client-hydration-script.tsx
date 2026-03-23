@@ -4,6 +4,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import AppNames from "../../utils/grab-app-names";
 import grabConstants from "../../utils/grab-constants";
 import pagePathTransform from "../../utils/page-path-transform";
+import grabRootFilePath from "../server/web-pages/grab-root-file-path";
 
 const { PAGES_DIR } = grabDirNames();
 
@@ -20,25 +21,23 @@ export default async function grabClientHydrationScript({
         ClientWindowPagePropsName,
     } = grabConstants();
 
+    const { root_file_path } = grabRootFilePath();
+
     const target_path = pagePathTransform({ page_path: page_local_path });
-
-    const root_component_path = path.join(
-        PAGES_DIR,
-        `${AppNames["RootPagesComponentName"]}.tsx`,
-    );
-
-    const does_root_exist = existsSync(root_component_path);
+    const target_root_path = root_file_path
+        ? pagePathTransform({ page_path: root_file_path })
+        : undefined;
 
     let txt = ``;
 
     txt += `import { hydrateRoot } from "react-dom/client";\n`;
-    if (does_root_exist) {
-        txt += `import Root from "${root_component_path}";\n`;
+    if (target_root_path) {
+        txt += `import Root from "${target_root_path}";\n`;
     }
     txt += `import Page from "${target_path}";\n\n`;
     txt += `const pageProps = window.${ClientWindowPagePropsName} || {};\n`;
 
-    if (does_root_exist) {
+    if (target_root_path) {
         txt += `const component = <Root suppressHydrationWarning={true} {...pageProps}><Page {...pageProps} /></Root>\n`;
     } else {
         txt += `const component = <Page suppressHydrationWarning={true} {...pageProps} />\n`;

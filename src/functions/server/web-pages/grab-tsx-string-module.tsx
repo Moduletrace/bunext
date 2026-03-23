@@ -1,8 +1,7 @@
 import isDevelopment from "../../../utils/is-development";
-import * as esbuild from "esbuild";
+import tailwindcss from "bun-plugin-tailwind";
 import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
-import tailwindEsbuildPlugin from "./tailwind-esbuild-plugin";
 
 type Params = {
     tsx: string;
@@ -20,21 +19,22 @@ export default async function grabTsxStringModule<T extends any = any>({
         .replace(/.*\/src\/pages\//, "")
         .replace(/\.tsx$/, "");
 
+    const src_file_path = path.join(
+        BUNX_CWD_MODULE_CACHE_DIR,
+        `${trimmed_file_path}.tsx`,
+    );
+
     const out_file_path = path.join(
         BUNX_CWD_MODULE_CACHE_DIR,
         `${trimmed_file_path}.js`,
     );
 
-    await esbuild.build({
-        stdin: {
-            contents: tsx,
-            resolveDir: process.cwd(),
-            loader: "tsx",
-        },
-        bundle: true,
+    await Bun.write(src_file_path, tsx);
+
+    await Bun.build({
+        entrypoints: [src_file_path],
         format: "esm",
-        target: "es2020",
-        platform: "node",
+        target: "bun",
         external: ["react", "react-dom"],
         minify: true,
         define: {
@@ -43,10 +43,12 @@ export default async function grabTsxStringModule<T extends any = any>({
             ),
         },
         metafile: true,
-        plugins: [tailwindEsbuildPlugin],
-        jsx: "automatic",
-        write: true,
-        outfile: out_file_path,
+        plugins: [tailwindcss],
+        jsx: {
+            runtime: "automatic",
+            development: dev,
+        },
+        outdir: BUNX_CWD_MODULE_CACHE_DIR,
     });
 
     Loader.registry.delete(out_file_path);
@@ -54,3 +56,27 @@ export default async function grabTsxStringModule<T extends any = any>({
 
     return module as T;
 }
+
+// await esbuild.build({
+//     stdin: {
+//         contents: tsx,
+//         resolveDir: process.cwd(),
+//         loader: "tsx",
+//     },
+//     bundle: true,
+//     format: "esm",
+//     target: "es2020",
+//     platform: "node",
+//     external: ["react", "react-dom"],
+//     minify: true,
+//     define: {
+//         "process.env.NODE_ENV": JSON.stringify(
+//             dev ? "development" : "production",
+//         ),
+//     },
+//     metafile: true,
+//     plugins: [tailwindEsbuildPlugin],
+//     jsx: "automatic",
+//     write: true,
+//     outfile: out_file_path,
+// });
