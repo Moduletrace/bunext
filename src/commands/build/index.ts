@@ -27,8 +27,8 @@ export default function () {
             log.banner();
             log.build("Building Project ...");
 
-            // await allPagesBunBundler();
+            await allPagesBunBundler();
 
-            allPagesBundler();
+            // await allPagesBundler();
         });
 }

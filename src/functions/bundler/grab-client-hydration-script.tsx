@@ -31,7 +31,7 @@ export default async function grabClientHydrationScript({
 
     let txt = ``;
 
-    txt += `import { hydrateRoot, createElement } from "react-dom/client";\n`;
+    txt += `import { hydrateRoot } from "react-dom/client";\n`;
     if (does_root_exist) {
         txt += `import Root from "${root_component_path}";\n`;
     }

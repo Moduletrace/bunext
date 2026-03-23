@@ -15,6 +15,7 @@ import watcher from "./server/watcher";
 import { log } from "../utils/log";
 import cron from "./server/cron";
 import EJSON from "../utils/ejson";
+import allPagesBunBundler from "./bundler/all-pages-bun-bundler";
 
 /**
  * # Declare Global Variables
@@ -28,12 +29,13 @@ declare global {
     var ROUTER: FileSystemRouter;
     var HMR_CONTROLLERS: GlobalHMRControllerObject[];
     var LAST_BUILD_TIME: number;
-    var BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap };
+    var BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
     var BUNDLER_REBUILDS: 0;
     var PAGES_SRC_WATCHER: FSWatcher | undefined;
     var CURRENT_VERSION: string | undefined;
     var PAGE_FILES: PageFiles[];
     var ROOT_FILE_UPDATED: boolean;
+    // var BUNDLER_CTX: BuildContext | undefined;
 }
 
 const { PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
@@ -59,13 +61,14 @@ export default async function bunextInit() {
     const is_dev = isDevelopment();
 
     if (is_dev) {
-        await allPagesBundler();
+        // await allPagesBundler();
+        await allPagesBunBundler();
         watcher();
     } else {
         const artifacts = EJSON.parse(
             readFileSync(HYDRATION_DST_DIR_MAP_JSON_FILE, "utf-8"),
         ) as { [k: string]: BundlerCTXMap } | undefined;
-        if (!artifacts?.[0]) {
+        if (!artifacts) {
             log.error("Please build first.");
             process.exit(1);
         }

@@ -8,8 +8,6 @@ import rewritePagesModule from "../../utils/rewrite-pages-module";
 const { ROOT_DIR } = grabDirNames();
 
 export default async function watcher() {
-    await Bun.sleep(1000);
-
     const pages_src_watcher = watch(
         ROOT_DIR,
         {
@@ -88,7 +86,9 @@ async function fullRebuild(params?: { msg?: string }) {
             (hmr) => hmr.target_map?.local_path,
         ).filter((f) => typeof f == "string");
 
-        await rewritePagesModule({ page_file_path: target_file_paths });
+        await rewritePagesModule({
+            page_file_path: target_file_paths,
+        });
 
         if (msg) {
             log.watch(msg);

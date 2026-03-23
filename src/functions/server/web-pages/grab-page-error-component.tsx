@@ -33,7 +33,7 @@ export default async function grabPageErrorComponent({
         const filePath = match?.filePath || presetComponent;
 
         const bundledMap = match?.filePath
-            ? global.BUNDLER_CTX_MAP[match.filePath]
+            ? global.BUNDLER_CTX_MAP?.[match.filePath]
             : ({} as BundlerCTXMap);
 
         const module: BunextPageModule = await import(filePath);

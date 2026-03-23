@@ -7,7 +7,7 @@ export default async function ({ req }: Params): Promise<Response> {
     const match = global.ROUTER.match(referer_url.pathname);
 
     const target_map = match?.filePath
-        ? global.BUNDLER_CTX_MAP[match.filePath]
+        ? global.BUNDLER_CTX_MAP?.[match.filePath]
         : undefined;
 
     let controller: ReadableStreamDefaultController<string>;
