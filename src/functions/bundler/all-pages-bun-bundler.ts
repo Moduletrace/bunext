@@ -82,7 +82,7 @@ export default async function allPagesBunBundler(params?: Params) {
         ],
     });
 
-    Bun.write(
+    await Bun.write(
         path.join(BUNX_TMP_DIR, "bundle.json"),
         JSON.stringify(result, null, 4),
         { createPath: true },

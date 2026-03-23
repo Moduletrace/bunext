@@ -18,6 +18,10 @@ export default async function ({ req }: Params): Promise<Response> {
             url.pathname.replace(/\/\.bunext\/public\/pages\//, ""),
         );
 
+        if (!file_path.startsWith(HYDRATION_DST_DIR + path.sep)) {
+            return new Response("Forbidden", { status: 403 });
+        }
+
         if (!existsSync(file_path)) {
             return new Response(`File Doesn't Exist`, {
                 status: 404,

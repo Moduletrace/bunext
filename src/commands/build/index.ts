@@ -1,11 +1,10 @@
 import { Command } from "commander";
-import allPagesBundler from "../../functions/bundler/all-pages-bundler";
 import { log } from "../../utils/log";
 import init from "../../functions/init";
 import rewritePagesModule from "../../utils/rewrite-pages-module";
 import allPagesBunBundler from "../../functions/bundler/all-pages-bun-bundler";
-import { execSync } from "child_process";
 import grabDirNames from "../../utils/grab-dir-names";
+import { rmSync } from "fs";
 
 const { HYDRATION_DST_DIR, BUNX_CWD_PAGES_REWRITE_DIR } = grabDirNames();
 
@@ -17,8 +16,8 @@ export default function () {
             process.env.BUILD = "true";
 
             try {
-                execSync(`rm -rf ${HYDRATION_DST_DIR}`);
-                execSync(`rm -rf ${BUNX_CWD_PAGES_REWRITE_DIR}`);
+                rmSync(HYDRATION_DST_DIR, { recursive: true });
+                rmSync(BUNX_CWD_PAGES_REWRITE_DIR, { recursive: true });
             } catch (error) {}
 
             await rewritePagesModule();

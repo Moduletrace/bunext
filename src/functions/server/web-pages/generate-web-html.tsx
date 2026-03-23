@@ -61,9 +61,11 @@ export default async function genWebHTML({
         html += `        <link rel="stylesheet" href="/${bundledMap.css_path}" />\n`;
     }
 
-    html += `        <script>window.${ClientWindowPagePropsName} = ${
-        EJSON.stringify(pageProps || {}) || "{}"
-    }</script>\n`;
+    const serializedProps = (EJSON.stringify(pageProps || {}) || "{}").replace(
+        /<\//g,
+        "<\\/",
+    );
+    html += `        <script>window.${ClientWindowPagePropsName} = ${serializedProps}</script>\n`;
 
     if (bundledMap?.path) {
         const dev = isDevelopment();

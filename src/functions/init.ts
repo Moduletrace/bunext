@@ -1,6 +1,5 @@
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
 import grabDirNames from "../utils/grab-dir-names";
-import { execSync } from "child_process";
 import path from "path";
 import grabConfig from "./grab-config";
 import type { BunextConfig } from "../types";
@@ -9,8 +8,32 @@ export default async function () {
     const dirNames = grabDirNames();
     const is_dev = !Boolean(process.env.NODE_ENV == "production");
 
-    execSync(`rm -rf ${dirNames.BUNEXT_CACHE_DIR}`);
-    execSync(`rm -rf ${dirNames.BUNX_CWD_MODULE_CACHE_DIR}`);
+    rmSync(dirNames.BUNEXT_CACHE_DIR, {
+        recursive: true,
+        force: true,
+    });
+    rmSync(dirNames.BUNX_CWD_MODULE_CACHE_DIR, {
+        recursive: true,
+        force: true,
+    });
+
+    try {
+        const react_package_dir = path.join(
+            dirNames.ROOT_DIR,
+            "node_modules",
+            "react",
+        );
+        const react_dom_package_dir = path.join(
+            dirNames.ROOT_DIR,
+            "node_modules",
+            "react-dom",
+        );
+
+        if (dirNames.BUNX_ROOT_DIR !== dirNames.ROOT_DIR) {
+            rmSync(react_package_dir, { recursive: true });
+            rmSync(react_dom_package_dir, { recursive: true });
+        }
+    } catch (error) {}
 
     try {
         const package_json = await Bun.file(

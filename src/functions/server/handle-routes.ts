@@ -28,7 +28,7 @@ export default async function ({ req }: Params): Promise<Response> {
                 msg: errMsg,
             },
             {
-                status: 401,
+                status: 404,
                 headers: {
                     "Content-Type": "application/json",
                 },

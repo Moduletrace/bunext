@@ -11,7 +11,7 @@ export default async function serverPostBuildFn() {
         return;
     }
 
-    for (let i = 0; i < global.HMR_CONTROLLERS.length; i++) {
+    for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
         const controller = global.HMR_CONTROLLERS[i];
 
         if (!controller.target_map?.local_path) {

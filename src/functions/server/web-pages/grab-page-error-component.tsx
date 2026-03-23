@@ -1,7 +1,6 @@
 import type { FC } from "react";
 import grabDirNames from "../../../utils/grab-dir-names";
 import type {
-    BundlerCTXMap,
     BunextPageModule,
     BunxRouteParams,
     GrabPageComponentRes,
@@ -34,7 +33,7 @@ export default async function grabPageErrorComponent({
 
         const bundledMap = match?.filePath
             ? global.BUNDLER_CTX_MAP?.[match.filePath]
-            : ({} as BundlerCTXMap);
+            : undefined;
 
         const module: BunextPageModule = await import(filePath);
         const Component = module.default as FC<any>;
@@ -72,7 +71,7 @@ export default async function grabPageErrorComponent({
             component: <DefaultNotFound />,
             routeParams,
             module: { default: DefaultNotFound },
-            bundledMap: {} as BundlerCTXMap,
+            bundledMap: undefined,
             serverRes: {
                 responseOptions: {
                     status: is404 ? 404 : 500,

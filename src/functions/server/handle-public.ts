@@ -19,6 +19,10 @@ export default async function ({ req }: Params): Promise<Response> {
             url.pathname.replace(/^\/public/, ""),
         );
 
+        if (!file_path.startsWith(PUBLIC_DIR + path.sep)) {
+            return new Response("Forbidden", { status: 403 });
+        }
+
         if (!existsSync(file_path)) {
             return new Response(`Public File Doesn't Exist`, {
                 status: 404,
