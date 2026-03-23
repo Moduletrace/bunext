@@ -14,17 +14,17 @@ describe("grabDirNames", () => {
         expect(dirs.PUBLIC_DIR).toBe(path.join(cwd, "public"));
     });
 
-    it("nests HYDRATION_DST_DIR under public/__bunext/pages", () => {
+    it("nests HYDRATION_DST_DIR under .bunext/public/pages", () => {
         const dirs = grabDirNames();
         expect(dirs.HYDRATION_DST_DIR).toBe(
-            path.join(dirs.PUBLIC_DIR, "__bunext", "pages"),
+            path.join(dirs.BUNX_CWD_DIR, "public", "pages"),
         );
     });
 
-    it("nests BUNEXT_CACHE_DIR under public/__bunext/cache", () => {
+    it("nests BUNEXT_CACHE_DIR under .bunext/public/cache", () => {
         const dirs = grabDirNames();
         expect(dirs.BUNEXT_CACHE_DIR).toBe(
-            path.join(dirs.PUBLIC_DIR, "__bunext", "cache"),
+            path.join(dirs.BUNX_CWD_DIR, "public", "cache"),
         );
     });
 

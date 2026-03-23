@@ -7,22 +7,15 @@ import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-result";
 import { writeFileSync } from "fs";
-import recordArtifacts from "./record-artifacts";
 const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 let build_starts = 0;
 const MAX_BUILD_STARTS = 10;
-export default async function allPagesBundler(params) {
-    const { page_file_paths } = params || {};
+export default async function allPagesESBuildContextBundler(params) {
     const pages = grabAllPages({ exclude_api: true });
-    const target_pages = page_file_paths?.[0]
-        ? pages.filter((p) => page_file_paths.includes(p.local_path))
-        : pages;
-    if (!page_file_paths) {
-        global.PAGE_FILES = pages;
-    }
+    global.PAGE_FILES = pages;
     const virtualEntries = {};
     const dev = isDevelopment();
-    for (const page of target_pages) {
+    for (const page of pages) {
         const key = page.transformed_path;
         const txt = await grabClientHydrationScript({
             page_local_path: page.local_path,
@@ -61,12 +54,41 @@ export default async function allPagesBundler(params) {
                     process.exit(1);
                 }
             });
-            // build.onEnd((result) => {
-            // });
+            build.onEnd((result) => {
+                if (result.errors.length > 0) {
+                    for (const error of result.errors) {
+                        const loc = error.location;
+                        const location = loc
+                            ? ` ${loc.file}:${loc.line}:${loc.column}`
+                            : "";
+                        log.error(`[Build]${location} ${error.text}`);
+                    }
+                    return;
+                }
+                const artifacts = grabArtifactsFromBundledResults({
+                    pages,
+                    result,
+                });
+                if (artifacts?.[0] && artifacts.length > 0) {
+                    for (let i = 0; i < artifacts.length; i++) {
+                        const artifact = artifacts[i];
+                        if (artifact?.local_path && global.BUNDLER_CTX_MAP) {
+                            global.BUNDLER_CTX_MAP[artifact.local_path] =
+                                artifact;
+                        }
+                    }
+                    params?.post_build_fn?.({ artifacts });
+                    writeFileSync(HYDRATION_DST_DIR_MAP_JSON_FILE, JSON.stringify(artifacts, null, 4));
+                }
+                const elapsed = (performance.now() - buildStart).toFixed(0);
+                log.success(`[Built] in ${elapsed}ms`);
+                global.RECOMPILING = false;
+                build_starts = 0;
+            });
         },
     };
     const entryPoints = Object.keys(virtualEntries).map((k) => `virtual:${k}`);
-    const result = await esbuild.build({
+    const ctx = await esbuild.context({
         entryPoints,
         outdir: HYDRATION_DST_DIR,
         bundle: true,
@@ -81,7 +103,7 @@ export default async function allPagesBundler(params) {
         metafile: true,
         plugins: [tailwindEsbuildPlugin, virtualPlugin, artifactTracker],
         jsx: "automatic",
-        // splitting: true,
+        splitting: true,
         // logLevel: "silent",
         external: [
             "react",
@@ -90,25 +112,6 @@ export default async function allPagesBundler(params) {
             "react/jsx-runtime",
         ],
     });
-    if (result.errors.length > 0) {
-        for (const error of result.errors) {
-            const loc = error.location;
-            const location = loc
-                ? ` ${loc.file}:${loc.line}:${loc.column}`
-                : "";
-            log.error(`[Build]${location} ${error.text}`);
-        }
-        return;
-    }
-    const artifacts = grabArtifactsFromBundledResults({
-        pages: target_pages,
-        result,
-    });
-    if (artifacts?.[0]) {
-        await recordArtifacts({ artifacts });
-    }
-    const elapsed = (performance.now() - buildStart).toFixed(0);
-    log.success(`[Built] in ${elapsed}ms`);
-    global.RECOMPILING = false;
-    build_starts = 0;
+    await ctx.rebuild();
+    // global.BUNDLER_CTX = ctx;
 }

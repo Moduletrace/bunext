@@ -40,11 +40,11 @@ describe("handle-routes", () => {
         mock.restore();
     });
 
-    test("returns 401 for unknown route", async () => {
+    test("returns 404 for unknown route", async () => {
         const req = new Request("http://localhost/api/unknown");
         const res = await handleRoutes({ req });
-        
-        expect(res.status).toBe(401);
+
+        expect(res.status).toBe(404);
         const json = await res.json();
         expect(json.success).toBe(false);
         expect(json.msg).toContain("not found");

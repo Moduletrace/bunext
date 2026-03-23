@@ -8,6 +8,7 @@ import watcher from "./server/watcher";
 import { log } from "../utils/log";
 import cron from "./server/cron";
 import EJSON from "../utils/ejson";
+import allPagesBunBundler from "./bundler/all-pages-bun-bundler";
 const { PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 export default async function bunextInit() {
     global.ORA_SPINNER = ora();
@@ -25,12 +26,13 @@ export default async function bunextInit() {
     global.ROUTER = router;
     const is_dev = isDevelopment();
     if (is_dev) {
-        await allPagesBundler();
+        // await allPagesBundler();
+        await allPagesBunBundler();
         watcher();
     }
     else {
         const artifacts = EJSON.parse(readFileSync(HYDRATION_DST_DIR_MAP_JSON_FILE, "utf-8"));
-        if (!artifacts?.[0]) {
+        if (!artifacts) {
             log.error("Please build first.");
             process.exit(1);
         }

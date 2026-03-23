@@ -71,6 +71,7 @@ export default async function allPagesBunBundler(params?: Params) {
             chunk: "chunks/[hash].[ext]",
         },
         plugins: [tailwindcss],
+        // plugins: [tailwindcss, BunSkipNonBrowserPlugin],
         splitting: true,
         target,
         metafile: true,

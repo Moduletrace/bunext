@@ -8,6 +8,9 @@ export default async function ({ req }) {
         const is_dev = isDevelopment();
         const url = new URL(req.url);
         const file_path = path.join(PUBLIC_DIR, url.pathname.replace(/^\/public/, ""));
+        if (!file_path.startsWith(PUBLIC_DIR + path.sep)) {
+            return new Response("Forbidden", { status: 403 });
+        }
         if (!existsSync(file_path)) {
             return new Response(`Public File Doesn't Exist`, {
                 status: 404,

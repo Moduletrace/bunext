@@ -5,6 +5,7 @@ import grabConstants from "../../utils/grab-constants";
 import handleHmr from "./handle-hmr";
 import handlePublic from "./handle-public";
 import handleFiles from "./handle-files";
+import handleBunextPublicAssets from "./handle-bunext-public-assets";
 export default async function bunextRequestHandler({ req: initial_req, }) {
     const is_dev = isDevelopment();
     let req = initial_req.clone();
@@ -26,6 +27,9 @@ export default async function bunextRequestHandler({ req: initial_req, }) {
         }
         if (url.pathname === "/__hmr" && is_dev) {
             response = await handleHmr({ req });
+        }
+        else if (url.pathname.startsWith("/.bunext/public/pages")) {
+            response = await handleBunextPublicAssets({ req });
         }
         else if (url.pathname.startsWith("/api/")) {
             response = await handleRoutes({ req });

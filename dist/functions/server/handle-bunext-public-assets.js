@@ -2,13 +2,13 @@ import grabDirNames from "../../utils/grab-dir-names";
 import path from "path";
 import isDevelopment from "../../utils/is-development";
 import { existsSync } from "fs";
-const { PUBLIC_DIR } = grabDirNames();
+const { HYDRATION_DST_DIR } = grabDirNames();
 export default async function ({ req }) {
     try {
         const is_dev = isDevelopment();
         const url = new URL(req.url);
-        const file_path = path.join(PUBLIC_DIR, url.pathname);
-        if (!file_path.startsWith(PUBLIC_DIR + path.sep)) {
+        const file_path = path.join(HYDRATION_DST_DIR, url.pathname.replace(/\/\.bunext\/public\/pages\//, ""));
+        if (!file_path.startsWith(HYDRATION_DST_DIR + path.sep)) {
             return new Response("Forbidden", { status: 403 });
         }
         if (!existsSync(file_path)) {

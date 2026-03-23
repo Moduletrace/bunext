@@ -20,4 +20,5 @@ export default function grabDirNames(): {
     BUNEXT_CACHE_DIR: string;
     BUNX_CWD_MODULE_CACHE_DIR: string;
     BUNX_CWD_PAGES_REWRITE_DIR: string;
+    HYDRATION_DST_DIR_MAP_JSON_FILE_NAME: string;
 };

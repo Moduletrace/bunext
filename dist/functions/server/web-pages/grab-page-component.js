@@ -33,7 +33,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             // log.error(errMsg);
             throw new Error(errMsg);
         }
-        const bundledMap = global.BUNDLER_CTX_MAP[file_path];
+        const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
         if (!bundledMap?.path) {
             const errMsg = `No Bundled File Path for this request path!`;
             log.error(errMsg);

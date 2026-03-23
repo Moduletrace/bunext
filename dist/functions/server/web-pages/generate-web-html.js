@@ -7,6 +7,13 @@ import grabWebPageHydrationScript from "./grab-web-page-hydration-script";
 import grabWebMetaHTML from "./grab-web-meta-html";
 import { log } from "../../../utils/log";
 import { AppData } from "../../../data/app-data";
+import { readFileSync } from "fs";
+import path from "path";
+let _reactVersion = "19";
+try {
+    _reactVersion = JSON.parse(readFileSync(path.join(process.cwd(), "node_modules/react/package.json"), "utf-8")).version;
+}
+catch { }
 export default async function genWebHTML({ component, pageProps, bundledMap, head: Head, module, meta, routeParams, debug, }) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } = grabContants();
     if (debug) {
@@ -30,8 +37,21 @@ export default async function genWebHTML({ component, pageProps, bundledMap, hea
     if (bundledMap?.css_path) {
         html += `        <link rel="stylesheet" href="/${bundledMap.css_path}" />\n`;
     }
-    html += `        <script>window.${ClientWindowPagePropsName} = ${EJSON.stringify(pageProps || {}) || "{}"}</script>\n`;
+    const serializedProps = (EJSON.stringify(pageProps || {}) || "{}").replace(/<\//g, "<\\/");
+    html += `        <script>window.${ClientWindowPagePropsName} = ${serializedProps}</script>\n`;
     if (bundledMap?.path) {
+        const dev = isDevelopment();
+        const devSuffix = dev ? "?dev" : "";
+        const importMap = JSON.stringify({
+            imports: {
+                react: `https://esm.sh/react@${_reactVersion}${devSuffix}`,
+                "react-dom": `https://esm.sh/react-dom@${_reactVersion}${devSuffix}`,
+                "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client${devSuffix}`,
+                "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime${devSuffix}`,
+                "react/jsx-dev-runtime": `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime${devSuffix}`,
+            },
+        });
+        html += `        <script type="importmap">${importMap}</script>\n`;
         html += `        <script src="/${bundledMap.path}" type="module" id="${AppData["BunextClientHydrationScriptID"]}" async></script>\n`;
     }
     if (isDevelopment()) {

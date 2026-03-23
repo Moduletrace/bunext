@@ -3,6 +3,7 @@ import grabDirNames from "../utils/grab-dir-names";
 import path from "path";
 import grabConfig from "./grab-config";
 import type { BunextConfig } from "../types";
+import { log } from "../utils/log";
 
 export default async function () {
     const dirNames = grabDirNames();
@@ -29,7 +30,13 @@ export default async function () {
             "react-dom",
         );
 
-        if (dirNames.BUNX_ROOT_DIR !== dirNames.ROOT_DIR) {
+        if (
+            dirNames.ROOT_DIR.startsWith(dirNames.BUNX_ROOT_DIR) &&
+            !dirNames.ROOT_DIR.includes(`${dirNames.BUNX_ROOT_DIR}/test/`)
+        ) {
+            log.error(`Can't Run From this Directory => ${dirNames.ROOT_DIR}`);
+            process.exit(1);
+        } else {
             rmSync(react_package_dir, { recursive: true });
             rmSync(react_dom_package_dir, { recursive: true });
         }

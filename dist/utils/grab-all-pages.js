@@ -48,7 +48,13 @@ function grabPageDirRecursively({ page_dir }) {
             }
         }
     }
-    return pages_files;
+    return pages_files.sort((a, b) => {
+        if (a.url_path === "/index")
+            return -1;
+        if (b.url_path === "/index")
+            return 1;
+        return 0;
+    });
 }
 function grabPageFileObject({ file_path, }) {
     let url_path = file_path

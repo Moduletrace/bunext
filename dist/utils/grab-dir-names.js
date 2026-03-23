@@ -5,16 +5,17 @@ export default function grabDirNames() {
     const PAGES_DIR = path.join(SRC_DIR, "pages");
     const API_DIR = path.join(PAGES_DIR, "api");
     const PUBLIC_DIR = path.join(ROOT_DIR, "public");
-    const BUNEXT_PUBLIC_DIR = path.join(PUBLIC_DIR, "__bunext");
-    const HYDRATION_DST_DIR = path.join(BUNEXT_PUBLIC_DIR, "pages");
-    const BUNEXT_CACHE_DIR = path.join(BUNEXT_PUBLIC_DIR, "cache");
-    const HYDRATION_DST_DIR_MAP_JSON_FILE = path.join(HYDRATION_DST_DIR, "map.json");
     const CONFIG_FILE = path.join(ROOT_DIR, "bunext.config.ts");
     const BUNX_CWD_DIR = path.resolve(ROOT_DIR, ".bunext");
     const BUNX_CWD_MODULE_CACHE_DIR = path.resolve(BUNX_CWD_DIR, "module-cache");
     const BUNX_CWD_PAGES_REWRITE_DIR = path.resolve(BUNX_CWD_DIR, "pages");
     const BUNX_TMP_DIR = path.resolve(BUNX_CWD_DIR, ".tmp");
     const BUNX_HYDRATION_SRC_DIR = path.resolve(BUNX_CWD_DIR, "client", "hydration-src");
+    const BUNEXT_PUBLIC_DIR = path.join(BUNX_CWD_DIR, "public");
+    const HYDRATION_DST_DIR = path.join(BUNEXT_PUBLIC_DIR, "pages");
+    const BUNEXT_CACHE_DIR = path.join(BUNEXT_PUBLIC_DIR, "cache");
+    const HYDRATION_DST_DIR_MAP_JSON_FILE_NAME = "map.json";
+    const HYDRATION_DST_DIR_MAP_JSON_FILE = path.join(HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE_NAME);
     const BUNX_ROOT_DIR = path.resolve(__dirname, "../../");
     const BUNX_ROOT_SRC_DIR = path.join(BUNX_ROOT_DIR, "src");
     const BUNX_ROOT_PRESETS_DIR = path.join(BUNX_ROOT_SRC_DIR, "presets");
@@ -44,5 +45,6 @@ export default function grabDirNames() {
         BUNEXT_CACHE_DIR,
         BUNX_CWD_MODULE_CACHE_DIR,
         BUNX_CWD_PAGES_REWRITE_DIR,
+        HYDRATION_DST_DIR_MAP_JSON_FILE_NAME,
     };
 }

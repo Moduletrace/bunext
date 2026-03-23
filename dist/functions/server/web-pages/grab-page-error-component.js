@@ -11,8 +11,8 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
         const match = router.match(errorRoute);
         const filePath = match?.filePath || presetComponent;
         const bundledMap = match?.filePath
-            ? global.BUNDLER_CTX_MAP[match.filePath]
-            : {};
+            ? global.BUNDLER_CTX_MAP?.[match.filePath]
+            : undefined;
         const module = await import(filePath);
         const Component = module.default;
         const component = _jsx(Component, { children: _jsx("span", { children: error.message }) });
@@ -41,7 +41,7 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
             component: _jsx(DefaultNotFound, {}),
             routeParams,
             module: { default: DefaultNotFound },
-            bundledMap: {},
+            bundledMap: undefined,
             serverRes: {
                 responseOptions: {
                     status: is404 ? 404 : 500,

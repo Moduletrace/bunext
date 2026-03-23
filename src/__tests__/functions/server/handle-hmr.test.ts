@@ -10,9 +10,9 @@ describe("handle-hmr", () => {
             }
         } as any;
         global.HMR_CONTROLLERS = [];
-        global.BUNDLER_CTX_MAP = [
-            { local_path: "/test-file" } as any
-        ];
+        global.BUNDLER_CTX_MAP = {
+            "/test-file": { local_path: "/test-file" } as any,
+        };
     });
 
     afterEach(() => {

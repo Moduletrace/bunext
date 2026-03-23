@@ -11,7 +11,7 @@ export default async function grabClientHydrationScript({ page_local_path, }) {
     const root_component_path = path.join(PAGES_DIR, `${AppNames["RootPagesComponentName"]}.tsx`);
     const does_root_exist = existsSync(root_component_path);
     let txt = ``;
-    txt += `import { hydrateRoot, createElement } from "react-dom/client";\n`;
+    txt += `import { hydrateRoot } from "react-dom/client";\n`;
     if (does_root_exist) {
         txt += `import Root from "${root_component_path}";\n`;
     }

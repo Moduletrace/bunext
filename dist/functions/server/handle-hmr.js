@@ -2,7 +2,7 @@ export default async function ({ req }) {
     const referer_url = new URL(req.headers.get("referer") || "");
     const match = global.ROUTER.match(referer_url.pathname);
     const target_map = match?.filePath
-        ? global.BUNDLER_CTX_MAP[match.filePath]
+        ? global.BUNDLER_CTX_MAP?.[match.filePath]
         : undefined;
     let controller;
     let heartbeat;

@@ -6,7 +6,6 @@ import { log } from "../../utils/log";
 import rewritePagesModule from "../../utils/rewrite-pages-module";
 const { ROOT_DIR } = grabDirNames();
 export default async function watcher() {
-    await Bun.sleep(1000);
     const pages_src_watcher = watch(ROOT_DIR, {
         recursive: true,
         persistent: true,
@@ -64,7 +63,9 @@ async function fullRebuild(params) {
         const { msg } = params || {};
         global.RECOMPILING = true;
         const target_file_paths = global.HMR_CONTROLLERS.map((hmr) => hmr.target_map?.local_path).filter((f) => typeof f == "string");
-        await rewritePagesModule({ page_file_path: target_file_paths });
+        await rewritePagesModule({
+            page_file_path: target_file_paths,
+        });
         if (msg) {
             log.watch(msg);
         }
