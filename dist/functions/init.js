@@ -14,20 +14,28 @@ export default async function () {
         recursive: true,
         force: true,
     });
-    try {
-        const react_package_dir = path.join(dirNames.ROOT_DIR, "node_modules", "react");
-        const react_dom_package_dir = path.join(dirNames.ROOT_DIR, "node_modules", "react-dom");
-        if (dirNames.ROOT_DIR.startsWith(dirNames.BUNX_ROOT_DIR) &&
-            !dirNames.ROOT_DIR.includes(`${dirNames.BUNX_ROOT_DIR}/test/`)) {
-            log.error(`Can't Run From this Directory => ${dirNames.ROOT_DIR}`);
-            process.exit(1);
-        }
-        else {
-            rmSync(react_package_dir, { recursive: true });
-            rmSync(react_dom_package_dir, { recursive: true });
-        }
-    }
-    catch (error) { }
+    // try {
+    //     const react_package_dir = path.join(
+    //         dirNames.ROOT_DIR,
+    //         "node_modules",
+    //         "react",
+    //     );
+    //     const react_dom_package_dir = path.join(
+    //         dirNames.ROOT_DIR,
+    //         "node_modules",
+    //         "react-dom",
+    //     );
+    //     if (
+    //         dirNames.ROOT_DIR.startsWith(dirNames.BUNX_ROOT_DIR) &&
+    //         !dirNames.ROOT_DIR.includes(`${dirNames.BUNX_ROOT_DIR}/test/`)
+    //     ) {
+    //         log.error(`Can't Run From this Directory => ${dirNames.ROOT_DIR}`);
+    //         process.exit(1);
+    //     } else {
+    //         rmSync(react_package_dir, { recursive: true });
+    //         rmSync(react_dom_package_dir, { recursive: true });
+    //     }
+    // } catch (error) {}
     try {
         const package_json = await Bun.file(path.resolve(__dirname, "../../package.json")).json();
         const current_version = package_json.version;
