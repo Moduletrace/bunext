@@ -18,29 +18,14 @@ export default async function () {
         force: true,
     });
 
-    // try {
-    //     const react_package_dir = path.join(
-    //         dirNames.ROOT_DIR,
-    //         "node_modules",
-    //         "react",
-    //     );
-    //     const react_dom_package_dir = path.join(
-    //         dirNames.ROOT_DIR,
-    //         "node_modules",
-    //         "react-dom",
-    //     );
-
-    //     if (
-    //         dirNames.ROOT_DIR.startsWith(dirNames.BUNX_ROOT_DIR) &&
-    //         !dirNames.ROOT_DIR.includes(`${dirNames.BUNX_ROOT_DIR}/test/`)
-    //     ) {
-    //         log.error(`Can't Run From this Directory => ${dirNames.ROOT_DIR}`);
-    //         process.exit(1);
-    //     } else {
-    //         rmSync(react_package_dir, { recursive: true });
-    //         rmSync(react_dom_package_dir, { recursive: true });
-    //     }
-    // } catch (error) {}
+    if (
+        dirNames.ROOT_DIR.startsWith(dirNames.BUNX_ROOT_DIR) &&
+        !dirNames.ROOT_DIR.includes(`${dirNames.BUNX_ROOT_DIR}/test/`)
+    ) {
+        log.error(`Can't Run From this Directory => ${dirNames.ROOT_DIR}`);
+        process.exit(1);
+    } else {
+    }
 
     try {
         const package_json = await Bun.file(
