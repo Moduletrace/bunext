@@ -64,7 +64,6 @@ export default async function allPagesBundler(params) {
                 if (build_starts == MAX_BUILD_STARTS) {
                     const error_msg = `Build Failed. Please check all your components and imports.`;
                     log.error(error_msg);
-                    process.exit(1);
                 }
             });
             // build.onEnd((result) => {

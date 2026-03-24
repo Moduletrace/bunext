@@ -1,31 +1,47 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import grabDirNames from "../../../utils/grab-dir-names";
-export default async function grabPageErrorComponent({ error, routeParams, is404, }) {
+import grabPageModules from "./grab-page-modules";
+import _ from "lodash";
+export default async function grabPageErrorComponent({ error, routeParams, is404, url, }) {
     const router = global.ROUTER;
     const { BUNX_ROOT_500_PRESET_COMPONENT, BUNX_ROOT_404_PRESET_COMPONENT } = grabDirNames();
     const errorRoute = is404 ? "/404" : "/500";
     const presetComponent = is404
         ? BUNX_ROOT_404_PRESET_COMPONENT
         : BUNX_ROOT_500_PRESET_COMPONENT;
+    const default_server_res = {
+        responseOptions: {
+            status: is404 ? 404 : 500,
+        },
+    };
     try {
         const match = router.match(errorRoute);
-        const filePath = match?.filePath || presetComponent;
-        const bundledMap = match?.filePath
-            ? global.BUNDLER_CTX_MAP?.[match.filePath]
-            : undefined;
-        const module = await import(filePath);
-        const Component = module.default;
-        const component = _jsx(Component, { children: _jsx("span", { children: error.message }) });
+        if (!match?.filePath) {
+            const default_module = await import(presetComponent);
+            const Component = default_module.default;
+            const default_jsx = (_jsx(Component, { children: _jsx("span", { children: error.message }) }));
+            return {
+                component: default_jsx,
+                module: default_module,
+                routeParams,
+                serverRes: default_server_res,
+            };
+        }
+        const file_path = match.filePath;
+        const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
+        const { component, module, serverRes, root_module } = await grabPageModules({
+            file_path: file_path,
+            query: match?.query,
+            routeParams,
+            url,
+        });
         return {
             component,
             routeParams,
             module,
             bundledMap,
-            serverRes: {
-                responseOptions: {
-                    status: is404 ? 404 : 500,
-                },
-            },
+            serverRes: _.merge(serverRes, default_server_res),
+            root_module,
         };
     }
     catch {
@@ -41,12 +57,7 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
             component: _jsx(DefaultNotFound, {}),
             routeParams,
             module: { default: DefaultNotFound },
-            bundledMap: undefined,
-            serverRes: {
-                responseOptions: {
-                    status: is404 ? 404 : 500,
-                },
-            },
+            serverRes: default_server_res,
         };
     }
 }

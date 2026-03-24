@@ -67,10 +67,9 @@ function grabPageFileObject({ file_path, }) {
     let file_name = url_path.split("/").pop();
     if (!file_name)
         return;
-    const transformed_path = pagePathTransform({ page_path: file_path });
+    // const transformed_path = pagePathTransform({ page_path: file_path });
     return {
         local_path: file_path,
-        transformed_path,
         url_path,
         file_name,
     };

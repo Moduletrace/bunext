@@ -13,6 +13,9 @@ export default async function watcherEsbuildCTX() {
     }, async (event, filename) => {
         if (!filename)
             return;
+        if (filename.match(/^\.\w+/)) {
+            return;
+        }
         const full_file_path = path.join(ROOT_DIR, filename);
         if (full_file_path.match(/\/styles$/)) {
             global.RECOMPILING = true;
@@ -38,6 +41,12 @@ export default async function watcherEsbuildCTX() {
                     return;
                 global.RECOMPILING = true;
                 await global.BUNDLER_CTX?.rebuild();
+                if (filename.match(/(404|500)\.tsx?/)) {
+                    for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
+                        const controller = global.HMR_CONTROLLERS[i];
+                        controller?.controller?.enqueue(`event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`);
+                    }
+                }
             }
             return;
         }
@@ -69,15 +78,13 @@ async function fullRebuild(params) {
         global.ROUTER.reload();
         await global.BUNDLER_CTX?.dispose();
         global.BUNDLER_CTX = undefined;
-        await allPagesESBuildContextBundler({
+        global.BUNDLER_CTX_MAP = {};
+        allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
         });
     }
     catch (error) {
         log.error(error);
-    }
-    finally {
-        global.RECOMPILING = false;
     }
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();

@@ -3,6 +3,7 @@ type Params = {
     error?: any;
     routeParams?: BunxRouteParams;
     is404?: boolean;
+    url?: URL;
 };
-export default function grabPageErrorComponent({ error, routeParams, is404, }: Params): Promise<GrabPageComponentRes>;
+export default function grabPageErrorComponent({ error, routeParams, is404, url, }: Params): Promise<GrabPageComponentRes>;
 export {};

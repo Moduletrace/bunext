@@ -13,6 +13,22 @@ export default async function grabClientHydrationScript({ page_local_path, }) {
     // const target_root_path = root_file_path
     //     ? pagePathTransform({ page_path: root_file_path })
     //     : undefined;
+    if (!existsSync(page_local_path)) {
+        return undefined;
+    }
+    if (root_file_path) {
+        if (!existsSync(root_file_path)) {
+            return undefined;
+        }
+        const root_content = await Bun.file(root_file_path).text();
+        if (!root_content.match(/^export default/m)) {
+            return undefined;
+        }
+    }
+    const page_content = await Bun.file(page_local_path).text();
+    if (!page_content.match(/^export default/m)) {
+        return undefined;
+    }
     let txt = ``;
     txt += `import { hydrateRoot } from "react-dom/client";\n`;
     if (root_file_path) {

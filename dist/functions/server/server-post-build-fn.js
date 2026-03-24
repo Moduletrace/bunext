@@ -9,7 +9,7 @@ export default async function serverPostBuildFn() {
     }
     for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
         const controller = global.HMR_CONTROLLERS[i];
-        if (!controller.target_map?.local_path) {
+        if (!controller?.target_map?.local_path) {
             continue;
         }
         const target_artifact = global.BUNDLER_CTX_MAP[controller.target_map.local_path];

@@ -2,81 +2,30 @@ import * as esbuild from "esbuild";
 import grabAllPages from "../../utils/grab-all-pages";
 import grabDirNames from "../../utils/grab-dir-names";
 import isDevelopment from "../../utils/is-development";
-import { log } from "../../utils/log";
 import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
 import grabClientHydrationScript from "./grab-client-hydration-script";
-import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-result";
-import { writeFileSync } from "fs";
 import path from "path";
-const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE, BUNX_HYDRATION_SRC_DIR, } = grabDirNames();
-let build_starts = 0;
-const MAX_BUILD_STARTS = 10;
+import virtualFilesPlugin from "./plugins/virtual-files-plugin";
+import esbuildCTXArtifactTracker from "./plugins/esbuild-ctx-artifact-tracker";
+const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR } = grabDirNames();
 export default async function allPagesESBuildContextBundler(params) {
+    // return await allPagesESBuildContextBundlerFiles(params);
     const pages = grabAllPages({ exclude_api: true });
     global.PAGE_FILES = pages;
     const dev = isDevelopment();
     const entryToPage = new Map();
     for (const page of pages) {
-        const txt = await grabClientHydrationScript({
+        const tsx = await grabClientHydrationScript({
             page_local_path: page.local_path,
         });
-        if (!txt)
+        if (!tsx)
             continue;
         const entryFile = path.join(BUNX_HYDRATION_SRC_DIR, `${page.url_path}.tsx`);
-        await Bun.write(entryFile, txt, { createPath: true });
-        entryToPage.set(path.resolve(entryFile), page);
+        // await Bun.write(entryFile, txt, { createPath: true });
+        entryToPage.set(entryFile, { ...page, tsx });
     }
-    let buildStart = 0;
-    const artifactTracker = {
-        name: "artifact-tracker",
-        setup(build) {
-            build.onStart(() => {
-                build_starts++;
-                buildStart = performance.now();
-                if (build_starts == MAX_BUILD_STARTS) {
-                    const error_msg = `Build Failed. Please check all your components and imports.`;
-                    log.error(error_msg);
-                    process.exit(1);
-                }
-            });
-            build.onEnd((result) => {
-                if (result.errors.length > 0) {
-                    for (const error of result.errors) {
-                        const loc = error.location;
-                        const location = loc
-                            ? ` ${loc.file}:${loc.line}:${loc.column}`
-                            : "";
-                        log.error(`[Build]${location} ${error.text}`);
-                    }
-                    return;
-                }
-                const artifacts = grabArtifactsFromBundledResults({
-                    result,
-                    entryToPage,
-                });
-                if (artifacts?.[0] && artifacts.length > 0) {
-                    for (let i = 0; i < artifacts.length; i++) {
-                        const artifact = artifacts[i];
-                        if (artifact?.local_path && global.BUNDLER_CTX_MAP) {
-                            global.BUNDLER_CTX_MAP[artifact.local_path] =
-                                artifact;
-                        }
-                    }
-                    params?.post_build_fn?.({ artifacts });
-                    // writeFileSync(
-                    //     HYDRATION_DST_DIR_MAP_JSON_FILE,
-                    //     JSON.stringify(artifacts, null, 4),
-                    // );
-                }
-                const elapsed = (performance.now() - buildStart).toFixed(0);
-                log.success(`[Built] in ${elapsed}ms`);
-                global.RECOMPILING = false;
-                build_starts = 0;
-            });
-        },
-    };
-    const entryPoints = [...entryToPage.keys()];
-    const ctx = await esbuild.context({
+    const entryPoints = [...entryToPage.keys()].map((e) => `hydration-virtual:${e}`);
+    global.BUNDLER_CTX = await esbuild.context({
         entryPoints,
         outdir: HYDRATION_DST_DIR,
         bundle: true,
@@ -89,10 +38,21 @@ export default async function allPagesESBuildContextBundler(params) {
         },
         entryNames: "[dir]/[hash]",
         metafile: true,
-        plugins: [tailwindEsbuildPlugin, artifactTracker],
+        plugins: [
+            tailwindEsbuildPlugin,
+            virtualFilesPlugin({
+                entryToPage,
+            }),
+            esbuildCTXArtifactTracker({
+                entryToPage,
+                post_build_fn: params?.post_build_fn,
+            }),
+        ],
         jsx: "automatic",
         splitting: true,
+        logLevel: "silent",
         // logLevel: "silent",
+        // logLevel: dev ? "error" : "silent",
         external: [
             "react",
             "react-dom",
@@ -100,9 +60,5 @@ export default async function allPagesESBuildContextBundler(params) {
             "react/jsx-runtime",
         ],
     });
-    await ctx.rebuild();
-    // if (params?.watch) {
-    //     await ctx.watch();
-    // }
-    global.BUNDLER_CTX = ctx;
+    await global.BUNDLER_CTX.rebuild();
 }
