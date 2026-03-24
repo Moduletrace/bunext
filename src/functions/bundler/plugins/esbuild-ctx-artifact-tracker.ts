@@ -31,7 +31,7 @@ export default function esbuildCTXArtifactTracker({
                 if (build_starts == MAX_BUILD_STARTS) {
                     const error_msg = `Build Failed. Please check all your components and imports.`;
                     log.error(error_msg);
-                    global.BUNDLER_CTX?.cancel();
+                    global.RECOMPILING = false;
                 }
             });
 
@@ -51,6 +51,8 @@ export default function esbuildCTXArtifactTracker({
                     result,
                     entryToPage,
                 });
+
+                // console.log("artifacts", artifacts);
 
                 if (artifacts?.[0] && artifacts.length > 0) {
                     for (let i = 0; i < artifacts.length; i++) {

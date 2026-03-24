@@ -2,6 +2,7 @@ import path from "path";
 import * as esbuild from "esbuild";
 import type { BundlerCTXMap, PageFiles } from "../../types";
 import grabDirNames from "../../utils/grab-dir-names";
+import { log } from "../../utils/log";
 
 const { ROOT_DIR } = grabDirNames();
 
@@ -26,7 +27,14 @@ export default function grabArtifactsFromBundledResults({
     )
         .filter(([, meta]) => meta.entryPoint)
         .map(([outputPath, meta]) => {
-            const entrypoint = path.join(ROOT_DIR, meta.entryPoint || "");
+            const entrypoint = meta.entryPoint?.match(/^hydration-virtual:/)
+                ? meta.entryPoint?.replace(/^hydration-virtual:/, "")
+                : meta.entryPoint
+                  ? path.join(ROOT_DIR, meta.entryPoint)
+                  : "";
+
+            // const entrypoint = path.join(ROOT_DIR, meta.entryPoint || "");
+            // console.log("entrypoint", entrypoint);
 
             const target_page = entryToPage.get(entrypoint);
 
@@ -42,7 +50,7 @@ export default function grabArtifactsFromBundledResults({
                 type: outputPath.endsWith(".css")
                     ? "text/css"
                     : "text/javascript",
-                entrypoint,
+                entrypoint: meta.entryPoint,
                 css_path: meta.cssBundle,
                 file_name,
                 local_path,

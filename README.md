@@ -1,6 +1,6 @@
 # Bunext
 
-A server-rendering framework for React, built entirely on [Bun](https://bun.sh). Bunext handles file-system routing, SSR, HMR, and client hydration — using `Bun.build` to bundle client assets and `Bun.serve` as the HTTP server.
+A server-rendering framework for React, built entirely on [Bun](https://bun.sh). Bunext handles file-system routing, SSR, HMR, and client hydration — using ESBuild to bundle client assets and `Bun.serve` as the HTTP server.
 
 ## Philosophy
 
@@ -8,7 +8,7 @@ Bunext is focused on **server-side rendering and processing**. Every page is ren
 
 The goal is a framework that is:
 
-- Fast — Bun's runtime speed and Bun.build's bundling make the full dev loop snappy
+- Fast — Bun's runtime speed and ESBuild's bundling make the full dev loop snappy
 - Transparent — the entire request pipeline is readable and debugable
 - Standard — server functions and API handlers use native Web APIs (`Request`, `Response`, `URL`) with no custom wrappers
 
@@ -924,7 +924,7 @@ Running `bunext dev`:
 1. Loads `bunext.config.ts` and sets `development: true`.
 2. Initializes directories (`.bunext/`, `public/pages/`).
 3. Creates a `Bun.FileSystemRouter` pointed at `src/pages/`.
-4. Starts `Bun.build` in **watch mode** — it will automatically rebuild when file content changes.
+4. Creates an ESBuild context and performs the initial build. File-change rebuilds are triggered manually by the FS watcher.
 5. Starts a file-system watcher on `src/` — when a file is created or deleted (a "rename" event), it triggers a full bundler rebuild to update the entry points.
 6. Waits for the first successful bundle.
 7. Starts `Bun.serve()`.
@@ -934,7 +934,7 @@ Running `bunext dev`:
 Running `bunext build`:
 
 1. Sets `NODE_ENV=production`.
-2. Runs `Bun.build` once with minification enabled.
+2. Runs ESBuild once with minification enabled.
 3. Writes all bundled artifacts to `.bunext/public/pages/` and the artifact map to `.bunext/public/pages/map.json`.
 4. Exits.
 
@@ -947,11 +947,13 @@ Running `bunext start`:
 
 ### Bundler
 
-The bundler uses `Bun.build` with the `bun-plugin-tailwind` plugin. For each page, a client hydration entry point is generated and written as a real temporary file under `.bunext/hydration-src/`. Each entry imports the page component and calls `hydrateRoot()` against the server-rendered DOM node. If `src/pages/__root.tsx` exists, the page is wrapped in the root layout.
+The bundler uses **ESBuild** with a virtual namespace plugin that generates in-memory hydration entry points for each page — no temporary files are written to disk. Each virtual entry imports the page component and calls `hydrateRoot()` against the server-rendered DOM node. If `src/pages/__root.tsx` exists, the page is wrapped in the root layout. Tailwind CSS is processed via a dedicated ESBuild plugin.
 
-React is loaded externally — `react`, `react-dom`, `react-dom/client`, and `react/jsx-runtime` are all marked as external in the `Bun.build` config. The correct React version is resolved from the framework's own `node_modules` at startup and injected into every HTML page via a `<script type="importmap">` pointing at `esm.sh`. This guarantees a single shared React instance across all page bundles and HMR updates regardless of project size.
+In development, an `esbuild.context()` is created once and rebuilt incrementally whenever the FS watcher detects a file change. In production, a single `esbuild.build()` call runs with minification enabled.
 
-After each build, output metadata from `Bun.build`'s metafile is used to map each output file back to its source page, producing a `BundlerCTXMap[]`. This map is stored in `global.BUNDLER_CTX_MAP` and written to `.bunext/public/pages/map.json`.
+React is loaded externally — `react`, `react-dom`, `react-dom/client`, and `react/jsx-runtime` are all marked as external in the ESBuild config. The correct React version is resolved from the framework's own `node_modules` at startup and injected into every HTML page via a `<script type="importmap">` pointing at `esm.sh`. This guarantees a single shared React instance across all page bundles and HMR updates regardless of project size.
+
+After each build, ESBuild's metafile is used to map each output file back to its source page, producing a `BundlerCTXMap[]`. This map is stored in `global.BUNDLER_CTX_MAP` and written to `.bunext/public/pages/map.json`.
 
 Output files are named `[hash].[ext]` so filenames change when content changes, enabling cache-busting.
 

@@ -52,6 +52,8 @@ export default async function watcherEsbuildCTX() {
                     if (global.RECOMPILING) return;
                     global.RECOMPILING = true;
 
+                    log.info(`Rebuilding CTX ...`);
+
                     await global.BUNDLER_CTX?.rebuild();
 
                     if (filename.match(/(404|500)\.tsx?/)) {
@@ -105,12 +107,18 @@ async function fullRebuild(params?: { msg?: string }) {
             log.watch(msg);
         }
 
+        log.info(`Reloading Router ...`);
+
         global.ROUTER.reload();
 
+        log.info(`Disposing Bundler CTX ...`);
         await global.BUNDLER_CTX?.dispose();
         global.BUNDLER_CTX = undefined;
 
-        await allPagesESBuildContextBundler({
+        global.BUNDLER_CTX_MAP = {};
+
+        log.info(`Rebuilding Modules ...`);
+        allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
         });
     } catch (error: any) {
@@ -120,6 +128,7 @@ async function fullRebuild(params?: { msg?: string }) {
     }
 
     if (global.PAGES_SRC_WATCHER) {
+        log.info(`Restarting watcher ...`);
         global.PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();
     }

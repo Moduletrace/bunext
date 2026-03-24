@@ -6,7 +6,6 @@ import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import type { PageFiles } from "../../types";
 import path from "path";
-import virtualFilesPlugin from "./plugins/virtual-files-plugin";
 import esbuildCTXArtifactTracker from "./plugins/esbuild-ctx-artifact-tracker";
 
 const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR } = grabDirNames();
@@ -15,9 +14,9 @@ type Params = {
     post_build_fn?: (params: { artifacts: any[] }) => Promise<void> | void;
 };
 
-export default async function allPagesESBuildContextBundler(params?: Params) {
-    // return await allPagesESBuildContextBundlerFiles(params);
-
+export default async function allPagesESBuildContextBundlerFiles(
+    params?: Params,
+) {
     const pages = grabAllPages({ exclude_api: true });
 
     global.PAGE_FILES = pages;
@@ -37,15 +36,13 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
             `${page.url_path}.tsx`,
         );
 
-        // await Bun.write(entryFile, txt, { createPath: true });
+        await Bun.write(entryFile, tsx, { createPath: true });
         entryToPage.set(entryFile, { ...page, tsx });
     }
 
-    const entryPoints = [...entryToPage.keys()].map(
-        (e) => `hydration-virtual:${e}`,
-    );
+    const entryPoints = [...entryToPage.keys()];
 
-    global.BUNDLER_CTX = await esbuild.context({
+    const ctx = await esbuild.context({
         entryPoints,
         outdir: HYDRATION_DST_DIR,
         bundle: true,
@@ -62,9 +59,6 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
         metafile: true,
         plugins: [
             tailwindEsbuildPlugin,
-            virtualFilesPlugin({
-                entryToPage,
-            }),
             esbuildCTXArtifactTracker({
                 entryToPage,
                 post_build_fn: params?.post_build_fn,
@@ -73,8 +67,6 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
         jsx: "automatic",
         splitting: true,
         logLevel: "silent",
-        // logLevel: "silent",
-        // logLevel: dev ? "error" : "silent",
         external: [
             "react",
             "react-dom",
@@ -83,5 +75,7 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
         ],
     });
 
-    await global.BUNDLER_CTX.rebuild();
+    await ctx.rebuild();
+
+    global.BUNDLER_CTX = ctx;
 }
