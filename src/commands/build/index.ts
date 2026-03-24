@@ -6,6 +6,7 @@ import allPagesBunBundler from "../../functions/bundler/all-pages-bun-bundler";
 import grabDirNames from "../../utils/grab-dir-names";
 import { rmSync } from "fs";
 import allPagesBundler from "../../functions/bundler/all-pages-bundler";
+import allPagesESBuildContextBundler from "../../functions/bundler/all-pages-esbuild-context-bundler";
 
 const { HYDRATION_DST_DIR, BUNX_CWD_PAGES_REWRITE_DIR } = grabDirNames();
 
@@ -26,8 +27,11 @@ export default function () {
             log.banner();
             log.build("Building Project ...");
 
-            await allPagesBunBundler();
+            // await allPagesBunBundler();
 
             // await allPagesBundler();
+            await allPagesESBuildContextBundler();
+
+            process.exit();
         });
 }

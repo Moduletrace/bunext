@@ -1,10 +1,10 @@
 import { watch, existsSync } from "fs";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
-import rebuildBundler from "./rebuild-bundler";
 import { log } from "../../utils/log";
+import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
 const { ROOT_DIR } = grabDirNames();
-export default async function watcher() {
+export default async function watcherEsbuildCTX() {
     const pages_src_watcher = watch(ROOT_DIR, {
         recursive: true,
         persistent: true,
@@ -35,7 +35,7 @@ export default async function watcher() {
                 if (global.RECOMPILING)
                     return;
                 global.RECOMPILING = true;
-                await fullRebuild();
+                await global.BUNDLER_CTX?.rebuild();
             }
             return;
         }
@@ -61,11 +61,13 @@ async function fullRebuild(params) {
     try {
         const { msg } = params || {};
         global.RECOMPILING = true;
-        const target_file_paths = global.HMR_CONTROLLERS.map((hmr) => hmr.target_map?.local_path).filter((f) => typeof f == "string");
         if (msg) {
             log.watch(msg);
         }
-        await rebuildBundler({ target_file_paths });
+        global.ROUTER.reload();
+        await global.BUNDLER_CTX?.dispose();
+        global.BUNDLER_CTX = undefined;
+        await allPagesESBuildContextBundler();
     }
     catch (error) {
         log.error(error);
@@ -75,6 +77,6 @@ async function fullRebuild(params) {
     }
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();
-        watcher();
+        watcherEsbuildCTX();
     }
 }

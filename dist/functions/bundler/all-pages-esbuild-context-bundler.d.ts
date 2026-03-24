@@ -1,7 +1,3 @@
-type Params = {
-    post_build_fn?: (params: {
-        artifacts: any[];
-    }) => Promise<void> | void;
-};
+type Params = {};
 export default function allPagesESBuildContextBundler(params?: Params): Promise<void>;
 export {};

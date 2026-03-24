@@ -1,15 +1,18 @@
 import path from "path";
 import * as esbuild from "esbuild";
 import type { BundlerCTXMap, PageFiles } from "../../types";
+import grabDirNames from "../../utils/grab-dir-names";
+
+const { ROOT_DIR } = grabDirNames();
 
 type Params = {
     result: esbuild.BuildResult<esbuild.BuildOptions>;
-    pages: PageFiles[];
+    entryToPage: Map<string, PageFiles>;
 };
 
 export default function grabArtifactsFromBundledResults({
     result,
-    pages,
+    entryToPage,
 }: Params) {
     if (result.errors.length > 0) return;
 
@@ -18,9 +21,9 @@ export default function grabArtifactsFromBundledResults({
     )
         .filter(([, meta]) => meta.entryPoint)
         .map(([outputPath, meta]) => {
-            const target_page = pages.find((p) => {
-                return meta.entryPoint === `virtual:${p.transformed_path}`;
-            });
+            const entrypoint = path.join(ROOT_DIR, meta.entryPoint || "");
+
+            const target_page = entryToPage.get(entrypoint);
 
             if (!target_page || !meta.entryPoint) {
                 return undefined;
@@ -29,16 +32,14 @@ export default function grabArtifactsFromBundledResults({
             const { file_name, local_path, url_path, transformed_path } =
                 target_page;
 
-            const cssPath = meta.cssBundle || undefined;
-
             return {
                 path: outputPath,
                 hash: path.basename(outputPath, path.extname(outputPath)),
                 type: outputPath.endsWith(".css")
                     ? "text/css"
                     : "text/javascript",
-                entrypoint: meta.entryPoint,
-                css_path: cssPath,
+                entrypoint,
+                css_path: meta.cssBundle,
                 file_name,
                 local_path,
                 url_path,

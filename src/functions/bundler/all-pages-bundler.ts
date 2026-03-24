@@ -166,14 +166,13 @@ export default async function allPagesBundler(params?: Params) {
         return;
     }
 
-    const artifacts = grabArtifactsFromBundledResults({
-        pages: target_pages,
-        result,
-    });
+    // const artifacts = grabArtifactsFromBundledResults({
+    //     result,
+    // });
 
-    if (artifacts?.[0]) {
-        await recordArtifacts({ artifacts });
-    }
+    // if (artifacts?.[0]) {
+    //     await recordArtifacts({ artifacts });
+    // }
 
     const elapsed = (performance.now() - buildStart).toFixed(0);
     log.success(`[Built] in ${elapsed}ms`);

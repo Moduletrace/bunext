@@ -7,14 +7,21 @@ import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-result";
 import { writeFileSync } from "fs";
+import type { PageFiles } from "../../types";
+import path from "path";
 
-const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
+const {
+    HYDRATION_DST_DIR,
+    HYDRATION_DST_DIR_MAP_JSON_FILE,
+    BUNX_HYDRATION_SRC_DIR,
+} = grabDirNames();
 
 let build_starts = 0;
 const MAX_BUILD_STARTS = 10;
 
 type Params = {
-    post_build_fn?: (params: { artifacts: any[] }) => Promise<void> | void;
+    // post_build_fn?: (params: { artifacts: any[] }) => Promise<void> | void;
+    // watch?: boolean;
 };
 
 export default async function allPagesESBuildContextBundler(params?: Params) {
@@ -22,40 +29,23 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
 
     global.PAGE_FILES = pages;
 
-    const virtualEntries: Record<string, string> = {};
     const dev = isDevelopment();
 
-    for (const page of pages) {
-        const key = page.transformed_path;
+    const entryToPage = new Map<string, PageFiles>();
 
+    for (const page of pages) {
         const txt = await grabClientHydrationScript({
             page_local_path: page.local_path,
         });
-
-        // if (page.url_path == "/index") {
-        //     console.log("txt", txt);
-        // }
-
         if (!txt) continue;
 
-        virtualEntries[key] = txt;
+        const entryFile = path.join(
+            BUNX_HYDRATION_SRC_DIR,
+            `${page.url_path}.tsx`,
+        );
+        await Bun.write(entryFile, txt, { createPath: true });
+        entryToPage.set(path.resolve(entryFile), page);
     }
-
-    const virtualPlugin: esbuild.Plugin = {
-        name: "virtual-entrypoints",
-        setup(build) {
-            build.onResolve({ filter: /^virtual:/ }, (args) => ({
-                path: args.path.replace("virtual:", ""),
-                namespace: "virtual",
-            }));
-
-            build.onLoad({ filter: /.*/, namespace: "virtual" }, (args) => ({
-                contents: virtualEntries[args.path],
-                loader: "tsx",
-                resolveDir: process.cwd(),
-            }));
-        },
-    };
 
     let buildStart = 0;
 
@@ -86,8 +76,8 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
                 }
 
                 const artifacts = grabArtifactsFromBundledResults({
-                    pages,
                     result,
+                    entryToPage,
                 });
 
                 if (artifacts?.[0] && artifacts.length > 0) {
@@ -99,12 +89,12 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
                         }
                     }
 
-                    params?.post_build_fn?.({ artifacts });
+                    // params?.post_build_fn?.({ artifacts });
 
-                    writeFileSync(
-                        HYDRATION_DST_DIR_MAP_JSON_FILE,
-                        JSON.stringify(artifacts, null, 4),
-                    );
+                    // writeFileSync(
+                    //     HYDRATION_DST_DIR_MAP_JSON_FILE,
+                    //     JSON.stringify(artifacts, null, 4),
+                    // );
                 }
 
                 const elapsed = (performance.now() - buildStart).toFixed(0);
@@ -117,13 +107,13 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
         },
     };
 
-    const entryPoints = Object.keys(virtualEntries).map((k) => `virtual:${k}`);
+    const entryPoints = [...entryToPage.keys()];
 
     const ctx = await esbuild.context({
         entryPoints,
         outdir: HYDRATION_DST_DIR,
         bundle: true,
-        minify: true,
+        minify: !dev,
         format: "esm",
         target: "es2020",
         platform: "browser",
@@ -134,7 +124,7 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
         },
         entryNames: "[dir]/[hash]",
         metafile: true,
-        plugins: [tailwindEsbuildPlugin, virtualPlugin, artifactTracker],
+        plugins: [tailwindEsbuildPlugin, artifactTracker],
         jsx: "automatic",
         splitting: true,
         // logLevel: "silent",
@@ -148,5 +138,9 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
 
     await ctx.rebuild();
 
-    // global.BUNDLER_CTX = ctx;
+    // if (params?.watch) {
+    //     await ctx.watch();
+    // }
+
+    global.BUNDLER_CTX = ctx;
 }

@@ -8,10 +8,8 @@ import path from "path";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import { mkdirSync, rmSync } from "fs";
 import recordArtifacts from "./record-artifacts";
-import BunSkipNonBrowserPlugin from "./plugins/bun-skip-browser-plugin";
 
-const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR, BUNX_TMP_DIR } =
-    grabDirNames();
+const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR } = grabDirNames();
 
 type Params = {
     target?: "bun" | "browser";
@@ -85,12 +83,6 @@ export default async function allPagesBunBundler(params?: Params) {
             "react/jsx-runtime",
         ],
     });
-
-    await Bun.write(
-        path.join(BUNX_TMP_DIR, "bundle.json"),
-        JSON.stringify(result, null, 4),
-        { createPath: true },
-    );
 
     if (!result.success) {
         for (const entry of result.logs) {

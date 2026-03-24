@@ -5,6 +5,8 @@ import bunextInit from "../../functions/bunext-init";
 import grabDirNames from "../../utils/grab-dir-names";
 import { rmSync } from "fs";
 import allPagesBunBundler from "../../functions/bundler/all-pages-bun-bundler";
+import allPagesESBuildContextBundler from "../../functions/bundler/all-pages-esbuild-context-bundler";
+import serverPostBuildFn from "../../functions/server/server-post-build-fn";
 
 const { HYDRATION_DST_DIR, BUNX_CWD_PAGES_REWRITE_DIR } = grabDirNames();
 
@@ -22,7 +24,10 @@ export default function () {
             } catch (error) {}
 
             await bunextInit();
-            await allPagesBunBundler();
+
+            // await allPagesBunBundler();
+
+            await allPagesESBuildContextBundler();
 
             await startServer();
         });

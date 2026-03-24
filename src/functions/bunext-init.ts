@@ -1,4 +1,3 @@
-import ora, { type Ora } from "ora";
 import type {
     BundlerCTXMap,
     BunextConfig,
@@ -10,16 +9,15 @@ import grabDirNames from "../utils/grab-dir-names";
 import { type FSWatcher } from "fs";
 import init from "./init";
 import isDevelopment from "../utils/is-development";
-import watcher from "./server/watcher";
 import { log } from "../utils/log";
 import cron from "./server/cron";
-import allPagesBunBundler from "./bundler/all-pages-bun-bundler";
+import type { BuildContext } from "esbuild";
+import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 
 /**
  * # Declare Global Variables
  */
 declare global {
-    var ORA_SPINNER: Ora;
     var CONFIG: BunextConfig;
     var SERVER: Server<any> | undefined;
     var RECOMPILING: boolean;
@@ -34,13 +32,12 @@ declare global {
     var PAGE_FILES: PageFiles[];
     var ROOT_FILE_UPDATED: boolean;
     var SKIPPED_BROWSER_MODULES: Set<string>;
+    var BUNDLER_CTX: BuildContext | undefined;
 }
 
-const { PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
+const { PAGES_DIR } = grabDirNames();
 
 export default async function bunextInit() {
-    global.ORA_SPINNER = ora();
-    global.ORA_SPINNER.clear();
     global.HMR_CONTROLLERS = [];
     global.BUNDLER_CTX_MAP = {};
     global.BUNDLER_REBUILDS = 0;
@@ -60,7 +57,7 @@ export default async function bunextInit() {
     const is_dev = isDevelopment();
 
     if (is_dev) {
-        watcher();
+        watcherEsbuildCTX();
     } else {
         cron();
     }

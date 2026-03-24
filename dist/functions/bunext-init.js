@@ -1,16 +1,12 @@
-import ora, {} from "ora";
 import grabDirNames from "../utils/grab-dir-names";
 import {} from "fs";
 import init from "./init";
 import isDevelopment from "../utils/is-development";
-import watcher from "./server/watcher";
 import { log } from "../utils/log";
 import cron from "./server/cron";
-import allPagesBunBundler from "./bundler/all-pages-bun-bundler";
-const { PAGES_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
+import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
+const { PAGES_DIR } = grabDirNames();
 export default async function bunextInit() {
-    global.ORA_SPINNER = ora();
-    global.ORA_SPINNER.clear();
     global.HMR_CONTROLLERS = [];
     global.BUNDLER_CTX_MAP = {};
     global.BUNDLER_REBUILDS = 0;
@@ -25,7 +21,7 @@ export default async function bunextInit() {
     global.ROUTER = router;
     const is_dev = isDevelopment();
     if (is_dev) {
-        watcher();
+        watcherEsbuildCTX();
     }
     else {
         cron();

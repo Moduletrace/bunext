@@ -1,12 +1,11 @@
-import { type Ora } from "ora";
 import type { BundlerCTXMap, BunextConfig, GlobalHMRControllerObject, PageFiles } from "../types";
 import type { FileSystemRouter, Server } from "bun";
 import { type FSWatcher } from "fs";
+import type { BuildContext } from "esbuild";
 /**
  * # Declare Global Variables
  */
 declare global {
-    var ORA_SPINNER: Ora;
     var CONFIG: BunextConfig;
     var SERVER: Server<any> | undefined;
     var RECOMPILING: boolean;
@@ -23,5 +22,6 @@ declare global {
     var PAGE_FILES: PageFiles[];
     var ROOT_FILE_UPDATED: boolean;
     var SKIPPED_BROWSER_MODULES: Set<string>;
+    var BUNDLER_CTX: BuildContext | undefined;
 }
 export default function bunextInit(): Promise<void>;
