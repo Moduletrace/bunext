@@ -7,7 +7,12 @@ const { ROOT_DIR } = grabDirNames();
 
 type Params = {
     result: esbuild.BuildResult<esbuild.BuildOptions>;
-    entryToPage: Map<string, PageFiles>;
+    entryToPage: Map<
+        string,
+        PageFiles & {
+            tsx: string;
+        }
+    >;
 };
 
 export default function grabArtifactsFromBundledResults({
@@ -29,8 +34,7 @@ export default function grabArtifactsFromBundledResults({
                 return undefined;
             }
 
-            const { file_name, local_path, url_path, transformed_path } =
-                target_page;
+            const { file_name, local_path, url_path } = target_page;
 
             return {
                 path: outputPath,
@@ -43,7 +47,6 @@ export default function grabArtifactsFromBundledResults({
                 file_name,
                 local_path,
                 url_path,
-                transformed_path,
             };
         });
 

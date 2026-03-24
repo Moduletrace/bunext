@@ -18,6 +18,10 @@ export default async function watcherEsbuildCTX() {
         async (event, filename) => {
             if (!filename) return;
 
+            if (filename.match(/^\.\w+/)) {
+                return;
+            }
+
             const full_file_path = path.join(ROOT_DIR, filename);
 
             if (full_file_path.match(/\/styles$/)) {
@@ -47,7 +51,21 @@ export default async function watcherEsbuildCTX() {
                 if (filename.match(target_files_match)) {
                     if (global.RECOMPILING) return;
                     global.RECOMPILING = true;
+
                     await global.BUNDLER_CTX?.rebuild();
+
+                    if (filename.match(/(404|500)\.tsx?/)) {
+                        for (
+                            let i = global.HMR_CONTROLLERS.length - 1;
+                            i >= 0;
+                            i--
+                        ) {
+                            const controller = global.HMR_CONTROLLERS[i];
+                            controller?.controller?.enqueue(
+                                `event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`,
+                            );
+                        }
+                    }
                 }
                 return;
             }

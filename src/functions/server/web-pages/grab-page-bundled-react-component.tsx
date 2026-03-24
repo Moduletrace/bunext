@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import type { GrabPageReactBundledComponentRes } from "../../../types";
 import grabPageReactComponentString from "./grab-page-react-component-string";
 import grabTsxStringModule from "./grab-tsx-string-module";
