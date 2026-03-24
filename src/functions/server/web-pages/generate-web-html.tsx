@@ -69,22 +69,21 @@ export default async function genWebHTML({
 
     const dev = isDevelopment();
     const devSuffix = dev ? "?dev" : "";
+    const browser_imports: Record<string, string> = {
+        react: `https://esm.sh/react@${_reactVersion}`,
+        "react-dom": `https://esm.sh/react-dom@${_reactVersion}`,
+        "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client`,
+        "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime`,
+    };
+
+    if (dev) {
+        browser_imports["react/jsx-dev-runtime"] =
+            `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`;
+    }
+
     const importMap = JSON.stringify({
-        imports: {
-            react: `https://esm.sh/react@${_reactVersion}${devSuffix}`,
-            "react-dom": `https://esm.sh/react-dom@${_reactVersion}${devSuffix}`,
-            "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client${devSuffix}`,
-            "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime${devSuffix}`,
-            "react/jsx-dev-runtime": `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime${devSuffix}`,
-        },
+        imports: browser_imports,
     });
-
-    // let skipped_modules_import_map: { [k: string]: string } = {};
-
-    // [...global.SKIPPED_BROWSER_MODULES].forEach((sk) => {
-    //     skipped_modules_import_map[sk] =
-    //         "data:text/javascript,export default {}";
-    // });
 
     let final_component = (
         <html {...html_props}>
@@ -151,12 +150,32 @@ export default async function genWebHTML({
                 {Head ? <Head serverRes={pageProps} ctx={routeParams} /> : null}
             </head>
             <body>
-                <div id={ClientRootElementIDName}>{component}</div>
+                <div
+                    id={ClientRootElementIDName}
+                    suppressHydrationWarning={!dev}
+                >
+                    {component}
+                </div>
             </body>
         </html>
     );
 
     let html = `<!DOCTYPE html>\n`;
+
+    // const stream = await renderToReadableStream(final_component, {
+    //     onError(error: any) {
+    //         // This is where you "omit" or handle the errors
+    //         // You can log it silently or ignore it
+    //         if (error.message.includes('unique "key" prop')) return;
+    //         console.error(error);
+    //     },
+    // });
+
+    // // 2. Convert the Web Stream to a String (Bun-optimized)
+    // const htmlBody = await new Response(stream).text();
+
+    // html += htmlBody;
+
     html += renderToString(final_component);
 
     return html;

@@ -4,6 +4,7 @@ import AppNames from "./grab-app-names";
 const prefix = {
     info: chalk.bgCyan.bold(" ℹnfo "),
     success: chalk.green.bold("✓"),
+    zap: chalk.green.bold("⚡"),
     error: chalk.red.bold("✗"),
     warn: chalk.yellow.bold("⚠"),
     build: chalk.magenta.bold("⚙"),

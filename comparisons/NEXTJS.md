@@ -58,7 +58,7 @@ This report compares the two on their overlapping surface — server-side render
 | Router                | `Bun.FileSystemRouter`                     | Custom (Pages Router) / React Router (App Router) |
 | SSR method            | `renderToString` (complete response, by design) | `renderToReadableStream` (streaming)       |
 | Component model       | Classic SSR + hydration                    | React Server Components + Client Components    |
-| Data fetching         | Per-page `server` export                   | `getServerSideProps`, `getStaticProps`, `fetch` in RSC |
+| Data fetching         | Per-page `.server.ts` companion file       | `getServerSideProps`, `getStaticProps`, `fetch` in RSC |
 | State persistence     | `window.__PAGE_PROPS__`                    | RSC payload, router cache                      |
 | Dev HMR transport     | Server-Sent Events (SSE)                   | WebSocket                                      |
 | Config format         | `bunext.config.ts`                         | `next.config.js` / `next.config.ts`            |
@@ -210,19 +210,25 @@ Streaming SSR's benefits — progressive flushing, Suspense-based partial render
 
 ### Data Fetching
 
-**Bunext** exposes a single data-fetching primitive: the `server` export on each page module.
+**Bunext** exposes a single data-fetching primitive: a companion **`.server.ts`** file alongside each page.
 
 ```ts
-export const server: BunextPageServerFn = async (ctx) => {
+// src/pages/products.server.ts
+import type { BunextPageServerFn } from "@moduletrace/bunext/types";
+
+const server: BunextPageServerFn = async (ctx) => {
     const data = await db.query(...);
     return { props: { data } };
 };
+
+export default server;
 ```
 
-The return value is serialized to `window.__PAGE_PROPS__` and passed as component props. A `url` object (copy of the request `URL`) is **always** injected into server props as a default, so every page can read URL metadata without writing a server function.
+The server file is never bundled into client JS — it runs exclusively on the server at request time. The return value is serialized to `window.__PAGE_PROPS__` and passed as component props. A `url` object (copy of the request `URL`) is **always** injected into server props as a default, so every page can read URL metadata without writing a server file at all.
 
 **Design notes:**
-- One server function per page. Data fetching is centralised at the page level, not scattered across components.
+- One server file per page. Data fetching is centralised at the page level, not scattered across components.
+- The page file (`.tsx`) exports only client-safe code — the React component, `meta`, `Head`, `config`, and `html_props`. Server-only code (Bun APIs, database clients, `fs`) lives in the `.server.ts` companion and is never sent to the browser.
 - All rendering is on-demand. SSG is intentionally out of scope — see [Caching](#caching) for how Bunext addresses this differently.
 - Server function result is passed via `window.__PAGE_PROPS__`, serialized to JSON and embedded in the HTML — large payloads increase page size.
 
@@ -289,7 +295,7 @@ Bunext's caching model is its answer to SSG. Rather than pre-building pages at d
 
 **Bunext** implements a **file-based HTML cache**:
 
-- Enabled per-page via `config.cachePage` or returned dynamically from the `server` function at runtime.
+- Enabled per-page via `config.cachePage` (exported from the page file) or returned dynamically from the server function in the `.server.ts` companion at runtime.
 - On a cache miss, the rendered HTML is written to `public/__bunext/cache/<key>.res.html` alongside a metadata file `<key>.meta.json` (creation timestamp, expiry, paradigm).
 - On a cache hit, the HTML file is read and returned with `X-Bunext-Cache: HIT`.
 - A cron job runs every 30 seconds to delete expired entries.
@@ -316,7 +322,7 @@ The key distinction from SSG: Bunext's cache is **demand-driven**. A site with 1
 
 ### Metadata and SEO
 
-**Bunext** supports both static and dynamic metadata:
+**Bunext** supports both static and dynamic metadata. These exports live in the **page file** (not the `.server.ts` companion), since they are processed at the server HTML-generation step and may reference types from the client module:
 
 - `export const meta: BunextPageModuleMeta` — static object with `title`, `description`, `keywords`, `author`, `robots`, `canonical`, `themeColor`, `og.*`, and `twitter.*` fields.
 - `export const meta: BunextPageModuleMetaFn` — async function receiving `ctx` and `serverRes` for dynamic metadata based on fetched data.
@@ -540,10 +546,13 @@ Next.js wraps these in `NextRequest` and `NextResponse`, which add convenience m
 
 ### Conditional Runtime Caching
 
-Bunext's `server` function can return `cachePage: true` and `cacheExpiry: N` based on runtime data — the authenticated state of the user, A/B test bucket, content freshness, or any other request-time condition:
+Bunext's server function can return `cachePage: true` and `cacheExpiry: N` based on runtime data — the authenticated state of the user, A/B test bucket, content freshness, or any other request-time condition:
 
 ```ts
-export const server: BunextPageServerFn = async (ctx) => {
+// src/pages/products.server.ts
+import type { BunextPageServerFn } from "@moduletrace/bunext/types";
+
+const server: BunextPageServerFn = async (ctx) => {
     const user = await getUser(ctx.req);
     return {
         props: { data },
@@ -551,16 +560,21 @@ export const server: BunextPageServerFn = async (ctx) => {
         cacheExpiry: 300,
     };
 };
+
+export default server;
 ```
 
 Next.js's ISR and full-route cache operate on fixed revalidation intervals set at build time. There is no mechanism to decide at runtime whether a specific request should be cached.
 
 ### Page Response Transform
 
-The `resTransform` field in the page `server` function's `ctx` parameter lets the developer post-process the final HTML response generated by the framework — add headers, set cookies, modify status codes — without touching middleware:
+The `resTransform` field in the server function's `ctx` parameter lets the developer post-process the final HTML response generated by the framework — add headers, set cookies, modify status codes — without touching middleware:
 
 ```ts
-export const server: BunextPageServerFn = async (ctx) => {
+// src/pages/page.server.ts
+import type { BunextPageServerFn } from "@moduletrace/bunext/types";
+
+const server: BunextPageServerFn = async (ctx) => {
     ctx.resTransform = (res) => {
         res.headers.set("X-Custom-Header", "value");
         return res;
@@ -568,6 +582,8 @@ export const server: BunextPageServerFn = async (ctx) => {
 
     return { props: {} };
 };
+
+export default server;
 ```
 
 This exists because page responses are generated entirely by the framework (`renderToString` → HTML template). Unlike API routes — where the developer returns a `Response` directly and already has full control — there is no other hook to modify the final page response at the route level without going through global middleware.
@@ -588,7 +604,7 @@ Next.js's codebase spans Turbopack (Rust), SWC (Rust), the App Router internals,
 
 The RSC model requires developers to constantly reason about the `"use client"` / `"use server"` boundary: what can be async, what has access to browser APIs, what gets serialized into the RSC payload. Mistakes at this boundary produce runtime errors that are difficult to diagnose.
 
-Bunext has one rule: the `server` function runs on the server, the component runs on both (SSR then hydration). There is no boundary to reason about.
+Bunext has one rule: the `.server.ts` companion file runs on the server, the page file runs on both (SSR then hydration). The separation is enforced by the file system, not by decorators or directives. There is no boundary to reason about inside a file.
 
 ### No Vendor Lock-In
 

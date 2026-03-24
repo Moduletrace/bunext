@@ -199,16 +199,19 @@ A typical Bunext project has the following layout:
 my-app/
 ├── src/
 │   └── pages/             # File-system routes (pages and API handlers)
-│       ├── __root.tsx     # Optional: root layout wrapper for all pages
-│       ├── index.tsx      # Route: /
-│       ├── about.tsx      # Route: /about
-│       ├── 404.tsx        # Optional: custom 404 page
-│       ├── 500.tsx        # Optional: custom 500 page
+│       ├── __root.tsx          # Optional: root layout wrapper for all pages
+│       ├── __root.server.ts    # Optional: root-level server logic
+│       ├── index.tsx           # Route: /
+│       ├── index.server.ts     # Optional: server logic for index route
+│       ├── about.tsx           # Route: /about
+│       ├── 404.tsx             # Optional: custom 404 page
+│       ├── 500.tsx             # Optional: custom 500 page
 │       ├── blog/
-│       │   ├── index.tsx  # Route: /blog
-│       │   └── [slug].tsx # Route: /blog/:slug (dynamic)
+│       │   ├── index.tsx       # Route: /blog
+│       │   ├── index.server.ts # Server logic for /blog
+│       │   └── [slug].tsx      # Route: /blog/:slug (dynamic)
 │       └── api/
-│           └── users.ts   # API route: /api/users
+│           └── users.ts        # API route: /api/users
 ├── public/                # Static files served at /public/*
 ├── .bunext/               # Internal build artifacts (do not edit manually)
 │   └── public/
@@ -275,19 +278,15 @@ export default function HomePage() {
 
 ### Server Function
 
-Export a `server` function to run server-side logic before rendering. The return value's `props` field is spread into the page component as props, and `query` carries route query parameters.
+Server logic lives in a companion **`.server.ts`** (or `.server.tsx`) file alongside the page. The framework looks for `<page>.server.ts` or `<page>.server.tsx` next to the page file and loads it separately on the server — it is never bundled into the client JS.
 
-```tsx
-// src/pages/profile.tsx
+The server file exports the server function as either `export default` or `export const server`. The return value's `props` field is spread into the page component as props, and `query` carries route query parameters.
+
+```ts
+// src/pages/profile.server.ts
 import type { BunextPageServerFn } from "@moduletrace/bunext/types";
 
-type Props = {
-    props?: { username: string; bio: string };
-    query?: Record<string, string>;
-    url?: URL;
-};
-
-export const server: BunextPageServerFn<{
+const server: BunextPageServerFn<{
     username: string;
     bio: string;
 }> = async (ctx) => {
@@ -304,6 +303,17 @@ export const server: BunextPageServerFn<{
     };
 };
 
+export default server;
+```
+
+```tsx
+// src/pages/profile.tsx  (client-only exports — bundled to the browser)
+type Props = {
+    props?: { username: string; bio: string };
+    query?: Record<string, string>;
+    url?: URL;
+};
+
 export default function ProfilePage({ props, url }: Props) {
     return (
         <div>
@@ -314,6 +324,8 @@ export default function ProfilePage({ props, url }: Props) {
     );
 }
 ```
+
+> **Why separate files?** Bundling server code (Bun APIs, database clients, `fs`, secrets) into the same file as a React component causes TypeScript compilation errors because the bundler processes the page file for the browser. The `.server.ts` companion file is loaded only by the server at request time and is never included in the client bundle.
 
 The server function receives a `ctx` object (type `BunxRouteParams`) with:
 
@@ -366,10 +378,13 @@ The `url` prop exposes the following fields from the standard Web `URL` interfac
 
 ### Redirects from Server
 
-Return a `redirect` object from the `server` function to redirect the client:
+Return a `redirect` object from the server function to redirect the client:
 
-```tsx
-export const server: BunextPageServerFn = async (ctx) => {
+```ts
+// src/pages/dashboard.server.ts
+import type { BunextPageServerFn } from "@moduletrace/bunext/types";
+
+const server: BunextPageServerFn = async (ctx) => {
     const isLoggedIn = false; // check auth
 
     if (!isLoggedIn) {
@@ -384,6 +399,8 @@ export const server: BunextPageServerFn = async (ctx) => {
 
     return { props: {} };
 };
+
+export default server;
 ```
 
 `permanent: true` sends a `301` redirect. Otherwise it sends `302`, or the value of `status_code` if provided.
@@ -392,8 +409,11 @@ export const server: BunextPageServerFn = async (ctx) => {
 
 Control status codes, headers, and other response options from the server function:
 
-```tsx
-export const server: BunextPageServerFn = async (ctx) => {
+```ts
+// src/pages/submit.server.ts
+import type { BunextPageServerFn } from "@moduletrace/bunext/types";
+
+const server: BunextPageServerFn = async (ctx) => {
     return {
         props: { message: "Created" },
         responseOptions: {
@@ -404,11 +424,13 @@ export const server: BunextPageServerFn = async (ctx) => {
         },
     };
 };
+
+export default server;
 ```
 
 ### SEO Metadata
 
-Export a `meta` object to inject SEO and Open Graph tags into the `<head>`:
+Export a `meta` object from the **page file** (not the server file) to inject SEO and Open Graph tags into the `<head>`:
 
 ```tsx
 import type { BunextPageModuleMeta } from "@moduletrace/bunext/types";
@@ -447,7 +469,7 @@ export default function AboutPage() {
 
 ### Dynamic Metadata
 
-`meta` can also be an async function that receives the request context and server response:
+`meta` can also be an async function that receives the request context and server response. Like `meta`, it is exported from the **page file**:
 
 ```tsx
 import type { BunextPageModuleMetaFn } from "@moduletrace/bunext/types";
@@ -483,7 +505,21 @@ export default function Page() {
 
 ### Root Layout
 
-Create `src/pages/__root.tsx` to wrap every page in a shared layout. The root component receives `children` (the current page component) along with all server props:
+Create `src/pages/__root.tsx` to wrap every page in a shared layout. The root component receives `children` (the current page component) along with all server props.
+
+If the root layout also needs server-side logic, place it in `src/pages/__root.server.ts` (or `.server.tsx`) — the same `.server.*` convention used by regular pages:
+
+```ts
+// src/pages/__root.server.ts
+import type { BunextPageServerFn } from "@moduletrace/bunext/types";
+
+const server: BunextPageServerFn = async (ctx) => {
+    // e.g. fetch navigation links, check auth
+    return { props: { navLinks: ["/", "/about"] } };
+};
+
+export default server;
+```
 
 ```tsx
 // src/pages/__root.tsx
@@ -636,12 +672,13 @@ export default function ProductsPage() {
 
 ### Dynamic Cache Control from Server Function
 
-Cache settings can also be returned from the `server` function, which lets you conditionally enable caching based on request data:
+Cache settings can also be returned from the server function, which lets you conditionally enable caching based on request data:
 
-```tsx
+```ts
+// src/pages/products.server.ts
 import type { BunextPageServerFn } from "@moduletrace/bunext/types";
 
-export const server: BunextPageServerFn = async (ctx) => {
+const server: BunextPageServerFn = async (ctx) => {
     const data = await fetchProducts();
 
     return {
@@ -651,6 +688,11 @@ export const server: BunextPageServerFn = async (ctx) => {
     };
 };
 
+export default server;
+```
+
+```tsx
+// src/pages/products.tsx
 export default function ProductsPage({ props }: any) {
     return (
         <ul>
@@ -957,7 +999,7 @@ Request
         1. Match route via FileSystemRouter
         2. Find bundled artifact in BUNDLER_CTX_MAP
         3. Import page module (with cache-busting timestamp in dev)
-        4. Run module.server(ctx) for server-side data
+        4. Import companion server module (<page>.server.ts/tsx) if it exists; run its exported function for server-side data
         5. Resolve meta (static object or async function)
         6. renderToString(component) → inject into HTML template
         7. Inject window.__PAGE_PROPS__, hydration <script>, CSS <link>

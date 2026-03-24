@@ -13,9 +13,6 @@ export default function () {
     return new Command("build")
         .description("Build Project")
         .action(async () => {
-            process.env.NODE_ENV = "production";
-            process.env.BUILD = "true";
-
             try {
                 rmSync(HYDRATION_DST_DIR, { recursive: true });
                 rmSync(BUNX_CWD_PAGES_REWRITE_DIR, { recursive: true });

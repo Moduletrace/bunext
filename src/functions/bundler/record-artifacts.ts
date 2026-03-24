@@ -25,8 +25,8 @@ export default async function recordArtifacts({
         global.BUNDLER_CTX_MAP = _.merge(global.BUNDLER_CTX_MAP, artifacts_map);
     }
 
-    await Bun.write(
-        HYDRATION_DST_DIR_MAP_JSON_FILE,
-        JSON.stringify(artifacts_map, null, 4),
-    );
+    // await Bun.write(
+    //     HYDRATION_DST_DIR_MAP_JSON_FILE,
+    //     JSON.stringify(artifacts_map, null, 4),
+    // );
 }

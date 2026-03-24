@@ -56,17 +56,19 @@ export default async function allPagesBunBundler(params?: Params) {
 
     const buildStart = performance.now();
 
+    const define = {
+        "process.env.NODE_ENV": JSON.stringify(
+            dev ? "development" : "production",
+        ),
+    };
+
     const result = await Bun.build({
         entrypoints: [...entryToPage.keys()],
         outdir: HYDRATION_DST_DIR,
         root: BUNX_HYDRATION_SRC_DIR,
-        minify: true,
+        minify: !dev,
         format: "esm",
-        define: {
-            "process.env.NODE_ENV": JSON.stringify(
-                dev ? "development" : "production",
-            ),
-        },
+        define,
         naming: {
             entry: "[dir]/[hash].[ext]",
             chunk: "chunks/[hash].[ext]",

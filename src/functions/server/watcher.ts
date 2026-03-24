@@ -82,9 +82,9 @@ async function fullRebuild(params?: { msg?: string }) {
 
         global.RECOMPILING = true;
 
-        const target_file_paths = global.HMR_CONTROLLERS.map(
-            (hmr) => hmr.target_map?.local_path,
-        ).filter((f) => typeof f == "string");
+        // const target_file_paths = global.HMR_CONTROLLERS.map(
+        //     (hmr) => hmr.target_map?.local_path,
+        // ).filter((f) => typeof f == "string");
 
         // await rewritePagesModule();
 
@@ -92,7 +92,8 @@ async function fullRebuild(params?: { msg?: string }) {
             log.watch(msg);
         }
 
-        await rebuildBundler({ target_file_paths });
+        await rebuildBundler();
+        // await rebuildBundler({ target_file_paths });
     } catch (error: any) {
         log.error(error);
     } finally {

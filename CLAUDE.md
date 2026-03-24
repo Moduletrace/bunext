@@ -40,11 +40,21 @@ bunext start        # Start production server from pre-built artifacts
 - `src/presets/` — Default 404/500 components and sample `bunext.config.ts`
 
 ### Page module contract
-Pages live in `src/pages/`. A page file may export:
-- Default export: React component receiving `ServerProps | StaticProps`
-- `server`: `BunextPageServerFn` — runs server-side before rendering, return value becomes props
+Pages live in `src/pages/`. Server logic is **separated from page files** into companion `.server.ts` / `.server.tsx` files to avoid bundling server-only code into the client.
+
+**Page file** (`page.tsx`) — client-safe exports only (bundled to the browser):
+- Default export: React component receiving props from the server file
 - `meta`: `BunextPageModuleMeta` — SEO/OG metadata
-- `head`: ReactNode — extra `<head>` content
+- `Head`: FC — extra `<head>` content
+- `config`: `BunextRouteConfig` — cache settings
+- `html_props`: `BunextHTMLProps` — attributes on the `<html>` element
+
+**Server file** (`page.server.ts` or `page.server.tsx`) — server-only, never sent to the browser:
+- Default export or `export const server`: `BunextPageServerFn` — runs server-side before rendering, return value becomes props
+
+The framework resolves the companion by replacing the page extension with `.server.ts` or `.server.tsx`. If neither exists, no server function runs and only the default `url` prop is injected.
+
+`__root.tsx` follows the same contract; its server companion is `__root.server.ts`.
 
 API routes live in `src/pages/api/` and follow standard Bun `Request → Response` handler conventions.
 

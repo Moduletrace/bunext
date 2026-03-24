@@ -1,7 +1,5 @@
 import { describe, expect, test, beforeAll, afterAll } from "bun:test";
 import startServer from "../../../src/functions/server/start-server";
-import rewritePagesModule from "../../../src/utils/rewrite-pages-module";
-import pagePathTransform from "../../../src/utils/page-path-transform";
 import path from "path";
 import fs from "fs";
 
@@ -9,9 +7,6 @@ import fs from "fs";
 const fixtureDir = path.resolve(__dirname, "../../../test/e2e-fixture");
 const fixturePagesDir = path.join(fixtureDir, "src", "pages");
 const fixtureIndexPage = path.join(fixturePagesDir, "index.tsx");
-
-// The rewritten page path (inside .bunext/pages, stripped of server logic)
-const rewrittenIndexPage = pagePathTransform({ page_path: fixtureIndexPage });
 
 let originalCwd = process.cwd();
 let originalPort: string | undefined;
@@ -36,10 +31,6 @@ describe("E2E Integration", () => {
             style: "nextjs",
             dir: fixturePagesDir,
         });
-
-        // Rewrite the fixture page (strips server logic) into .bunext/pages
-        // so that grab-page-react-component-string can resolve the import
-        await rewritePagesModule({ page_file_path: fixtureIndexPage });
 
         // Pre-populate the bundler context map so grab-page-component can
         // look up the compiled path. The `path` value only needs to be
@@ -70,12 +61,6 @@ describe("E2E Integration", () => {
             delete process.env.PORT;
         }
 
-        // Remove the rewritten page created during setup
-        const rewrittenDir = path.dirname(rewrittenIndexPage);
-        if (fs.existsSync(rewrittenDir)) {
-            fs.rmSync(rewrittenDir, { recursive: true, force: true });
-        }
-
         // Remove any generated .bunext artifacts from the fixture
         const dotBunext = path.join(fixtureDir, ".bunext");
         if (fs.existsSync(dotBunext)) {
@@ -101,5 +86,42 @@ describe("E2E Integration", () => {
         const text = await response.text();
         // Default 404 component is rendered
         expect(text).toContain("404");
+    });
+
+    test("server props injected from .server.ts companion file", async () => {
+        const serverFilePath = path.join(fixturePagesDir, "index.server.ts");
+        const pageFilePath = fixtureIndexPage;
+
+        // Write a temporary .server.ts companion that injects a prop
+        await Bun.write(serverFilePath, `
+import type { BunextPageServerFn } from "../../../../../src/types";
+
+const server: BunextPageServerFn<{ greeting: string }> = async () => {
+    return { props: { greeting: "Hello from server" } };
+};
+
+export default server;
+`);
+
+        // Add the fixture page to the BUNDLER_CTX_MAP
+        global.BUNDLER_CTX_MAP[pageFilePath] = {
+            path: ".bunext/public/pages/index.js",
+            hash: "index",
+            type: "text/javascript",
+            entrypoint: pageFilePath,
+            local_path: pageFilePath,
+            url_path: "/",
+            file_name: "index",
+        };
+
+        const response = await fetch(`http://localhost:${server.port}/`);
+        expect(response.status).toBe(200);
+
+        const html = await response.text();
+        // __PAGE_PROPS__ should include the prop from the server companion
+        expect(html).toContain("Hello from server");
+
+        // Clean up
+        fs.unlinkSync(serverFilePath);
     });
 });
