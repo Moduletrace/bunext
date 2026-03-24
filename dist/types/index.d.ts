@@ -1,5 +1,5 @@
 import type { MatchedRoute, Server, WebSocketHandler } from "bun";
-import type { FC, JSX, PropsWithChildren, ReactNode } from "react";
+import type { DetailedHTMLProps, FC, HtmlHTMLAttributes, JSX, PropsWithChildren, ReactNode } from "react";
 export type ServerProps = {
     params: Record<string, string>;
     searchParams: Record<string, string>;
@@ -129,11 +129,10 @@ export type PageDistGenParams = {
 };
 export type LivePageDistGenParams = {
     component: ReactNode;
-    head?: FC<BunextPageHeadFCProps>;
     pageProps?: any;
     module?: BunextPageModule;
+    root_module?: BunextRootModule;
     bundledMap?: BundlerCTXMap;
-    meta?: BunextPageModuleMeta;
     routeParams?: BunxRouteParams;
     debug?: boolean;
 };
@@ -143,11 +142,16 @@ export type BunextPageHeadFCProps = {
 };
 export type BunextPageModule = {
     default: FC<any>;
-    server?: BunextPageServerFn;
     meta?: BunextPageModuleMeta | BunextPageModuleMetaFn;
     Head?: FC<BunextPageHeadFCProps>;
     config?: BunextRouteConfig;
+    html_props?: BunextHTMLProps;
 };
+export type BunextPageServerModule = {
+    default?: BunextPageServerFn;
+    server?: BunextPageServerFn;
+};
+export type BunextHTMLProps = DetailedHTMLProps<HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
 export type BunextPageModuleMetaFn = (params: {
     ctx: BunxRouteParams;
     serverRes?: BunextPageModuleServerReturn;
@@ -235,10 +239,10 @@ export type GrabPageComponentRes = {
     routeParams?: BunxRouteParams;
     bundledMap?: BundlerCTXMap;
     module: BunextPageModule;
-    meta?: BunextPageModuleMeta;
-    head?: FC<BunextPageHeadFCProps>;
+    root_module?: BunextRootModule;
     debug?: boolean;
 };
+export type BunextRootModule = BunextPageModule;
 export type GrabPageReactBundledComponentRes = {
     component: JSX.Element;
     server_res?: BunextPageModuleServerReturn;

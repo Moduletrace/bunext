@@ -1,61 +1,9 @@
-import { escape } from "lodash";
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 export default function grabWebMetaHTML({ meta }) {
-    let html = ``;
-    if (meta.title) {
-        html += `        <title>${escape(meta.title)}</title>\n`;
-    }
-    if (meta.description) {
-        html += `        <meta name="description" content="${escape(meta.description)}" />\n`;
-    }
-    if (meta.keywords) {
-        const keywords = Array.isArray(meta.keywords)
+    const keywords = meta.keywords
+        ? Array.isArray(meta.keywords)
             ? meta.keywords.join(", ")
-            : meta.keywords;
-        html += `        <meta name="keywords" content="${escape(keywords)}" />\n`;
-    }
-    if (meta.author) {
-        html += `        <meta name="author" content="${escape(meta.author)}" />\n`;
-    }
-    if (meta.robots) {
-        html += `        <meta name="robots" content="${escape(meta.robots)}" />\n`;
-    }
-    if (meta.canonical) {
-        html += `        <link rel="canonical" href="${escape(meta.canonical)}" />\n`;
-    }
-    if (meta.themeColor) {
-        html += `        <meta name="theme-color" content="${escape(meta.themeColor)}" />\n`;
-    }
-    if (meta.og) {
-        const { og } = meta;
-        if (og.title)
-            html += `        <meta property="og:title" content="${escape(og.title)}" />\n`;
-        if (og.description)
-            html += `        <meta property="og:description" content="${escape(og.description)}" />\n`;
-        if (og.image)
-            html += `        <meta property="og:image" content="${escape(og.image)}" />\n`;
-        if (og.url)
-            html += `        <meta property="og:url" content="${escape(og.url)}" />\n`;
-        if (og.type)
-            html += `        <meta property="og:type" content="${escape(og.type)}" />\n`;
-        if (og.siteName)
-            html += `        <meta property="og:site_name" content="${escape(og.siteName)}" />\n`;
-        if (og.locale)
-            html += `        <meta property="og:locale" content="${escape(og.locale)}" />\n`;
-    }
-    if (meta.twitter) {
-        const { twitter } = meta;
-        if (twitter.card)
-            html += `        <meta name="twitter:card" content="${escape(twitter.card)}" />\n`;
-        if (twitter.title)
-            html += `        <meta name="twitter:title" content="${escape(twitter.title)}" />\n`;
-        if (twitter.description)
-            html += `        <meta name="twitter:description" content="${escape(twitter.description)}" />\n`;
-        if (twitter.image)
-            html += `        <meta name="twitter:image" content="${escape(twitter.image)}" />\n`;
-        if (twitter.site)
-            html += `        <meta name="twitter:site" content="${escape(twitter.site)}" />\n`;
-        if (twitter.creator)
-            html += `        <meta name="twitter:creator" content="${escape(twitter.creator)}" />\n`;
-    }
-    return html;
+            : meta.keywords
+        : undefined;
+    return (_jsxs(_Fragment, { children: [meta.title && _jsx("title", { children: meta.title }), meta.description && (_jsx("meta", { name: "description", content: meta.description })), keywords && _jsx("meta", { name: "keywords", content: keywords }), meta.author && _jsx("meta", { name: "author", content: meta.author }), meta.robots && _jsx("meta", { name: "robots", content: meta.robots }), meta.canonical && (_jsx("link", { rel: "canonical", href: meta.canonical })), meta.themeColor && (_jsx("meta", { name: "theme-color", content: meta.themeColor })), meta.og?.title && (_jsx("meta", { property: "og:title", content: meta.og.title })), meta.og?.description && (_jsx("meta", { property: "og:description", content: meta.og.description })), meta.og?.image && (_jsx("meta", { property: "og:image", content: meta.og.image })), meta.og?.url && (_jsx("meta", { property: "og:url", content: meta.og.url })), meta.og?.type && (_jsx("meta", { property: "og:type", content: meta.og.type })), meta.og?.siteName && (_jsx("meta", { property: "og:site_name", content: meta.og.siteName })), meta.og?.locale && (_jsx("meta", { property: "og:locale", content: meta.og.locale })), meta.twitter?.card && (_jsx("meta", { name: "twitter:card", content: meta.twitter.card })), meta.twitter?.title && (_jsx("meta", { name: "twitter:title", content: meta.twitter.title })), meta.twitter?.description && (_jsx("meta", { name: "twitter:description", content: meta.twitter.description })), meta.twitter?.image && (_jsx("meta", { name: "twitter:image", content: meta.twitter.image })), meta.twitter?.site && (_jsx("meta", { name: "twitter:site", content: meta.twitter.site })), meta.twitter?.creator && (_jsx("meta", { name: "twitter:creator", content: meta.twitter.creator }))] }));
 }

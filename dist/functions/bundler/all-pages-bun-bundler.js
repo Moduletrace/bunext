@@ -7,6 +7,7 @@ import path from "path";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import { mkdirSync, rmSync } from "fs";
 import recordArtifacts from "./record-artifacts";
+import BunSkipNonBrowserPlugin from "./plugins/bun-skip-browser-plugin";
 const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR, BUNX_TMP_DIR } = grabDirNames();
 export default async function allPagesBunBundler(params) {
     const { target = "browser", page_file_paths } = params || {};
@@ -37,15 +38,16 @@ export default async function allPagesBunBundler(params) {
     if (entryToPage.size === 0)
         return;
     const buildStart = performance.now();
+    const define = {
+        "process.env.NODE_ENV": JSON.stringify(dev ? "development" : "production"),
+    };
     const result = await Bun.build({
         entrypoints: [...entryToPage.keys()],
         outdir: HYDRATION_DST_DIR,
         root: BUNX_HYDRATION_SRC_DIR,
-        minify: true,
+        minify: !dev,
         format: "esm",
-        define: {
-            "process.env.NODE_ENV": JSON.stringify(dev ? "development" : "production"),
-        },
+        define,
         naming: {
             entry: "[dir]/[hash].[ext]",
             chunk: "chunks/[hash].[ext]",
@@ -94,7 +96,10 @@ export default async function allPagesBunBundler(params) {
         });
     }
     if (artifacts?.[0]) {
-        await recordArtifacts({ artifacts });
+        await recordArtifacts({
+            artifacts,
+            page_file_paths,
+        });
     }
     const elapsed = (performance.now() - buildStart).toFixed(0);
     log.success(`[Built] in ${elapsed}ms`);

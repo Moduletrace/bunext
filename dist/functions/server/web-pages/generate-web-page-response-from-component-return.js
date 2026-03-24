@@ -1,17 +1,17 @@
+import _ from "lodash";
 import isDevelopment from "../../../utils/is-development";
 import { log } from "../../../utils/log";
 import writeCache from "../../cache/write-cache";
 import genWebHTML from "./generate-web-html";
-export default async function generateWebPageResponseFromComponentReturn({ component, module, bundledMap, head, meta, routeParams, serverRes, debug, }) {
+export default async function generateWebPageResponseFromComponentReturn({ component, module, bundledMap, routeParams, serverRes, debug, root_module, }) {
     const html = await genWebHTML({
         component,
         pageProps: serverRes,
         bundledMap,
         module,
-        meta,
-        head,
         routeParams,
         debug,
+        root_module,
     });
     if (debug) {
         log.info("html", html);
@@ -36,8 +36,9 @@ export default async function generateWebPageResponseFromComponentReturn({ compo
             Expires: "0",
         };
     }
-    const cache_page = module.config?.cachePage || serverRes?.cachePage || false;
-    const expiry_seconds = module.config?.cacheExpiry || serverRes?.cacheExpiry;
+    const config = _.merge(root_module?.config, module.config);
+    const cache_page = config?.cachePage || serverRes?.cachePage || false;
+    const expiry_seconds = config?.cacheExpiry || serverRes?.cacheExpiry;
     if (cache_page && routeParams?.url) {
         const key = routeParams.url.pathname + (routeParams.url.search || "");
         writeCache({

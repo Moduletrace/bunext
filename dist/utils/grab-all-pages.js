@@ -20,14 +20,18 @@ function grabPageDirRecursively({ page_dir }) {
     }
     for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
+        const page_name = page.split("/").pop();
         const full_page_path = path.join(page_dir, page);
-        if (!existsSync(full_page_path)) {
+        if (!existsSync(full_page_path) || !page_name) {
             continue;
         }
         if (page.match(new RegExp(`${AppNames["RootPagesComponentName"]}`))) {
             continue;
         }
         if (page.match(/\(|\)|--|\/api\//)) {
+            continue;
+        }
+        if (page_name.split(".").length > 2) {
             continue;
         }
         const page_stat = statSync(full_page_path);

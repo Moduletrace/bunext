@@ -8,6 +8,7 @@ import grabClientHydrationScript from "./grab-client-hydration-script";
 import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-result";
 import { writeFileSync } from "fs";
 import recordArtifacts from "./record-artifacts";
+import stripServerSideLogic from "./strip-server-side-logic";
 const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 let build_starts = 0;
 const MAX_BUILD_STARTS = 10;
@@ -23,7 +24,7 @@ export default async function allPagesBundler(params) {
     const virtualEntries = {};
     const dev = isDevelopment();
     for (const page of target_pages) {
-        const key = page.transformed_path;
+        const key = page.local_path;
         const txt = await grabClientHydrationScript({
             page_local_path: page.local_path,
         });
@@ -32,6 +33,11 @@ export default async function allPagesBundler(params) {
         // }
         if (!txt)
             continue;
+        // const final_tsx = stripServerSideLogic({
+        //     txt_code: txt,
+        //     file_path: key,
+        // });
+        // console.log("final_tsx", final_tsx);
         virtualEntries[key] = txt;
     }
     const virtualPlugin = {
@@ -66,6 +72,28 @@ export default async function allPagesBundler(params) {
         },
     };
     const entryPoints = Object.keys(virtualEntries).map((k) => `virtual:${k}`);
+    // let alias: any = {};
+    // const excludes = [
+    //     "bun:sqlite",
+    //     "path",
+    //     "url",
+    //     "events",
+    //     "util",
+    //     "crypto",
+    //     "net",
+    //     "tls",
+    //     "fs",
+    //     "node:path",
+    //     "node:url",
+    //     "node:process",
+    //     "node:fs",
+    //     "node:timers/promises",
+    // ];
+    // for (let i = 0; i < excludes.length; i++) {
+    //     const exclude = excludes[i];
+    //     alias[exclude] = "./empty.js";
+    // }
+    // console.log("alias", alias);
     const result = await esbuild.build({
         entryPoints,
         outdir: HYDRATION_DST_DIR,
@@ -89,6 +117,7 @@ export default async function allPagesBundler(params) {
             "react-dom/client",
             "react/jsx-runtime",
         ],
+        // alias,
     });
     if (result.errors.length > 0) {
         for (const error of result.errors) {

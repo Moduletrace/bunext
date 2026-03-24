@@ -1,2 +1,2 @@
 import type { GrabPageComponentRes } from "../../../types";
-export default function generateWebPageResponseFromComponentReturn({ component, module, bundledMap, head, meta, routeParams, serverRes, debug, }: GrabPageComponentRes): Promise<Response>;
+export default function generateWebPageResponseFromComponentReturn({ component, module, bundledMap, routeParams, serverRes, debug, root_module, }: GrabPageComponentRes): Promise<Response>;

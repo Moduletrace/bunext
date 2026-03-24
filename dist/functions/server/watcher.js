@@ -3,7 +3,7 @@ import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import rebuildBundler from "./rebuild-bundler";
 import { log } from "../../utils/log";
-import rewritePagesModule from "../../utils/rewrite-pages-module";
+// import rewritePagesModule from "../../utils/rewrite-pages-module";
 const { ROOT_DIR } = grabDirNames();
 export default async function watcher() {
     const pages_src_watcher = watch(ROOT_DIR, {
@@ -62,14 +62,15 @@ async function fullRebuild(params) {
     try {
         const { msg } = params || {};
         global.RECOMPILING = true;
-        const target_file_paths = global.HMR_CONTROLLERS.map((hmr) => hmr.target_map?.local_path).filter((f) => typeof f == "string");
-        await rewritePagesModule({
-            page_file_path: target_file_paths,
-        });
+        // const target_file_paths = global.HMR_CONTROLLERS.map(
+        //     (hmr) => hmr.target_map?.local_path,
+        // ).filter((f) => typeof f == "string");
+        // await rewritePagesModule();
         if (msg) {
             log.watch(msg);
         }
-        await rebuildBundler({ target_file_paths });
+        await rebuildBundler();
+        // await rebuildBundler({ target_file_paths });
     }
     catch (error) {
         log.error(error);

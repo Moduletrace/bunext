@@ -22,5 +22,6 @@ declare global {
     var CURRENT_VERSION: string | undefined;
     var PAGE_FILES: PageFiles[];
     var ROOT_FILE_UPDATED: boolean;
+    var SKIPPED_BROWSER_MODULES: Set<string>;
 }
 export default function bunextInit(): Promise<void>;

@@ -6,7 +6,7 @@ declare const bunext: {
         info: (msg: string, log?: any) => void;
         success: (msg: string, log?: any) => void;
         error: (msg: string | Error, log?: any) => void;
-        warn: (msg: string) => void;
+        warn: (msg: string, log?: any) => void;
         build: (msg: string) => void;
         watch: (msg: string) => void;
         server: (url: string) => void;

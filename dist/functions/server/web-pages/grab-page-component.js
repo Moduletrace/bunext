@@ -4,6 +4,8 @@ import grabPageBundledReactComponent from "./grab-page-bundled-react-component";
 import _ from "lodash";
 import { log } from "../../../utils/log";
 import grabRootFilePath from "./grab-root-file-path";
+import grabPageServerRes from "./grab-page-server-res";
+import grabPageServerPath from "./grab-page-server-path";
 class NotFoundError extends Error {
 }
 export default async function grabPageComponent({ req, file_path: passed_file_path, debug, }) {
@@ -35,6 +37,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         }
         const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
         if (!bundledMap?.path) {
+            console.log(global.BUNDLER_CTX_MAP);
             const errMsg = `No Bundled File Path for this request path!`;
             log.error(errMsg);
             throw new Error(errMsg);
@@ -43,72 +46,52 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             log.info(`bundledMap:`, bundledMap);
         }
         const { root_file_path } = grabRootFilePath();
+        const root_module = root_file_path
+            ? await import(`${root_file_path}?t=${now}`)
+            : undefined;
+        const { server_file_path: root_server_file_path } = root_file_path
+            ? grabPageServerPath({ file_path: root_file_path })
+            : {};
+        const root_server_module = root_server_file_path
+            ? await import(`${root_server_file_path}?t=${now}`)
+            : undefined;
+        const root_server_fn = root_server_module?.default || root_server_module?.server;
+        const rootServerRes = root_server_fn
+            ? await grabPageServerRes({
+                server_function: root_server_fn,
+                url,
+                query: match?.query,
+                routeParams,
+            })
+            : undefined;
+        if (debug) {
+            log.info(`rootServerRes:`, rootServerRes);
+        }
         const module = await import(`${file_path}?t=${now}`);
+        const { server_file_path } = grabPageServerPath({ file_path });
+        const server_module = server_file_path
+            ? await import(`${server_file_path}?t=${now}`)
+            : undefined;
         if (debug) {
             log.info(`module:`, module);
         }
-        const serverRes = await (async () => {
-            const default_props = {
-                url: {
-                    ..._.pick(url, [
-                        "host",
-                        "hostname",
-                        "pathname",
-                        "origin",
-                        "port",
-                        "search",
-                        "searchParams",
-                        "hash",
-                        "href",
-                        "password",
-                        "protocol",
-                        "username",
-                    ]),
-                },
+        const server_fn = server_module?.default || server_module?.server;
+        const serverRes = server_fn
+            ? await grabPageServerRes({
+                server_function: server_fn,
+                url,
                 query: match?.query,
-            };
-            try {
-                if (routeParams) {
-                    const serverData = await module["server"]?.({
-                        ...routeParams,
-                        query: { ...routeParams.query, ...match?.query },
-                    });
-                    return {
-                        ...serverData,
-                        ...default_props,
-                    };
-                }
-                return {
-                    ...default_props,
-                };
-            }
-            catch (error) {
-                return {
-                    ...default_props,
-                };
-            }
-        })();
+                routeParams,
+            })
+            : undefined;
         if (debug) {
             log.info(`serverRes:`, serverRes);
         }
-        const meta = module.meta
-            ? typeof module.meta == "function" && routeParams
-                ? await module.meta({
-                    ctx: routeParams,
-                    serverRes,
-                })
-                : typeof module.meta == "object"
-                    ? module.meta
-                    : undefined
-            : undefined;
-        if (debug) {
-            log.info(`meta:`, meta);
-        }
-        const Head = module.Head;
+        const mergedServerRes = _.merge(rootServerRes || {}, serverRes || {});
         const { component } = (await grabPageBundledReactComponent({
             file_path,
             root_file_path,
-            server_res: serverRes,
+            server_res: mergedServerRes,
         })) || {};
         if (!component) {
             throw new Error(`Couldn't grab page component`);
@@ -118,12 +101,11 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         }
         return {
             component,
-            serverRes,
+            serverRes: mergedServerRes,
             routeParams,
             module,
             bundledMap,
-            meta,
-            head: Head,
+            root_module,
         };
     }
     catch (error) {

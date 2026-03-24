@@ -4,24 +4,27 @@ import grabDirNames from "../../utils/grab-dir-names";
 import AppNames from "../../utils/grab-app-names";
 import grabConstants from "../../utils/grab-constants";
 import pagePathTransform from "../../utils/page-path-transform";
+import grabRootFilePath from "../server/web-pages/grab-root-file-path";
 const { PAGES_DIR } = grabDirNames();
 export default async function grabClientHydrationScript({ page_local_path, }) {
     const { ClientRootElementIDName, ClientRootComponentWindowName, ClientWindowPagePropsName, } = grabConstants();
-    const target_path = pagePathTransform({ page_path: page_local_path });
-    const root_component_path = path.join(PAGES_DIR, `${AppNames["RootPagesComponentName"]}.tsx`);
-    const does_root_exist = existsSync(root_component_path);
+    const { root_file_path } = grabRootFilePath();
+    // const target_path = pagePathTransform({ page_path: page_local_path });
+    // const target_root_path = root_file_path
+    //     ? pagePathTransform({ page_path: root_file_path })
+    //     : undefined;
     let txt = ``;
     txt += `import { hydrateRoot } from "react-dom/client";\n`;
-    if (does_root_exist) {
-        txt += `import Root from "${root_component_path}";\n`;
+    if (root_file_path) {
+        txt += `import Root from "${root_file_path}";\n`;
     }
-    txt += `import Page from "${target_path}";\n\n`;
+    txt += `import Page from "${page_local_path}";\n\n`;
     txt += `const pageProps = window.${ClientWindowPagePropsName} || {};\n`;
-    if (does_root_exist) {
-        txt += `const component = <Root suppressHydrationWarning={true} {...pageProps}><Page {...pageProps} /></Root>\n`;
+    if (root_file_path) {
+        txt += `const component = <Root {...pageProps}><Page {...pageProps} /></Root>\n`;
     }
     else {
-        txt += `const component = <Page suppressHydrationWarning={true} {...pageProps} />\n`;
+        txt += `const component = <Page {...pageProps} />\n`;
     }
     txt += `if (window.${ClientRootComponentWindowName}?.render) {\n`;
     txt += `    window.${ClientRootComponentWindowName}.render(component);\n`;
