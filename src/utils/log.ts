@@ -19,7 +19,8 @@ export const log = {
     },
     error: (msg: string | Error, log?: any) =>
         console.error(`${prefix.error}  ${chalk.red(String(msg))}`, log || ""),
-    warn: (msg: string) => console.warn(`${prefix.warn}  ${chalk.yellow(msg)}`),
+    warn: (msg: string, log?: any) =>
+        console.warn(`${prefix.warn}  ${chalk.yellow(msg)}`, log || ""),
     build: (msg: string) =>
         console.log(`${prefix.build}  ${chalk.magenta(msg)}`),
     watch: (msg: string) => console.log(`${prefix.watch}  ${chalk.blue(msg)}`),

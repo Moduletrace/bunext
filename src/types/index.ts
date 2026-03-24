@@ -167,11 +167,15 @@ export type BunextPageHeadFCProps = {
 
 export type BunextPageModule = {
     default: FC<any>;
-    server?: BunextPageServerFn;
     meta?: BunextPageModuleMeta | BunextPageModuleMetaFn;
     Head?: FC<BunextPageHeadFCProps>;
     config?: BunextRouteConfig;
     html_props?: BunextHTMLProps;
+};
+
+export type BunextPageServerModule = {
+    default?: BunextPageServerFn;
+    server?: BunextPageServerFn;
 };
 
 export type BunextHTMLProps = DetailedHTMLProps<

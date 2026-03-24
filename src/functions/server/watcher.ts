@@ -3,7 +3,7 @@ import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import rebuildBundler from "./rebuild-bundler";
 import { log } from "../../utils/log";
-import rewritePagesModule from "../../utils/rewrite-pages-module";
+// import rewritePagesModule from "../../utils/rewrite-pages-module";
 
 const { ROOT_DIR } = grabDirNames();
 
@@ -86,7 +86,7 @@ async function fullRebuild(params?: { msg?: string }) {
             (hmr) => hmr.target_map?.local_path,
         ).filter((f) => typeof f == "string");
 
-        await rewritePagesModule();
+        // await rewritePagesModule();
 
         if (msg) {
             log.watch(msg);

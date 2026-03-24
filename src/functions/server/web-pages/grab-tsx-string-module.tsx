@@ -2,6 +2,7 @@ import isDevelopment from "../../../utils/is-development";
 import tailwindcss from "bun-plugin-tailwind";
 import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
+import BunSkipNonBrowserPlugin from "../../bundler/plugins/bun-skip-browser-plugin";
 
 type Params = {
     tsx: string;
@@ -31,7 +32,7 @@ export default async function grabTsxStringModule<T extends any = any>({
 
     await Bun.write(src_file_path, tsx);
 
-    await Bun.build({
+    const build = await Bun.build({
         entrypoints: [src_file_path],
         format: "esm",
         target: "bun",
@@ -43,7 +44,7 @@ export default async function grabTsxStringModule<T extends any = any>({
             ),
         },
         metafile: true,
-        plugins: [tailwindcss],
+        plugins: [tailwindcss, BunSkipNonBrowserPlugin],
         jsx: {
             runtime: "automatic",
             development: dev,

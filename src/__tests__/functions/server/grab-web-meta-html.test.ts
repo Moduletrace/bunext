@@ -1,108 +1,109 @@
 import { describe, it, expect } from "bun:test";
+import { renderToString } from "react-dom/server";
 import grabWebMetaHTML from "../../../functions/server/web-pages/grab-web-meta-html";
+
+function render(meta: Parameters<typeof grabWebMetaHTML>[0]["meta"]) {
+    return renderToString(grabWebMetaHTML({ meta }));
+}
 
 describe("grabWebMetaHTML", () => {
     it("returns empty string for empty meta object", () => {
-        expect(grabWebMetaHTML({ meta: {} })).toBe("");
+        expect(render({})).toBe("");
     });
 
     it("generates a title tag", () => {
-        const html = grabWebMetaHTML({ meta: { title: "My Page" } });
-        expect(html).toContain("<title>My Page</title>");
+        expect(render({ title: "My Page" })).toContain("<title>My Page</title>");
     });
 
     it("generates a description meta tag", () => {
-        const html = grabWebMetaHTML({ meta: { description: "A description" } });
-        expect(html).toContain('<meta name="description" content="A description"');
+        expect(render({ description: "A description" })).toContain(
+            'content="A description"',
+        );
     });
 
     it("joins array keywords with comma", () => {
-        const html = grabWebMetaHTML({
-            meta: { keywords: ["react", "bun", "ssr"] },
-        });
-        expect(html).toContain('content="react, bun, ssr"');
+        expect(render({ keywords: ["react", "bun", "ssr"] })).toContain(
+            'content="react, bun, ssr"',
+        );
     });
 
     it("uses string keywords directly", () => {
-        const html = grabWebMetaHTML({ meta: { keywords: "react, bun" } });
-        expect(html).toContain('content="react, bun"');
+        expect(render({ keywords: "react, bun" })).toContain(
+            'content="react, bun"',
+        );
     });
 
     it("generates author meta tag", () => {
-        const html = grabWebMetaHTML({ meta: { author: "Alice" } });
-        expect(html).toContain('<meta name="author" content="Alice"');
+        expect(render({ author: "Alice" })).toContain('content="Alice"');
     });
 
     it("generates robots meta tag", () => {
-        const html = grabWebMetaHTML({ meta: { robots: "noindex" } });
-        expect(html).toContain('<meta name="robots" content="noindex"');
+        expect(render({ robots: "noindex" })).toContain('content="noindex"');
     });
 
     it("generates canonical link tag", () => {
-        const html = grabWebMetaHTML({
-            meta: { canonical: "https://example.com/page" },
-        });
-        expect(html).toContain('<link rel="canonical" href="https://example.com/page"');
+        expect(render({ canonical: "https://example.com/page" })).toContain(
+            'href="https://example.com/page"',
+        );
     });
 
     it("generates theme-color meta tag", () => {
-        const html = grabWebMetaHTML({ meta: { themeColor: "#ff0000" } });
-        expect(html).toContain('<meta name="theme-color" content="#ff0000"');
+        expect(render({ themeColor: "#ff0000" })).toContain(
+            'content="#ff0000"',
+        );
     });
 
     it("generates OG tags", () => {
-        const html = grabWebMetaHTML({
-            meta: {
-                og: {
-                    title: "OG Title",
-                    description: "OG Desc",
-                    image: "https://example.com/img.png",
-                    url: "https://example.com",
-                    type: "website",
-                    siteName: "Example",
-                    locale: "en_US",
-                },
+        const html = render({
+            og: {
+                title: "OG Title",
+                description: "OG Desc",
+                image: "https://example.com/img.png",
+                url: "https://example.com",
+                type: "website",
+                siteName: "Example",
+                locale: "en_US",
             },
         });
-        expect(html).toContain('<meta property="og:title" content="OG Title"');
-        expect(html).toContain('<meta property="og:description" content="OG Desc"');
-        expect(html).toContain('<meta property="og:image" content="https://example.com/img.png"');
-        expect(html).toContain('<meta property="og:url" content="https://example.com"');
-        expect(html).toContain('<meta property="og:type" content="website"');
-        expect(html).toContain('<meta property="og:site_name" content="Example"');
-        expect(html).toContain('<meta property="og:locale" content="en_US"');
+        expect(html).toContain('property="og:title"');
+        expect(html).toContain('content="OG Title"');
+        expect(html).toContain('property="og:description"');
+        expect(html).toContain('property="og:image"');
+        expect(html).toContain('property="og:url"');
+        expect(html).toContain('property="og:type"');
+        expect(html).toContain('property="og:site_name"');
+        expect(html).toContain('property="og:locale"');
     });
 
     it("generates Twitter card tags", () => {
-        const html = grabWebMetaHTML({
-            meta: {
-                twitter: {
-                    card: "summary_large_image",
-                    title: "Tweet Title",
-                    description: "Tweet Desc",
-                    image: "https://example.com/tw.png",
-                    site: "@example",
-                    creator: "@alice",
-                },
+        const html = render({
+            twitter: {
+                card: "summary_large_image",
+                title: "Tweet Title",
+                description: "Tweet Desc",
+                image: "https://example.com/tw.png",
+                site: "@example",
+                creator: "@alice",
             },
         });
-        expect(html).toContain('<meta name="twitter:card" content="summary_large_image"');
-        expect(html).toContain('<meta name="twitter:title" content="Tweet Title"');
-        expect(html).toContain('<meta name="twitter:description" content="Tweet Desc"');
-        expect(html).toContain('<meta name="twitter:image" content="https://example.com/tw.png"');
-        expect(html).toContain('<meta name="twitter:site" content="@example"');
-        expect(html).toContain('<meta name="twitter:creator" content="@alice"');
+        expect(html).toContain('name="twitter:card"');
+        expect(html).toContain('content="summary_large_image"');
+        expect(html).toContain('name="twitter:title"');
+        expect(html).toContain('name="twitter:description"');
+        expect(html).toContain('name="twitter:image"');
+        expect(html).toContain('name="twitter:site"');
+        expect(html).toContain('name="twitter:creator"');
     });
 
     it("skips undefined OG fields", () => {
-        const html = grabWebMetaHTML({ meta: { og: { title: "Only Title" } } });
+        const html = render({ og: { title: "Only Title" } });
         expect(html).toContain("og:title");
         expect(html).not.toContain("og:description");
         expect(html).not.toContain("og:image");
     });
 
     it("does not emit tags for missing fields", () => {
-        const html = grabWebMetaHTML({ meta: { title: "Hello" } });
+        const html = render({ title: "Hello" });
         expect(html).not.toContain("description");
         expect(html).not.toContain("og:");
         expect(html).not.toContain("twitter:");

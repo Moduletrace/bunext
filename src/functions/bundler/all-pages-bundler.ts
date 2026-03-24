@@ -9,6 +9,7 @@ import grabArtifactsFromBundledResults from "./grab-artifacts-from-bundled-resul
 import { writeFileSync } from "fs";
 import type { BundlerCTXMap } from "../../types";
 import recordArtifacts from "./record-artifacts";
+import stripServerSideLogic from "./strip-server-side-logic";
 
 const { HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE } = grabDirNames();
 
@@ -39,7 +40,7 @@ export default async function allPagesBundler(params?: Params) {
     const dev = isDevelopment();
 
     for (const page of target_pages) {
-        const key = page.transformed_path;
+        const key = page.local_path;
 
         const txt = await grabClientHydrationScript({
             page_local_path: page.local_path,
@@ -50,6 +51,13 @@ export default async function allPagesBundler(params?: Params) {
         // }
 
         if (!txt) continue;
+
+        // const final_tsx = stripServerSideLogic({
+        //     txt_code: txt,
+        //     file_path: key,
+        // });
+
+        // console.log("final_tsx", final_tsx);
 
         virtualEntries[key] = txt;
     }
@@ -94,6 +102,31 @@ export default async function allPagesBundler(params?: Params) {
 
     const entryPoints = Object.keys(virtualEntries).map((k) => `virtual:${k}`);
 
+    // let alias: any = {};
+    // const excludes = [
+    //     "bun:sqlite",
+    //     "path",
+    //     "url",
+    //     "events",
+    //     "util",
+    //     "crypto",
+    //     "net",
+    //     "tls",
+    //     "fs",
+    //     "node:path",
+    //     "node:url",
+    //     "node:process",
+    //     "node:fs",
+    //     "node:timers/promises",
+    // ];
+
+    // for (let i = 0; i < excludes.length; i++) {
+    //     const exclude = excludes[i];
+    //     alias[exclude] = "./empty.js";
+    // }
+
+    // console.log("alias", alias);
+
     const result = await esbuild.build({
         entryPoints,
         outdir: HYDRATION_DST_DIR,
@@ -119,6 +152,7 @@ export default async function allPagesBundler(params?: Params) {
             "react-dom/client",
             "react/jsx-runtime",
         ],
+        // alias,
     });
 
     if (result.errors.length > 0) {

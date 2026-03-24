@@ -2,6 +2,7 @@ import grabRouteParams from "../../../utils/grab-route-params";
 import type {
     BunextPageModule,
     BunextPageModuleServerReturn,
+    BunextPageServerModule,
     BunextRootModule,
     BunxRouteParams,
     GrabPageComponentRes,
@@ -12,6 +13,7 @@ import _ from "lodash";
 import { log } from "../../../utils/log";
 import grabRootFilePath from "./grab-root-file-path";
 import grabPageServerRes from "./grab-page-server-res";
+import grabPageServerPath from "./grab-page-server-path";
 
 class NotFoundError extends Error {}
 
@@ -77,20 +79,23 @@ export default async function grabPageComponent({
         }
 
         const { root_file_path } = grabRootFilePath();
-
-        const module: BunextPageModule = await import(`${file_path}?t=${now}`);
         const root_module: BunextRootModule | undefined = root_file_path
             ? await import(`${root_file_path}?t=${now}`)
             : undefined;
+        const { server_file_path: root_server_file_path } = root_file_path
+            ? grabPageServerPath({ file_path: root_file_path })
+            : {};
+        const root_server_module: BunextPageServerModule = root_server_file_path
+            ? await import(`${root_server_file_path}?t=${now}`)
+            : undefined;
 
-        if (debug) {
-            log.info(`module:`, module);
-        }
+        const root_server_fn =
+            root_server_module?.default || root_server_module?.server;
 
         const rootServerRes: BunextPageModuleServerReturn | undefined =
-            root_module?.server
+            root_server_fn
                 ? await grabPageServerRes({
-                      module: root_module,
+                      server_function: root_server_fn,
                       url,
                       query: match?.query,
                       routeParams,
@@ -101,39 +106,38 @@ export default async function grabPageComponent({
             log.info(`rootServerRes:`, rootServerRes);
         }
 
-        const serverRes: BunextPageModuleServerReturn = await grabPageServerRes(
-            {
-                module,
-                url,
-                query: match?.query,
-                routeParams,
-            },
-        );
+        const module: BunextPageModule = await import(`${file_path}?t=${now}`);
+        const { server_file_path } = grabPageServerPath({ file_path });
+        const server_module: BunextPageServerModule = server_file_path
+            ? await import(`${server_file_path}?t=${now}`)
+            : undefined;
+
+        if (debug) {
+            log.info(`module:`, module);
+        }
+
+        const server_fn = server_module?.default || server_module?.server;
+
+        const serverRes: BunextPageModuleServerReturn | undefined = server_fn
+            ? await grabPageServerRes({
+                  server_function: server_fn,
+                  url,
+                  query: match?.query,
+                  routeParams,
+              })
+            : undefined;
 
         if (debug) {
             log.info(`serverRes:`, serverRes);
         }
 
-        const meta = module.meta
-            ? typeof module.meta == "function" && routeParams
-                ? await module.meta({
-                      ctx: routeParams,
-                      serverRes,
-                  })
-                : typeof module.meta == "object"
-                  ? module.meta
-                  : undefined
-            : undefined;
-
-        if (debug) {
-            log.info(`meta:`, meta);
-        }
+        const mergedServerRes = _.merge(rootServerRes || {}, serverRes || {});
 
         const { component } =
             (await grabPageBundledReactComponent({
                 file_path,
                 root_file_path,
-                server_res: serverRes,
+                server_res: mergedServerRes,
             })) || {};
 
         if (!component) {
@@ -146,7 +150,7 @@ export default async function grabPageComponent({
 
         return {
             component,
-            serverRes: _.merge(rootServerRes || {}, serverRes),
+            serverRes: mergedServerRes,
             routeParams,
             module,
             bundledMap,

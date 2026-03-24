@@ -23,24 +23,24 @@ export default async function grabClientHydrationScript({
 
     const { root_file_path } = grabRootFilePath();
 
-    const target_path = pagePathTransform({ page_path: page_local_path });
-    const target_root_path = root_file_path
-        ? pagePathTransform({ page_path: root_file_path })
-        : undefined;
+    // const target_path = pagePathTransform({ page_path: page_local_path });
+    // const target_root_path = root_file_path
+    //     ? pagePathTransform({ page_path: root_file_path })
+    //     : undefined;
 
     let txt = ``;
 
     txt += `import { hydrateRoot } from "react-dom/client";\n`;
-    if (target_root_path) {
-        txt += `import Root from "${target_root_path}";\n`;
+    if (root_file_path) {
+        txt += `import Root from "${root_file_path}";\n`;
     }
-    txt += `import Page from "${target_path}";\n\n`;
+    txt += `import Page from "${page_local_path}";\n\n`;
     txt += `const pageProps = window.${ClientWindowPagePropsName} || {};\n`;
 
-    if (target_root_path) {
-        txt += `const component = <Root suppressHydrationWarning={true} {...pageProps}><Page {...pageProps} /></Root>\n`;
+    if (root_file_path) {
+        txt += `const component = <Root {...pageProps}><Page {...pageProps} /></Root>\n`;
     } else {
-        txt += `const component = <Page suppressHydrationWarning={true} {...pageProps} />\n`;
+        txt += `const component = <Page {...pageProps} />\n`;
     }
 
     txt += `if (window.${ClientRootComponentWindowName}?.render) {\n`;

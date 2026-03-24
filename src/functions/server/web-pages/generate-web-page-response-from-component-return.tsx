@@ -1,3 +1,4 @@
+import _ from "lodash";
 import type { GrabPageComponentRes } from "../../../types";
 import isDevelopment from "../../../utils/is-development";
 import { log } from "../../../utils/log";
@@ -53,9 +54,10 @@ export default async function generateWebPageResponseFromComponentReturn({
         };
     }
 
-    const cache_page =
-        module.config?.cachePage || serverRes?.cachePage || false;
-    const expiry_seconds = module.config?.cacheExpiry || serverRes?.cacheExpiry;
+    const config = _.merge(root_module?.config, module.config);
+
+    const cache_page = config?.cachePage || serverRes?.cachePage || false;
+    const expiry_seconds = config?.cacheExpiry || serverRes?.cacheExpiry;
 
     if (cache_page && routeParams?.url) {
         const key = routeParams.url.pathname + (routeParams.url.search || "");

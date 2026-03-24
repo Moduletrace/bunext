@@ -79,6 +79,13 @@ export default async function genWebHTML({
         },
     });
 
+    // let skipped_modules_import_map: { [k: string]: string } = {};
+
+    // [...global.SKIPPED_BROWSER_MODULES].forEach((sk) => {
+    //     skipped_modules_import_map[sk] =
+    //         "data:text/javascript,export default {}";
+    // });
+
     let final_component = (
         <html {...html_props}>
             <head>
@@ -100,6 +107,16 @@ export default async function genWebHTML({
                         __html: `window.${ClientWindowPagePropsName} = ${serializedProps}`,
                     }}
                 />
+
+                {/* {global.SKIPPED_BROWSER_MODULES ? (
+                    <script
+                        type="importmap"
+                        dangerouslySetInnerHTML={{
+                            __html: importMap,
+                        }}
+                        fetchPriority="high"
+                    />
+                ) : null} */}
 
                 {bundledMap?.path ? (
                     <>

@@ -13,10 +13,10 @@ export default function grabPageReactComponentString({
     server_res,
 }: Params): string | undefined {
     try {
-        const target_path = pagePathTransform({ page_path: file_path });
-        const target_root_path = root_file_path
-            ? pagePathTransform({ page_path: root_file_path })
-            : undefined;
+        // const target_path = pagePathTransform({ page_path: file_path });
+        // const target_root_path = root_file_path
+        //     ? pagePathTransform({ page_path: root_file_path })
+        //     : undefined;
 
         let tsx = ``;
 
@@ -24,18 +24,23 @@ export default function grabPageReactComponentString({
             EJSON.stringify(server_res || {}) ?? "{}",
         );
 
-        if (target_root_path) {
-            tsx += `import Root from "${target_root_path}"\n`;
+        // Import Root from its original source path so that all sub-components
+        // that import __root (e.g. AppContext) resolve to the same module instance.
+        // Using the rewritten .bunext/pages/__root would create a separate
+        // createContext() call, breaking context for any sub-component that
+        // imports AppContext via a relative path to the source __root.
+        if (root_file_path) {
+            tsx += `import Root from "${root_file_path}"\n`;
         }
 
-        tsx += `import Page from "${target_path}"\n`;
+        tsx += `import Page from "${file_path}"\n`;
         tsx += `export default function Main() {\n\n`;
         tsx += `const props = JSON.parse(${server_res_json})\n\n`;
         tsx += `    return (\n`;
-        if (target_root_path) {
-            tsx += `        <Root suppressHydrationWarning={true} {...props}><Page {...props} /></Root>\n`;
+        if (root_file_path) {
+            tsx += `        <Root {...props}><Page {...props} /></Root>\n`;
         } else {
-            tsx += `        <Page suppressHydrationWarning={true} {...props} />\n`;
+            tsx += `        <Page {...props} />\n`;
         }
         tsx += `    )\n`;
         tsx += `}\n`;

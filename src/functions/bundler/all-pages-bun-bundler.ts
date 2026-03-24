@@ -8,6 +8,7 @@ import path from "path";
 import grabClientHydrationScript from "./grab-client-hydration-script";
 import { mkdirSync, rmSync } from "fs";
 import recordArtifacts from "./record-artifacts";
+import BunSkipNonBrowserPlugin from "./plugins/bun-skip-browser-plugin";
 
 const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR, BUNX_TMP_DIR } =
     grabDirNames();

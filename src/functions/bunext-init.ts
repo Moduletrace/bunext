@@ -35,6 +35,7 @@ declare global {
     var CURRENT_VERSION: string | undefined;
     var PAGE_FILES: PageFiles[];
     var ROOT_FILE_UPDATED: boolean;
+    var SKIPPED_BROWSER_MODULES: Set<string>;
     // var BUNDLER_CTX: BuildContext | undefined;
 }
 
@@ -47,6 +48,7 @@ export default async function bunextInit() {
     global.BUNDLER_CTX_MAP = {};
     global.BUNDLER_REBUILDS = 0;
     global.PAGE_FILES = [];
+    global.SKIPPED_BROWSER_MODULES = new Set<string>();
 
     await init();
     log.banner();

@@ -2,7 +2,7 @@ import { Command } from "commander";
 import startServer from "../../functions/server/start-server";
 import { log } from "../../utils/log";
 import bunextInit from "../../functions/bunext-init";
-import rewritePagesModule from "../../utils/rewrite-pages-module";
+// import rewritePagesModule from "../../utils/rewrite-pages-module";
 import grabDirNames from "../../utils/grab-dir-names";
 import { rmSync } from "fs";
 
@@ -21,7 +21,7 @@ export default function () {
                 rmSync(BUNX_CWD_PAGES_REWRITE_DIR, { recursive: true });
             } catch (error) {}
 
-            await rewritePagesModule();
+            // await rewritePagesModule();
             await bunextInit();
 
             await startServer();

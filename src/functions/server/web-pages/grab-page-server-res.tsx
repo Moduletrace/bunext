@@ -1,6 +1,7 @@
 import type {
     BunextPageModule,
     BunextPageModuleServerReturn,
+    BunextPageServerFn,
     BunxRouteParams,
     GrabPageComponentRes,
 } from "../../../types";
@@ -8,7 +9,7 @@ import _ from "lodash";
 
 type Params = {
     url?: URL;
-    module: BunextPageModule;
+    server_function: BunextPageServerFn;
     query?: Record<string, string>;
     routeParams?: BunxRouteParams;
 };
@@ -17,7 +18,7 @@ export default async function grabPageServerRes({
     url,
     query,
     routeParams,
-    module,
+    server_function,
 }: Params): Promise<BunextPageModuleServerReturn> {
     const default_props: BunextPageModuleServerReturn = {
         url: url
@@ -43,7 +44,7 @@ export default async function grabPageServerRes({
 
     try {
         if (routeParams) {
-            const serverData = await module["server"]?.({
+            const serverData = await server_function({
                 ...routeParams,
                 query: { ...routeParams.query, ...query },
             });

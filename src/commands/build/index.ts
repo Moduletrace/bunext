@@ -1,10 +1,11 @@
 import { Command } from "commander";
 import { log } from "../../utils/log";
 import init from "../../functions/init";
-import rewritePagesModule from "../../utils/rewrite-pages-module";
+// import rewritePagesModule from "../../utils/rewrite-pages-module";
 import allPagesBunBundler from "../../functions/bundler/all-pages-bun-bundler";
 import grabDirNames from "../../utils/grab-dir-names";
 import { rmSync } from "fs";
+import allPagesBundler from "../../functions/bundler/all-pages-bundler";
 
 const { HYDRATION_DST_DIR, BUNX_CWD_PAGES_REWRITE_DIR } = grabDirNames();
 
@@ -20,7 +21,9 @@ export default function () {
                 rmSync(BUNX_CWD_PAGES_REWRITE_DIR, { recursive: true });
             } catch (error) {}
 
-            await rewritePagesModule();
+            global.SKIPPED_BROWSER_MODULES = new Set<string>();
+
+            // await rewritePagesModule();
             await init();
 
             log.banner();
