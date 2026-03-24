@@ -27,7 +27,9 @@ export default function () {
 
             // await allPagesBunBundler();
 
-            await allPagesESBuildContextBundler();
+            await allPagesESBuildContextBundler({
+                post_build_fn: serverPostBuildFn,
+            });
 
             await startServer();
         });

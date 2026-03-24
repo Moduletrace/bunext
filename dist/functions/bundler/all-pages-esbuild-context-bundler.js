@@ -62,7 +62,7 @@ export default async function allPagesESBuildContextBundler(params) {
                                 artifact;
                         }
                     }
-                    // params?.post_build_fn?.({ artifacts });
+                    params?.post_build_fn?.({ artifacts });
                     // writeFileSync(
                     //     HYDRATION_DST_DIR_MAP_JSON_FILE,
                     //     JSON.stringify(artifacts, null, 4),

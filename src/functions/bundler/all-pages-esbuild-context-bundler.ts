@@ -20,7 +20,7 @@ let build_starts = 0;
 const MAX_BUILD_STARTS = 10;
 
 type Params = {
-    // post_build_fn?: (params: { artifacts: any[] }) => Promise<void> | void;
+    post_build_fn?: (params: { artifacts: any[] }) => Promise<void> | void;
     // watch?: boolean;
 };
 
@@ -89,7 +89,7 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
                         }
                     }
 
-                    // params?.post_build_fn?.({ artifacts });
+                    params?.post_build_fn?.({ artifacts });
 
                     // writeFileSync(
                     //     HYDRATION_DST_DIR_MAP_JSON_FILE,

@@ -1,8 +1,10 @@
 import { watch, existsSync } from "fs";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
+import rebuildBundler from "./rebuild-bundler";
 import { log } from "../../utils/log";
 import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
+import serverPostBuildFn from "./server-post-build-fn";
 const { ROOT_DIR } = grabDirNames();
 export default async function watcherEsbuildCTX() {
     const pages_src_watcher = watch(ROOT_DIR, {
@@ -67,7 +69,9 @@ async function fullRebuild(params) {
         global.ROUTER.reload();
         await global.BUNDLER_CTX?.dispose();
         global.BUNDLER_CTX = undefined;
-        await allPagesESBuildContextBundler();
+        await allPagesESBuildContextBundler({
+            post_build_fn: serverPostBuildFn,
+        });
     }
     catch (error) {
         log.error(error);
