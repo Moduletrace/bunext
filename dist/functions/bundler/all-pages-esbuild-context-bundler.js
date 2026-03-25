@@ -57,7 +57,7 @@ export default async function allPagesESBuildContextBundler(params) {
             "react",
             "react-dom",
             "react-dom/client",
-            "react/jsx-runtime",
+            // "react/jsx-runtime",
         ],
     });
     await global.BUNDLER_CTX.rebuild();
