@@ -9,7 +9,7 @@ export default async function startServer() {
 
     global.SERVER = server;
 
-    log.server(`http://localhost:${server.port}`);
+    log.server(`http://${server.hostname}:${server.port}`);
 
     return server;
 }

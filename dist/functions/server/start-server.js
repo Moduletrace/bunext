@@ -5,6 +5,6 @@ export default async function startServer() {
     const serverParams = await serverParamsGen();
     const server = Bun.serve(serverParams);
     global.SERVER = server;
-    log.server(`http://localhost:${server.port}`);
+    log.server(`http://${server.hostname}:${server.port}`);
     return server;
 }

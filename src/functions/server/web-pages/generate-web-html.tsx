@@ -76,10 +76,10 @@ export default async function genWebHTML({
         "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime`,
     };
 
-    if (dev) {
-        browser_imports["react/jsx-dev-runtime"] =
-            `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`;
-    }
+    // if (dev) {
+    //     browser_imports["react/jsx-dev-runtime"] =
+    //         `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`;
+    // }
 
     const importMap = JSON.stringify({
         imports: browser_imports,

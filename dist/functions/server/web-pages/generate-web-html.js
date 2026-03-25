@@ -50,10 +50,10 @@ export default async function genWebHTML({ component, pageProps, bundledMap, mod
         "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client`,
         "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime`,
     };
-    if (dev) {
-        browser_imports["react/jsx-dev-runtime"] =
-            `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`;
-    }
+    // if (dev) {
+    //     browser_imports["react/jsx-dev-runtime"] =
+    //         `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`;
+    // }
     const importMap = JSON.stringify({
         imports: browser_imports,
     });

@@ -47,7 +47,7 @@ export type BunextConfig = {
     middleware?: (params: BunextConfigMiddlewareParams) => Promise<Response | Request | undefined> | Response | Request | undefined;
     defaultCacheExpiry?: number;
     websocket?: WebSocketHandler<any>;
-    serverOptions?: Bun.Serve.Options<any>;
+    serverOptions?: Omit<Bun.Serve.Options<any>, "fetch" | "routes">;
 };
 export type BunextConfigMiddlewareParams = {
     req: Request;

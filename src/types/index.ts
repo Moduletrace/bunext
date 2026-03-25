@@ -64,7 +64,7 @@ export type BunextConfig = {
         | undefined;
     defaultCacheExpiry?: number;
     websocket?: WebSocketHandler<any>;
-    serverOptions?: Bun.Serve.Options<any>;
+    serverOptions?: Omit<Bun.Serve.Options<any>, "fetch" | "routes">;
 };
 
 export type BunextConfigMiddlewareParams = {
