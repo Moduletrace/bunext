@@ -74,6 +74,7 @@ export default async function genWebHTML({
         "react-dom": `https://esm.sh/react-dom@${_reactVersion}`,
         "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client`,
         "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime`,
+        "react/jsx-dev-runtime": `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`,
     };
 
     // if (dev) {

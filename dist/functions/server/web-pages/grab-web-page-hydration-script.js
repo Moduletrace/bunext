@@ -4,9 +4,17 @@ export default async function (params) {
     const { ClientWindowPagePropsName } = grabConstants();
     let script = "";
     script += `console.log(\`Development Environment\`);\n\n`;
+    const errors_to_supress = [
+        "hydrat",
+        "react/jsx-dev-runtime",
+        "react/jsx-runtime",
+    ];
+    const supress_condition = errors_to_supress
+        .map((e) => `args[0].includes("${e}")`)
+        .join(" || ");
     script += `const _ce = console.error.bind(console);\n`;
     script += `console.error = (...args) => {\n`;
-    script += `    if (typeof args[0] === "string" && args[0].includes("hydrat")) return;\n`;
+    script += `    if (typeof args[0] === "string" && (${supress_condition})) return;\n`;
     script += `    _ce(...args);\n`;
     script += `};\n\n`;
     script += `function __bunext_show_error(message, source, stack) {\n`;
