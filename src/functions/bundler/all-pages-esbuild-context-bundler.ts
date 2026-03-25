@@ -80,7 +80,8 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
             "react",
             "react-dom",
             "react-dom/client",
-            // "react/jsx-runtime",
+            "react/jsx-runtime",
+            "react/jsx-dev-runtime",
         ],
     });
 
