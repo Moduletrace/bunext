@@ -23,10 +23,6 @@ export default async function (params?: Params) {
         .map((e) => `args[0].includes("${e}")`)
         .join(" || ");
 
-    const runtime_supress_condition = errors_to_supress
-        .map((e) => `message.includes("${e}")`)
-        .join(" || ");
-
     script += `const _ce = console.error.bind(console);\n`;
     script += `console.error = (...args) => {\n`;
     script += `    if (typeof args[0] === "string" && (${supress_condition})) return;\n`;
@@ -43,7 +39,8 @@ export default async function (params?: Params) {
     script += `    document.body.appendChild(overlay);\n`;
     script += `}\n\n`;
     script += `function __bunext_should_suppress_runtime_error(message) {\n`;
-    script += `    return typeof message === "string" && (${runtime_supress_condition});\n`;
+    script += `    return false;\n`;
+    // script += `    return typeof message === "string" && (message.includes('Dynamic require of "react/jsx-dev-runtime"') || message.includes("react/jsx-dev-runtime"));\n`;
     script += `}\n\n`;
     script += `window.addEventListener("error", (e) => {\n`;
     script += `    const message = String(e.message ?? "");\n`;
