@@ -1,0 +1,29 @@
+import _ from "lodash";
+import { log } from "../../../utils/log";
+import writeCache from "../../cache/write-cache";
+export default async function generateWebPageGetCachePage({ module, routeParams, serverRes, root_module, html, }) {
+    const config = _.merge(root_module?.config, module.config);
+    const cache_page = config?.cachePage || serverRes?.cachePage || false;
+    const expiry_seconds = config?.cacheExpiry || serverRes?.cacheExpiry;
+    if (cache_page && routeParams?.url) {
+        try {
+            const is_cache = typeof cache_page == "boolean"
+                ? cache_page
+                : await cache_page({ ctx: routeParams, serverRes });
+            if (!is_cache) {
+                return false;
+            }
+            const key = routeParams.url.pathname + (routeParams.url.search || "");
+            writeCache({
+                key,
+                value: html,
+                paradigm: "html",
+                expiry_seconds,
+            });
+        }
+        catch (error) {
+            log.error(`Error writing Cache => ${error.message}\n`, error);
+        }
+    }
+    return true;
+}

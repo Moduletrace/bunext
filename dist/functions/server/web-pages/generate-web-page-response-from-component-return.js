@@ -1,9 +1,10 @@
 import _ from "lodash";
 import isDevelopment from "../../../utils/is-development";
 import { log } from "../../../utils/log";
-import writeCache from "../../cache/write-cache";
 import genWebHTML from "./generate-web-html";
+import generateWebPageGetCachePage from "./generate-web-page-get-cache-page";
 export default async function generateWebPageResponseFromComponentReturn({ component, module, bundledMap, routeParams, serverRes, debug, root_module, }) {
+    const is_dev = isDevelopment();
     const html = await genWebHTML({
         component,
         pageProps: serverRes,
@@ -28,7 +29,7 @@ export default async function generateWebPageResponseFromComponentReturn({ compo
             ...serverRes?.responseOptions?.headers,
         },
     };
-    if (isDevelopment()) {
+    if (is_dev) {
         res_opts.headers = {
             ...res_opts.headers,
             "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -36,16 +37,13 @@ export default async function generateWebPageResponseFromComponentReturn({ compo
             Expires: "0",
         };
     }
-    const config = _.merge(root_module?.config, module.config);
-    const cache_page = config?.cachePage || serverRes?.cachePage || false;
-    const expiry_seconds = config?.cacheExpiry || serverRes?.cacheExpiry;
-    if (cache_page && routeParams?.url) {
-        const key = routeParams.url.pathname + (routeParams.url.search || "");
-        writeCache({
-            key,
-            value: html,
-            paradigm: "html",
-            expiry_seconds,
+    if (!is_dev) {
+        await generateWebPageGetCachePage({
+            html,
+            module,
+            root_module,
+            routeParams,
+            serverRes,
         });
     }
     const res = new Response(html, res_opts);

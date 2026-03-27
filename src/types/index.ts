@@ -222,7 +222,10 @@ export type BunextPageServerFn<
 ) => Promise<BunextPageModuleServerReturn<T>>;
 
 export type BunextRouteConfig = {
-    cachePage?: boolean;
+    /**
+     * Whether to cache the current page
+     */
+    cachePage?: BunextCachePageType;
     /**
      * Expiry time of the cache in seconds
      */
@@ -237,13 +240,24 @@ export type BunextPageModuleServerReturn<
     query?: Q;
     redirect?: BunextPageModuleServerRedirect;
     responseOptions?: ResponseInit;
-    cachePage?: boolean;
+    /**
+     * Whether to cache the current page
+     */
+    cachePage?: BunextCachePageType;
     /**
      * Expiry time of the cache in seconds
      */
     cacheExpiry?: number;
     url?: BunextPageModuleServerReturnURLObject;
+    error?: string;
 };
+
+export type BunextCachePageType =
+    | boolean
+    | ((params: {
+          ctx: Omit<BunxRouteParams, "body">;
+          serverRes?: BunextPageModuleServerReturn;
+      }) => Promise<boolean> | boolean);
 
 export type BunextPageProps<
     T extends { [k: string]: any } = { [k: string]: any },

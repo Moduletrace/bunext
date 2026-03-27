@@ -6,6 +6,7 @@ import type {
     GrabPageComponentRes,
 } from "../../../types";
 import _ from "lodash";
+import { log } from "../../../utils/log";
 
 type Params = {
     url?: URL;
@@ -56,9 +57,15 @@ export default async function grabPageServerRes({
         return {
             ...default_props,
         };
-    } catch (error) {
+    } catch (error: any) {
+        log.error(
+            `Page ${url?.pathname} Server Error => ${error.message}\n`,
+            error,
+        );
+
         return {
             ...default_props,
+            error: error.message,
         };
     }
 }

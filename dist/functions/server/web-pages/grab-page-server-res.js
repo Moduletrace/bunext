@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { log } from "../../../utils/log";
 export default async function grabPageServerRes({ url, query, routeParams, server_function, }) {
     const default_props = {
         url: url
@@ -37,8 +38,10 @@ export default async function grabPageServerRes({ url, query, routeParams, serve
         };
     }
     catch (error) {
+        log.error(`Page ${url?.pathname} Server Error => ${error.message}\n`, error);
         return {
             ...default_props,
+            error: error.message,
         };
     }
 }
