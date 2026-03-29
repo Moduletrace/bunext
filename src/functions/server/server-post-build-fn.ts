@@ -23,9 +23,10 @@ export default async function serverPostBuildFn() {
 
         const mock_req = new Request(controller.page_url);
 
-        const { serverRes } = await grabPageComponent({
-            req: mock_req,
-        });
+        const { serverRes, bundledMap, module, root_module } =
+            await grabPageComponent({
+                req: mock_req,
+            });
 
         const final_artifact: Omit<GlobalHMRControllerObject, "controller"> = {
             ..._.omit(controller, ["controller"]),

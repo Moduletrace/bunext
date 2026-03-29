@@ -14,7 +14,7 @@ export default async function serverPostBuildFn() {
         }
         const target_artifact = global.BUNDLER_CTX_MAP[controller.target_map.local_path];
         const mock_req = new Request(controller.page_url);
-        const { serverRes } = await grabPageComponent({
+        const { serverRes, bundledMap, module, root_module } = await grabPageComponent({
             req: mock_req,
         });
         const final_artifact = {

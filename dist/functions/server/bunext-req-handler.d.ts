@@ -1,5 +1,6 @@
 type Params = {
     req: Request;
+    server: Bun.Server<any>;
 };
-export default function bunextRequestHandler({ req: initial_req, }: Params): Promise<Response>;
+export default function bunextRequestHandler({ req: initial_req, server, }: Params): Promise<Response>;
 export {};

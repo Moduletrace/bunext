@@ -62,7 +62,7 @@ export default async function genWebHTML({ component, pageProps, bundledMap, mod
                             __html: `window.${ClientWindowPagePropsName} = ${serializedProps}`,
                         } }), bundledMap?.path ? (_jsxs(_Fragment, { children: [_jsx("script", { type: "importmap", dangerouslySetInnerHTML: {
                                     __html: importMap,
-                                }, fetchPriority: "high" }), _jsx("script", { src: `/${bundledMap.path}`, type: "module", id: AppData["BunextClientHydrationScriptID"], defer: true })] })) : null, is_dev ? (_jsx("script", { defer: true, dangerouslySetInnerHTML: {
+                                }, defer: true }), _jsx("script", { src: `/${bundledMap.path}`, type: "module", id: AppData["BunextClientHydrationScriptID"], defer: true })] })) : null, is_dev ? (_jsx("script", { defer: true, dangerouslySetInnerHTML: {
                             __html: page_hydration_script,
                         } })) : null, RootHead ? (_jsx(RootHead, { serverRes: pageProps, ctx: routeParams })) : null, Head ? _jsx(Head, { serverRes: pageProps, ctx: routeParams }) : null] }), _jsx("body", { children: _jsx("div", { id: ClientRootElementIDName, suppressHydrationWarning: !dev, children: component }) })] }));
     let html = `<!DOCTYPE html>\n`;

@@ -14,8 +14,8 @@ await bunext.bunextInit();
 const server = Bun.serve({
     routes: {
         "/*": {
-            async GET(req) {
-                return await bunext.bunextRequestHandler({ req });
+            async GET(req, server) {
+                return await bunext.bunextRequestHandler({ req, server });
             },
         },
     },

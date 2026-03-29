@@ -6,7 +6,7 @@ import handleHmr from "./handle-hmr";
 import handlePublic from "./handle-public";
 import handleFiles from "./handle-files";
 import handleBunextPublicAssets from "./handle-bunext-public-assets";
-export default async function bunextRequestHandler({ req: initial_req, }) {
+export default async function bunextRequestHandler({ req: initial_req, server, }) {
     const is_dev = isDevelopment();
     let req = initial_req.clone();
     try {
@@ -25,6 +25,10 @@ export default async function bunextRequestHandler({ req: initial_req, }) {
                 req = middleware_res;
             }
         }
+        // const server_upgrade = server.upgrade(req);
+        // if (server_upgrade) {
+        //     return undefined;
+        // }
         if (url.pathname === "/__hmr" && is_dev) {
             response = await handleHmr({ req });
         }

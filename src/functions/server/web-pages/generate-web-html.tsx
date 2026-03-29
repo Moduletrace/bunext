@@ -125,7 +125,7 @@ export default async function genWebHTML({
                             dangerouslySetInnerHTML={{
                                 __html: importMap,
                             }}
-                            fetchPriority="high"
+                            defer
                         />
                         <script
                             src={`/${bundledMap.path}`}

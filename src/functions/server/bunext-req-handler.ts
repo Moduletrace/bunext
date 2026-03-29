@@ -8,10 +8,12 @@ import handleFiles from "./handle-files";
 import handleBunextPublicAssets from "./handle-bunext-public-assets";
 type Params = {
     req: Request;
+    server: Bun.Server<any>;
 };
 
 export default async function bunextRequestHandler({
     req: initial_req,
+    server,
 }: Params): Promise<Response> {
     const is_dev = isDevelopment();
     let req = initial_req.clone();
@@ -37,6 +39,12 @@ export default async function bunextRequestHandler({
                 req = middleware_res;
             }
         }
+
+        // const server_upgrade = server.upgrade(req);
+
+        // if (server_upgrade) {
+        //     return undefined;
+        // }
 
         if (url.pathname === "/__hmr" && is_dev) {
             response = await handleHmr({ req });

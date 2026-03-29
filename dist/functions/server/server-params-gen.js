@@ -9,7 +9,7 @@ export default async function () {
     const config = await grabConfig();
     return {
         async fetch(req, server) {
-            return await bunextRequestHandler({ req });
+            return await bunextRequestHandler({ req, server });
         },
         port,
         idleTimeout: development ? 0 : undefined,
