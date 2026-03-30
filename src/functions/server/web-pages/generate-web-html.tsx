@@ -9,6 +9,7 @@ import { log } from "../../../utils/log";
 import { AppData } from "../../../data/app-data";
 import { readFileSync } from "fs";
 import path from "path";
+import _ from "lodash";
 
 let _reactVersion = "19";
 try {
@@ -86,6 +87,8 @@ export default async function genWebHTML({
         imports: browser_imports,
     });
 
+    const final_meta = _.merge(root_meta, page_meta);
+
     let final_component = (
         <html {...html_props}>
             <head>
@@ -95,8 +98,7 @@ export default async function genWebHTML({
                     content="width=device-width, initial-scale=1.0"
                 />
 
-                {root_meta ? grabWebMetaHTML({ meta: root_meta }) : null}
-                {page_meta ? grabWebMetaHTML({ meta: page_meta }) : null}
+                {final_meta ? grabWebMetaHTML({ meta: final_meta }) : null}
 
                 {bundledMap?.css_path ? (
                     <link rel="stylesheet" href={`/${bundledMap.css_path}`} />

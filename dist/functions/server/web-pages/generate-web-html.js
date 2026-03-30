@@ -9,6 +9,7 @@ import { log } from "../../../utils/log";
 import { AppData } from "../../../data/app-data";
 import { readFileSync } from "fs";
 import path from "path";
+import _ from "lodash";
 let _reactVersion = "19";
 try {
     _reactVersion = JSON.parse(readFileSync(path.join(process.cwd(), "node_modules/react/package.json"), "utf-8")).version;
@@ -58,7 +59,8 @@ export default async function genWebHTML({ component, pageProps, bundledMap, mod
     const importMap = JSON.stringify({
         imports: browser_imports,
     });
-    let final_component = (_jsxs("html", { ...html_props, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0" }), root_meta ? grabWebMetaHTML({ meta: root_meta }) : null, page_meta ? grabWebMetaHTML({ meta: page_meta }) : null, bundledMap?.css_path ? (_jsx("link", { rel: "stylesheet", href: `/${bundledMap.css_path}` })) : null, _jsx("script", { dangerouslySetInnerHTML: {
+    const final_meta = _.merge(root_meta, page_meta);
+    let final_component = (_jsxs("html", { ...html_props, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0" }), final_meta ? grabWebMetaHTML({ meta: final_meta }) : null, bundledMap?.css_path ? (_jsx("link", { rel: "stylesheet", href: `/${bundledMap.css_path}` })) : null, _jsx("script", { dangerouslySetInnerHTML: {
                             __html: `window.${ClientWindowPagePropsName} = ${serializedProps}`,
                         } }), bundledMap?.path ? (_jsxs(_Fragment, { children: [_jsx("script", { type: "importmap", dangerouslySetInnerHTML: {
                                     __html: importMap,
