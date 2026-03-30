@@ -9,7 +9,7 @@ import writeCache from "../../cache/write-cache";
 
 type Params = {
     html: string;
-    module: BunextPageModule;
+    module?: BunextPageModule;
     root_module?: BunextPageModule;
     routeParams?: BunxRouteParams;
     serverRes?: BunextPageModuleServerReturn<any, any>;
@@ -22,7 +22,7 @@ export default async function generateWebPageGetCachePage({
     root_module,
     html,
 }: Params) {
-    const config = _.merge(root_module?.config, module.config);
+    const config = _.merge(root_module?.config, module?.config);
 
     const cache_page = config?.cachePage || serverRes?.cachePage || false;
     const expiry_seconds = config?.cacheExpiry || serverRes?.cacheExpiry;

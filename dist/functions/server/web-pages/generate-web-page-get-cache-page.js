@@ -2,7 +2,7 @@ import _ from "lodash";
 import { log } from "../../../utils/log";
 import writeCache from "../../cache/write-cache";
 export default async function generateWebPageGetCachePage({ module, routeParams, serverRes, root_module, html, }) {
-    const config = _.merge(root_module?.config, module.config);
+    const config = _.merge(root_module?.config, module?.config);
     const cache_page = config?.cachePage || serverRes?.cachePage || false;
     const expiry_seconds = config?.cacheExpiry || serverRes?.cacheExpiry;
     if (cache_page && routeParams?.url) {

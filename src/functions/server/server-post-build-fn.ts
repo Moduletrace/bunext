@@ -1,5 +1,5 @@
 import _ from "lodash";
-import type { BundlerCTXMap, GlobalHMRControllerObject } from "../../types";
+import type { GlobalHMRControllerObject } from "../../types";
 import grabPageComponent from "./web-pages/grab-page-component";
 
 export default async function serverPostBuildFn() {
@@ -23,10 +23,10 @@ export default async function serverPostBuildFn() {
 
         const mock_req = new Request(controller.page_url);
 
-        const { serverRes, bundledMap, module, root_module } =
-            await grabPageComponent({
-                req: mock_req,
-            });
+        const { serverRes } = await grabPageComponent({
+            req: mock_req,
+            return_server_res_only: true,
+        });
 
         const final_artifact: Omit<GlobalHMRControllerObject, "controller"> = {
             ..._.omit(controller, ["controller"]),

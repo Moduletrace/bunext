@@ -7,9 +7,10 @@ import grabRootFilePath from "./grab-root-file-path";
 import grabPageServerRes from "./grab-page-server-res";
 import grabPageServerPath from "./grab-page-server-path";
 import grabPageModules from "./grab-page-modules";
+import grabPageCombinedServerRes from "./grab-page-combined-server-res";
 class NotFoundError extends Error {
 }
-export default async function grabPageComponent({ req, file_path: passed_file_path, debug, }) {
+export default async function grabPageComponent({ req, file_path: passed_file_path, debug, return_server_res_only, }) {
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
     let routeParams = undefined;
@@ -44,6 +45,16 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         }
         if (debug) {
             log.info(`bundledMap:`, bundledMap);
+        }
+        if (return_server_res_only) {
+            const { serverRes } = await grabPageCombinedServerRes({
+                file_path,
+                debug,
+                query: match?.query,
+                routeParams,
+                url,
+            });
+            return { serverRes };
         }
         const { component, module, serverRes, root_module } = await grabPageModules({
             file_path,

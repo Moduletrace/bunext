@@ -278,11 +278,11 @@ export type BunextPageModuleMetadata = {
 };
 
 export type GrabPageComponentRes = {
-    component: JSX.Element;
+    component?: JSX.Element;
     serverRes?: BunextPageModuleServerReturn;
     routeParams?: BunxRouteParams;
     bundledMap?: BundlerCTXMap;
-    module: BunextPageModule;
+    module?: BunextPageModule;
     root_module?: BunextRootModule;
     debug?: boolean;
 };

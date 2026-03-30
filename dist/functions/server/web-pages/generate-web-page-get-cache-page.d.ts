@@ -1,7 +1,7 @@
 import type { BunextPageModule, BunextPageModuleServerReturn, BunxRouteParams } from "../../../types";
 type Params = {
     html: string;
-    module: BunextPageModule;
+    module?: BunextPageModule;
     root_module?: BunextPageModule;
     routeParams?: BunxRouteParams;
     serverRes?: BunextPageModuleServerReturn<any, any>;
