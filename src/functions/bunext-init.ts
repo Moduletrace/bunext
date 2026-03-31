@@ -33,9 +33,11 @@ declare global {
     var ROOT_FILE_UPDATED: boolean;
     var SKIPPED_BROWSER_MODULES: Set<string>;
     var BUNDLER_CTX: BuildContext | undefined;
+    var DIR_NAMES: ReturnType<typeof grabDirNames>;
 }
 
-const { PAGES_DIR } = grabDirNames();
+const dirNames = grabDirNames();
+const { PAGES_DIR } = dirNames;
 
 export default async function bunextInit() {
     global.HMR_CONTROLLERS = [];
@@ -43,6 +45,7 @@ export default async function bunextInit() {
     global.BUNDLER_REBUILDS = 0;
     global.PAGE_FILES = [];
     global.SKIPPED_BROWSER_MODULES = new Set<string>();
+    global.DIR_NAMES = dirNames;
 
     await init();
     log.banner();

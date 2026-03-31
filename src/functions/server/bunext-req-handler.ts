@@ -48,7 +48,7 @@ export default async function bunextRequestHandler({
 
         if (url.pathname === "/__hmr" && is_dev) {
             response = await handleHmr({ req });
-        } else if (url.pathname.startsWith("/.bunext/public/pages")) {
+        } else if (url.pathname.startsWith("/.bunext")) {
             response = await handleBunextPublicAssets({ req });
         } else if (url.pathname.startsWith("/api/")) {
             response = await handleRoutes({ req });

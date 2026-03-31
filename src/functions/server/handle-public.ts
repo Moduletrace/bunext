@@ -23,20 +23,24 @@ export default async function ({ req }: Params): Promise<Response> {
             return new Response("Forbidden", { status: 403 });
         }
 
-        if (!existsSync(file_path)) {
-            return new Response(`Public File Doesn't Exist`, {
-                status: 404,
-            });
-        }
-
-        const file = Bun.file(file_path);
-
-        let res_opts: ResponseInit = {};
-
-        return new Response(file, res_opts);
+        return readFileResponse({ file_path });
     } catch (error) {
         return new Response(`Public File Not Found`, {
             status: 404,
         });
     }
+}
+
+export function readFileResponse({ file_path }: { file_path: string }) {
+    if (!existsSync(file_path)) {
+        return new Response(`Public File Doesn't Exist`, {
+            status: 404,
+        });
+    }
+
+    const file = Bun.file(file_path);
+
+    // let res_opts: ResponseInit = {};
+
+    return new Response(file);
 }

@@ -1,4 +1,4 @@
-import { renderToString } from "react-dom/server";
+import { renderToReadableStream, renderToString } from "react-dom/server";
 import grabContants from "../../../utils/grab-constants";
 import EJSON from "../../../utils/ejson";
 import type { LivePageDistGenParams } from "../../../types";
@@ -10,6 +10,9 @@ import { AppData } from "../../../data/app-data";
 import { readFileSync } from "fs";
 import path from "path";
 import _ from "lodash";
+import grabDirNames from "../../../utils/grab-dir-names";
+
+const {} = grabDirNames();
 
 let _reactVersion = "19";
 try {
@@ -70,6 +73,15 @@ export default async function genWebHTML({
 
     const dev = isDevelopment();
     const devSuffix = dev ? "?dev" : "";
+
+    // const browser_imports: Record<string, string> = {
+    //     react: `/.bunext/react`,
+    //     "react-dom": `/.bunext/react-dom`,
+    //     "react-dom/client": `/.bunext/react-dom-client`,
+    //     "react/jsx-runtime": `/.bunext/react-jsx-runtime`,
+    //     "react/jsx-dev-runtime": `/.bunext/react-jsx-dev-runtime`,
+    // };
+
     const browser_imports: Record<string, string> = {
         react: `https://esm.sh/react@${_reactVersion}`,
         "react-dom": `https://esm.sh/react-dom@${_reactVersion}`,
@@ -110,15 +122,10 @@ export default async function genWebHTML({
                     }}
                 />
 
-                {/* {global.SKIPPED_BROWSER_MODULES ? (
-                    <script
-                        type="importmap"
-                        dangerouslySetInnerHTML={{
-                            __html: importMap,
-                        }}
-                        fetchPriority="high"
-                    />
-                ) : null} */}
+                {RootHead ? (
+                    <RootHead serverRes={pageProps} ctx={routeParams} />
+                ) : null}
+                {Head ? <Head serverRes={pageProps} ctx={routeParams} /> : null}
 
                 {bundledMap?.path ? (
                     <>
@@ -146,11 +153,6 @@ export default async function genWebHTML({
                         }}
                     />
                 ) : null}
-
-                {RootHead ? (
-                    <RootHead serverRes={pageProps} ctx={routeParams} />
-                ) : null}
-                {Head ? <Head serverRes={pageProps} ctx={routeParams} /> : null}
             </head>
             <body>
                 <div
@@ -165,21 +167,21 @@ export default async function genWebHTML({
 
     let html = `<!DOCTYPE html>\n`;
 
-    // const stream = await renderToReadableStream(final_component, {
-    //     onError(error: any) {
-    //         // This is where you "omit" or handle the errors
-    //         // You can log it silently or ignore it
-    //         if (error.message.includes('unique "key" prop')) return;
-    //         console.error(error);
-    //     },
-    // });
+    const stream = await renderToReadableStream(final_component, {
+        onError(error: any) {
+            // This is where you "omit" or handle the errors
+            // You can log it silently or ignore it
+            if (error.message.includes('unique "key" prop')) return;
+            console.error(error);
+        },
+    });
 
-    // // 2. Convert the Web Stream to a String (Bun-optimized)
-    // const htmlBody = await new Response(stream).text();
+    // 2. Convert the Web Stream to a String (Bun-optimized)
+    const htmlBody = await new Response(stream).text();
 
-    // html += htmlBody;
+    html += htmlBody;
 
-    html += renderToString(final_component);
+    // html += renderToString(final_component);
 
     return html;
 }

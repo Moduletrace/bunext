@@ -196,23 +196,27 @@ export type BunextPageModuleMeta = {
     robots?: string;
     canonical?: string;
     themeColor?: string;
-    og?: {
-        title?: string;
-        description?: string;
-        image?: string;
-        url?: string;
-        type?: string;
-        siteName?: string;
-        locale?: string;
-    };
-    twitter?: {
-        card?: "summary" | "summary_large_image" | "app" | "player";
-        title?: string;
-        description?: string;
-        image?: string;
-        site?: string;
-        creator?: string;
-    };
+    og?: BunextPageModuleMetaOG;
+    twitter?: BunextPageModuleMetaTwitter;
+};
+
+export type BunextPageModuleMetaOG = {
+    title?: string;
+    description?: string;
+    image?: string;
+    url?: string;
+    type?: string;
+    siteName?: string;
+    locale?: string;
+};
+
+export type BunextPageModuleMetaTwitter = {
+    card?: "summary" | "summary_large_image" | "app" | "player";
+    title?: string;
+    description?: string;
+    image?: string;
+    site?: string;
+    creator?: string;
 };
 
 export type BunextPageServerFn<
