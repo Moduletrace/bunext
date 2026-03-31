@@ -1,11 +1,8 @@
 import { Command } from "commander";
 import { log } from "../../utils/log";
 import init from "../../functions/init";
-// import rewritePagesModule from "../../utils/rewrite-pages-module";
-import allPagesBunBundler from "../../functions/bundler/all-pages-bun-bundler";
 import grabDirNames from "../../utils/grab-dir-names";
 import { rmSync } from "fs";
-import allPagesBundler from "../../functions/bundler/all-pages-bundler";
 import allPagesESBuildContextBundler from "../../functions/bundler/all-pages-esbuild-context-bundler";
 const { HYDRATION_DST_DIR, BUNX_CWD_PAGES_REWRITE_DIR } = grabDirNames();
 export default function () {

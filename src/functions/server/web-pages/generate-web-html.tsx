@@ -82,44 +82,52 @@ export default async function genWebHTML({
     //     "react/jsx-dev-runtime": `/.bunext/react-jsx-dev-runtime`,
     // };
 
-    const browser_imports: Record<string, string> = {
-        react: `https://esm.sh/react@${_reactVersion}`,
-        "react-dom": `https://esm.sh/react-dom@${_reactVersion}`,
-        "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client`,
-        "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime`,
-        "react/jsx-dev-runtime": `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`,
-    };
+    // const browser_imports: Record<string, string> = {
+    //     react: `https://esm.sh/react@${_reactVersion}`,
+    //     "react-dom": `https://esm.sh/react-dom@${_reactVersion}`,
+    //     "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client`,
+    //     "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime`,
+    //     "react/jsx-dev-runtime": `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`,
+    // };
 
     // if (dev) {
     //     browser_imports["react/jsx-dev-runtime"] =
     //         `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`;
     // }
 
-    const importMap = JSON.stringify({
-        imports: browser_imports,
-    });
+    // const importMap = JSON.stringify({
+    //     imports: browser_imports,
+    // });
 
     const final_meta = _.merge(root_meta, page_meta);
 
     let final_component = (
         <html {...html_props}>
             <head>
-                <meta charSet="utf-8" />
+                <meta charSet="utf-8" data-bunext-head />
                 <meta
                     name="viewport"
                     content="width=device-width, initial-scale=1.0"
+                    data-bunext-head
                 />
 
                 {final_meta ? grabWebMetaHTML({ meta: final_meta }) : null}
 
+                {/* <link rel="preconnect" href="https://esm.sh" /> */}
+
                 {bundledMap?.css_path ? (
-                    <link rel="stylesheet" href={`/${bundledMap.css_path}`} />
+                    <link
+                        rel="stylesheet"
+                        href={`/${bundledMap.css_path}`}
+                        data-bunext-head
+                    />
                 ) : null}
 
                 <script
                     dangerouslySetInnerHTML={{
                         __html: `window.${ClientWindowPagePropsName} = ${serializedProps}`,
                     }}
+                    data-bunext-head
                 />
 
                 {RootHead ? (
@@ -129,18 +137,20 @@ export default async function genWebHTML({
 
                 {bundledMap?.path ? (
                     <>
-                        <script
+                        {/* <script
                             type="importmap"
-                            dangerouslySetInnerHTML={{
+                        dangerouslySetInnerHTML={{
                                 __html: importMap,
                             }}
                             defer
-                        />
+                            data-bunext-head
+                        /> */}
                         <script
                             src={`/${bundledMap.path}`}
                             type="module"
                             id={AppData["BunextClientHydrationScriptID"]}
                             defer
+                            data-bunext-head
                         />
                     </>
                 ) : null}
@@ -151,6 +161,7 @@ export default async function genWebHTML({
                         dangerouslySetInnerHTML={{
                             __html: page_hydration_script,
                         }}
+                        data-bunext-head
                     />
                 ) : null}
             </head>

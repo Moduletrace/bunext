@@ -5,13 +5,15 @@ import isDevelopment from "../utils/is-development";
 import { log } from "../utils/log";
 import cron from "./server/cron";
 import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
-const { PAGES_DIR } = grabDirNames();
+const dirNames = grabDirNames();
+const { PAGES_DIR } = dirNames;
 export default async function bunextInit() {
     global.HMR_CONTROLLERS = [];
     global.BUNDLER_CTX_MAP = {};
     global.BUNDLER_REBUILDS = 0;
     global.PAGE_FILES = [];
     global.SKIPPED_BROWSER_MODULES = new Set();
+    global.DIR_NAMES = dirNames;
     await init();
     log.banner();
     const router = new Bun.FileSystemRouter({

@@ -1,5 +1,6 @@
 import type { BundlerCTXMap, BunextConfig, GlobalHMRControllerObject, PageFiles } from "../types";
 import type { FileSystemRouter, Server } from "bun";
+import grabDirNames from "../utils/grab-dir-names";
 import { type FSWatcher } from "fs";
 import type { BuildContext } from "esbuild";
 /**
@@ -23,5 +24,6 @@ declare global {
     var ROOT_FILE_UPDATED: boolean;
     var SKIPPED_BROWSER_MODULES: Set<string>;
     var BUNDLER_CTX: BuildContext | undefined;
+    var DIR_NAMES: ReturnType<typeof grabDirNames>;
 }
 export default function bunextInit(): Promise<void>;

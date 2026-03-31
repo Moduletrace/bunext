@@ -11,7 +11,7 @@ import rewritePages from "./rewrite-pages";
 program
     .name(`bunext`)
     .description(`A React Next JS replacement built with bun JS`)
-    .version(`1.0.0`);
+    .version(`1.0.43`);
 /**
  * # Declare Commands
  */

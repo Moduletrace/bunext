@@ -53,13 +53,14 @@ export default async function allPagesESBuildContextBundler(params) {
         logLevel: "silent",
         // logLevel: "silent",
         // logLevel: dev ? "error" : "silent",
-        external: [
-            "react",
-            "react-dom",
-            "react-dom/client",
-            "react/jsx-runtime",
-            "react/jsx-dev-runtime",
-        ],
+        // external: [
+        //     "react",
+        //     "react-dom",
+        //     "react-dom/client",
+        //     "react/jsx-runtime",
+        //     "react/jsx-dev-runtime",
+        // ],
+        // jsxDev: dev,
     });
     await global.BUNDLER_CTX.rebuild();
 }
