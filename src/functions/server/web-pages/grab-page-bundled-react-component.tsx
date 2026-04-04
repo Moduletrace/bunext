@@ -35,7 +35,10 @@ export default async function grabPageBundledReactComponent({
             tsx,
         };
     } catch (error: any) {
-        log.error(`grabPageBundledReactComponent Error: ${error.message}`);
+        log.error(
+            `grabPageBundledReactComponent Error: ${error.message}`,
+            error,
+        );
         return undefined;
     }
 }

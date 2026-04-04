@@ -22,7 +22,7 @@ export default async function grabPageBundledReactComponent({ file_path, root_fi
         };
     }
     catch (error) {
-        log.error(`grabPageBundledReactComponent Error: ${error.message}`);
+        log.error(`grabPageBundledReactComponent Error: ${error.message}`, error);
         return undefined;
     }
 }
