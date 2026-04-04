@@ -20,10 +20,6 @@ export default function () {
         }
         catch (error) { }
         await bunextInit();
-        // await allPagesBunBundler();
-        await allPagesESBuildContextBundler({
-            post_build_fn: serverPostBuildFn,
-        });
         await startServer();
     });
 }

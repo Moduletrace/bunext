@@ -25,12 +25,6 @@ export default function () {
 
             await bunextInit();
 
-            // await allPagesBunBundler();
-
-            await allPagesESBuildContextBundler({
-                post_build_fn: serverPostBuildFn,
-            });
-
             await startServer();
         });
 }

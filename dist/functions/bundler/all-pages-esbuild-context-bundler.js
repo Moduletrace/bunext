@@ -50,6 +50,7 @@ export default async function allPagesESBuildContextBundler(params) {
         ],
         jsx: "automatic",
         splitting: true,
+        treeShaking: true,
         logLevel: "silent",
         // logLevel: "silent",
         // logLevel: dev ? "error" : "silent",

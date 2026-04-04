@@ -13,6 +13,8 @@ import { log } from "../utils/log";
 import cron from "./server/cron";
 import type { BuildContext } from "esbuild";
 import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
+import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
+import serverPostBuildFn from "./server/server-post-build-fn";
 
 /**
  * # Declare Global Variables
@@ -60,8 +62,12 @@ export default async function bunextInit() {
     const is_dev = isDevelopment();
 
     if (is_dev) {
+        await allPagesESBuildContextBundler({
+            post_build_fn: serverPostBuildFn,
+        });
         watcherEsbuildCTX();
     } else {
+        await allPagesESBuildContextBundler();
         cron();
     }
 }

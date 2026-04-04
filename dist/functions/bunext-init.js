@@ -5,6 +5,8 @@ import isDevelopment from "../utils/is-development";
 import { log } from "../utils/log";
 import cron from "./server/cron";
 import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
+import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
+import serverPostBuildFn from "./server/server-post-build-fn";
 const dirNames = grabDirNames();
 const { PAGES_DIR } = dirNames;
 export default async function bunextInit() {
@@ -23,9 +25,13 @@ export default async function bunextInit() {
     global.ROUTER = router;
     const is_dev = isDevelopment();
     if (is_dev) {
+        await allPagesESBuildContextBundler({
+            post_build_fn: serverPostBuildFn,
+        });
         watcherEsbuildCTX();
     }
     else {
+        await allPagesESBuildContextBundler();
         cron();
     }
 }
