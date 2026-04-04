@@ -79,6 +79,7 @@ export default async function watcherEsbuildCTX() {
 
             if (!filename.match(/^src\/pages\/|\.css$/)) return;
             if (filename.match(/\/(--|\()/)) return;
+            if (filename.match(/ /)) return;
 
             if (global.RECOMPILING) return;
 

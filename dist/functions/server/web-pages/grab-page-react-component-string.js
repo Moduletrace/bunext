@@ -1,4 +1,5 @@
 import EJSON from "../../../utils/ejson";
+import { log } from "../../../utils/log";
 import pagePathTransform from "../../../utils/page-path-transform";
 export default function grabPageReactComponentString({ file_path, root_file_path, server_res, }) {
     try {
@@ -31,6 +32,7 @@ export default function grabPageReactComponentString({ file_path, root_file_path
         return tsx;
     }
     catch (error) {
+        log.error(`grabPageReactComponentString Error: ${error.message}`);
         return undefined;
     }
 }

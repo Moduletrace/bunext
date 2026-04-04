@@ -1,6 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import grabPageReactComponentString from "./grab-page-react-component-string";
 import grabTsxStringModule from "./grab-tsx-string-module";
+import { log } from "../../../utils/log";
 export default async function grabPageBundledReactComponent({ file_path, root_file_path, server_res, }) {
     try {
         let tsx = grabPageReactComponentString({
@@ -21,6 +22,7 @@ export default async function grabPageBundledReactComponent({ file_path, root_fi
         };
     }
     catch (error) {
+        log.error(`grabPageBundledReactComponent Error: ${error.message}`);
         return undefined;
     }
 }

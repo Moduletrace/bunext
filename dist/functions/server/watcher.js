@@ -45,7 +45,7 @@ export default async function watcher() {
         }
         if (!filename.match(/^src\/pages\/|\.css$/))
             return;
-        if (filename.match(/\/(--|\()/))
+        if (filename.match(/\/(--|\(| )/))
             return;
         if (global.RECOMPILING)
             return;

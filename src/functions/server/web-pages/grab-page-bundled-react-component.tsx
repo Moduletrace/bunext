@@ -1,7 +1,7 @@
-import type { JSX } from "react";
 import type { GrabPageReactBundledComponentRes } from "../../../types";
 import grabPageReactComponentString from "./grab-page-react-component-string";
 import grabTsxStringModule from "./grab-tsx-string-module";
+import { log } from "../../../utils/log";
 
 type Params = {
     file_path: string;
@@ -35,6 +35,7 @@ export default async function grabPageBundledReactComponent({
             tsx,
         };
     } catch (error: any) {
+        log.error(`grabPageBundledReactComponent Error: ${error.message}`);
         return undefined;
     }
 }

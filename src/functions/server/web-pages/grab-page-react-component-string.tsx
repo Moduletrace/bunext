@@ -1,4 +1,5 @@
 import EJSON from "../../../utils/ejson";
+import { log } from "../../../utils/log";
 import pagePathTransform from "../../../utils/page-path-transform";
 
 type Params = {
@@ -47,6 +48,7 @@ export default function grabPageReactComponentString({
 
         return tsx;
     } catch (error: any) {
+        log.error(`grabPageReactComponentString Error: ${error.message}`);
         return undefined;
     }
 }

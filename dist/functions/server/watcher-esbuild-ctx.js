@@ -57,6 +57,8 @@ export default async function watcherEsbuildCTX() {
             return;
         if (filename.match(/\/(--|\()/))
             return;
+        if (filename.match(/ /))
+            return;
         if (global.RECOMPILING)
             return;
         const action = existsSync(full_file_path) ? "created" : "deleted";
