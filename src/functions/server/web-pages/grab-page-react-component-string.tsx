@@ -1,6 +1,6 @@
 import EJSON from "../../../utils/ejson";
+import isDevelopment from "../../../utils/is-development";
 import { log } from "../../../utils/log";
-import pagePathTransform from "../../../utils/page-path-transform";
 
 type Params = {
     file_path: string;
@@ -13,11 +13,11 @@ export default function grabPageReactComponentString({
     root_file_path,
     server_res,
 }: Params): string | undefined {
+    const now = Date.now();
+    const dev = isDevelopment();
+
     try {
-        // const target_path = pagePathTransform({ page_path: file_path });
-        // const target_root_path = root_file_path
-        //     ? pagePathTransform({ page_path: root_file_path })
-        //     : undefined;
+        const import_suffix = dev ? `?t=${now}` : "";
 
         let tsx = ``;
 
@@ -31,10 +31,10 @@ export default function grabPageReactComponentString({
         // createContext() call, breaking context for any sub-component that
         // imports AppContext via a relative path to the source __root.
         if (root_file_path) {
-            tsx += `import Root from "${root_file_path}"\n`;
+            tsx += `import Root from "${root_file_path}${import_suffix}"\n`;
         }
 
-        tsx += `import Page from "${file_path}"\n`;
+        tsx += `import Page from "${file_path}${import_suffix}"\n`;
         tsx += `export default function Main() {\n\n`;
         tsx += `const props = JSON.parse(${server_res_json})\n\n`;
         tsx += `    return (\n`;

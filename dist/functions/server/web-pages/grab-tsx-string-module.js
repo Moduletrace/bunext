@@ -1,38 +1,55 @@
 import isDevelopment from "../../../utils/is-development";
-import tailwindcss from "bun-plugin-tailwind";
-import grabDirNames from "../../../utils/grab-dir-names";
-import path from "path";
-import BunSkipNonBrowserPlugin from "../../bundler/plugins/bun-skip-browser-plugin";
-export default async function grabTsxStringModule({ tsx, file_path, }) {
+import { transform } from "esbuild";
+export default async function grabTsxStringModule({ tsx, }) {
     const dev = isDevelopment();
-    const { BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
-    const trimmed_file_path = file_path
-        .replace(/.*\/src\/pages\//, "")
-        .replace(/\.tsx$/, "");
-    const src_file_path = path.join(BUNX_CWD_MODULE_CACHE_DIR, `${trimmed_file_path}.tsx`);
-    const out_file_path = path.join(BUNX_CWD_MODULE_CACHE_DIR, `${trimmed_file_path}.js`);
-    await Bun.write(src_file_path, tsx);
-    const build = await Bun.build({
-        entrypoints: [src_file_path],
+    const now = Date.now();
+    const final_tsx = dev ? tsx + `\n// v_${now}` : tsx;
+    const result = await transform(final_tsx, {
+        loader: "tsx",
         format: "esm",
-        target: "bun",
-        external: ["react", "react-dom"],
-        minify: true,
-        define: {
-            "process.env.NODE_ENV": JSON.stringify(dev ? "development" : "production"),
-        },
-        metafile: true,
-        plugins: [tailwindcss, BunSkipNonBrowserPlugin],
-        jsx: {
-            runtime: "automatic",
-            development: dev,
-        },
-        outdir: BUNX_CWD_MODULE_CACHE_DIR,
+        jsx: "automatic",
+        minify: !dev,
     });
-    Loader.registry.delete(out_file_path);
-    const module = await import(`${out_file_path}?t=${Date.now()}`);
-    return module;
+    const blob = new Blob([result.code], { type: "text/javascript" });
+    const url = URL.createObjectURL(blob);
+    const mod = await import(url);
+    URL.revokeObjectURL(url);
+    return mod;
 }
+// const trimmed_file_path = file_path
+//     .replace(/.*\/src\/pages\//, "")
+//     .replace(/\.tsx$/, "");
+// const src_file_path = path.join(
+//     BUNX_CWD_MODULE_CACHE_DIR,
+//     `${trimmed_file_path}.tsx`,
+// );
+// const out_file_path = path.join(
+//     BUNX_CWD_MODULE_CACHE_DIR,
+//     `${trimmed_file_path}.js`,
+// );
+// await Bun.write(src_file_path, tsx);
+// const build = await Bun.build({
+//     entrypoints: [src_file_path],
+//     format: "esm",
+//     target: "bun",
+//     // external: ["react", "react-dom"],
+//     minify: true,
+//     define: {
+//         "process.env.NODE_ENV": JSON.stringify(
+//             dev ? "development" : "production",
+//         ),
+//     },
+//     metafile: true,
+//     plugins: [tailwindcss, BunSkipNonBrowserPlugin],
+//     jsx: {
+//         runtime: "automatic",
+//         development: dev,
+//     },
+//     outdir: BUNX_CWD_MODULE_CACHE_DIR,
+// });
+// Loader.registry.delete(out_file_path);
+// const module = await import(`${out_file_path}?t=${Date.now()}`);
+// return module as T;
 // await esbuild.build({
 //     stdin: {
 //         contents: tsx,

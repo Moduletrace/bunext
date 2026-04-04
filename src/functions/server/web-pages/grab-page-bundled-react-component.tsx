@@ -25,7 +25,7 @@ export default async function grabPageBundledReactComponent({
             return undefined;
         }
 
-        const mod = await grabTsxStringModule({ tsx, file_path });
+        const mod = await grabTsxStringModule({ tsx });
         const Main = mod.default;
         const component = <Main />;
 
