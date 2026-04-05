@@ -15,6 +15,9 @@ export default async function watcherEsbuildCTX() {
             persistent: true,
         },
         async (event, filename) => {
+            // log.info(`event: ${event}`);
+            // log.info(`filename: ${filename}`);
+
             if (!filename) return;
 
             if (filename.match(/^\.\w+/)) {
@@ -92,7 +95,9 @@ export default async function watcherEsbuildCTX() {
                 ? "Sylesheet"
                 : file_stat?.isDirectory()
                   ? "Directory"
-                  : "Page";
+                  : filename.match(/\/pages\/api\//)
+                    ? "API Route"
+                    : "Page";
 
             await fullRebuild({
                 msg: `${type} ${action}: ${filename}. Rebuilding ...`,
