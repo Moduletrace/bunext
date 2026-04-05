@@ -9,6 +9,9 @@ import { AppData } from "../../../data/app-data";
 import { readFileSync } from "fs";
 import path from "path";
 import _ from "lodash";
+import grabDirNames from "../../../utils/grab-dir-names";
+
+const { ROOT_DIR } = grabDirNames();
 
 let _reactVersion = "19";
 try {
@@ -33,7 +36,7 @@ export default async function genWebHTML({
         grabContants();
 
     const { renderToReadableStream } = await import(
-        `${global.DIR_NAMES.ROOT_DIR}/node_modules/react-dom/server.js`
+        `${ROOT_DIR}/node_modules/react-dom/server.js`
     );
 
     const is_dev = isDevelopment();

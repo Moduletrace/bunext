@@ -1,7 +1,17 @@
 import { describe, expect, test, beforeAll, afterAll } from "bun:test";
 import startServer from "../../../src/functions/server/start-server";
 import path from "path";
-import fs from "fs";
+import fs, { FSWatcher } from "fs";
+import { execSync } from "child_process";
+import {
+    BundlerCTXMap,
+    BunextConfig,
+    GlobalHMRControllerObject,
+    PageFiles,
+} from "../../types";
+import { FileSystemRouter } from "bun";
+import { BuildContext } from "esbuild";
+import grabDirNames from "../../utils/grab-dir-names";
 
 // Fixture lives under test/ so the framework's directory guard allows it
 const fixtureDir = path.resolve(__dirname, "../../../test/e2e-fixture");
@@ -10,6 +20,25 @@ const fixtureIndexPage = path.join(fixturePagesDir, "index.tsx");
 
 let originalCwd = process.cwd();
 let originalPort: string | undefined;
+
+declare global {
+    var CONFIG: BunextConfig;
+    var SERVER: Bun.Server<any> | undefined;
+    var RECOMPILING: boolean;
+    var WATCHER_TIMEOUT: any;
+    var ROUTER: FileSystemRouter;
+    var HMR_CONTROLLERS: GlobalHMRControllerObject[];
+    var LAST_BUILD_TIME: number;
+    var BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
+    var BUNDLER_REBUILDS: 0;
+    var PAGES_SRC_WATCHER: FSWatcher | undefined;
+    var CURRENT_VERSION: string | undefined;
+    var PAGE_FILES: PageFiles[];
+    var ROOT_FILE_UPDATED: boolean;
+    var SKIPPED_BROWSER_MODULES: Set<string>;
+    var BUNDLER_CTX: BuildContext | undefined;
+    var DIR_NAMES: ReturnType<typeof grabDirNames>;
+}
 
 describe("E2E Integration", () => {
     let server: any;
@@ -20,6 +49,10 @@ describe("E2E Integration", () => {
         process.env.PORT = "0";
 
         process.chdir(fixtureDir);
+
+        execSync(`bun init -y && bun install react react-dom`, {
+            cwd: fixtureDir,
+        });
 
         global.CONFIG = { development: true };
         global.HMR_CONTROLLERS = [];
@@ -81,7 +114,9 @@ describe("E2E Integration", () => {
     });
 
     test("returns 404 for unknown route", async () => {
-        const response = await fetch(`http://localhost:${server.port}/unknown-foo-bar123`);
+        const response = await fetch(
+            `http://localhost:${server.port}/unknown-foo-bar123`,
+        );
         expect(response.status).toBe(404);
         const text = await response.text();
         // Default 404 component is rendered
@@ -93,7 +128,9 @@ describe("E2E Integration", () => {
         const pageFilePath = fixtureIndexPage;
 
         // Write a temporary .server.ts companion that injects a prop
-        await Bun.write(serverFilePath, `
+        await Bun.write(
+            serverFilePath,
+            `
 import type { BunextPageServerFn } from "../../../../../src/types";
 
 const server: BunextPageServerFn<{ greeting: string }> = async () => {
@@ -101,18 +138,19 @@ const server: BunextPageServerFn<{ greeting: string }> = async () => {
 };
 
 export default server;
-`);
+`,
+        );
 
         // Add the fixture page to the BUNDLER_CTX_MAP
-        global.BUNDLER_CTX_MAP[pageFilePath] = {
-            path: ".bunext/public/pages/index.js",
-            hash: "index",
-            type: "text/javascript",
-            entrypoint: pageFilePath,
-            local_path: pageFilePath,
-            url_path: "/",
-            file_name: "index",
-        };
+        // global.BUNDLER_CTX_MAP[pageFilePath] = {
+        //     path: ".bunext/public/pages/index.js",
+        //     hash: "index",
+        //     type: "text/javascript",
+        //     entrypoint: pageFilePath,
+        //     local_path: pageFilePath,
+        //     url_path: "/",
+        //     file_name: "index",
+        // };
 
         const response = await fetch(`http://localhost:${server.port}/`);
         expect(response.status).toBe(200);

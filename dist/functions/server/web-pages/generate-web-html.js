@@ -9,6 +9,8 @@ import { AppData } from "../../../data/app-data";
 import { readFileSync } from "fs";
 import path from "path";
 import _ from "lodash";
+import grabDirNames from "../../../utils/grab-dir-names";
+const { ROOT_DIR } = grabDirNames();
 let _reactVersion = "19";
 try {
     _reactVersion = JSON.parse(readFileSync(path.join(process.cwd(), "node_modules/react/package.json"), "utf-8")).version;
@@ -16,7 +18,7 @@ try {
 catch { }
 export default async function genWebHTML({ component, pageProps, bundledMap, module, routeParams, debug, root_module, }) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } = grabContants();
-    const { renderToReadableStream } = await import(`${global.DIR_NAMES.ROOT_DIR}/node_modules/react-dom/server.js`);
+    const { renderToReadableStream } = await import(`${ROOT_DIR}/node_modules/react-dom/server.js`);
     const is_dev = isDevelopment();
     if (debug) {
         log.info("component", component);
