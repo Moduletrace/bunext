@@ -1,5 +1,4 @@
-import type { BunextPageModule, BunextPageModuleServerReturn, BunxRouteParams } from "../../../types";
-import type { JSX } from "react";
+import type { BunextPageModule, BunxRouteParams } from "../../../types";
 type Params = {
     file_path: string;
     debug?: boolean;
@@ -8,8 +7,8 @@ type Params = {
     routeParams?: BunxRouteParams;
 };
 export default function grabPageModules({ file_path, debug, url, query, routeParams, }: Params): Promise<{
-    component: JSX.Element;
-    serverRes: BunextPageModuleServerReturn;
+    component: import("react").JSX.Element;
+    serverRes: import("../../../types").BunextPageModuleServerReturn;
     module: BunextPageModule;
     root_module: BunextPageModule | undefined;
 }>;

@@ -1,11 +1,8 @@
 import { existsSync } from "fs";
-import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
-import AppNames from "../../utils/grab-app-names";
 import grabConstants from "../../utils/grab-constants";
-import pagePathTransform from "../../utils/page-path-transform";
 import grabRootFilePath from "../server/web-pages/grab-root-file-path";
-const { PAGES_DIR } = grabDirNames();
+const { ROOT_DIR } = grabDirNames();
 export default async function grabClientHydrationScript({ page_local_path, }) {
     const { ClientRootElementIDName, ClientRootComponentWindowName, ClientWindowPagePropsName, } = grabConstants();
     const { root_file_path } = grabRootFilePath();
@@ -30,7 +27,7 @@ export default async function grabClientHydrationScript({ page_local_path, }) {
         return undefined;
     }
     let txt = ``;
-    txt += `import { hydrateRoot } from "react-dom/client";\n`;
+    txt += `import { hydrateRoot } from "${ROOT_DIR}/node_modules/react-dom/client.js";\n`;
     if (root_file_path) {
         txt += `import Root from "${root_file_path}";\n`;
     }
