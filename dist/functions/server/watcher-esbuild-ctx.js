@@ -1,4 +1,4 @@
-import { watch, existsSync } from "fs";
+import { watch, existsSync, statSync } from "fs";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import { log } from "../../utils/log";
@@ -16,6 +16,10 @@ export default async function watcherEsbuildCTX() {
             return;
         }
         const full_file_path = path.join(ROOT_DIR, filename);
+        const does_file_exist = existsSync(full_file_path);
+        const file_stat = does_file_exist
+            ? statSync(full_file_path)
+            : undefined;
         if (full_file_path.match(/\/styles$/)) {
             global.RECOMPILING = true;
             await Bun.sleep(1000);
@@ -49,7 +53,8 @@ export default async function watcherEsbuildCTX() {
             }
             return;
         }
-        const is_file_of_interest = Boolean(filename.match(target_files_match));
+        const is_file_of_interest = Boolean(filename.match(target_files_match)) ||
+            file_stat?.isDirectory();
         if (!is_file_of_interest) {
             return;
         }
@@ -61,8 +66,12 @@ export default async function watcherEsbuildCTX() {
             return;
         if (global.RECOMPILING)
             return;
-        const action = existsSync(full_file_path) ? "created" : "deleted";
-        const type = filename.match(/\.css$/) ? "Sylesheet" : "Page";
+        const action = does_file_exist ? "created" : "deleted";
+        const type = filename.match(/\.css$/)
+            ? "Sylesheet"
+            : file_stat?.isDirectory()
+                ? "Directory"
+                : "Page";
         await fullRebuild({
             msg: `${type} ${action}: ${filename}. Rebuilding ...`,
         });
