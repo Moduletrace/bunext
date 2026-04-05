@@ -2,7 +2,7 @@
     "name": "@moduletrace/bunext",
     "module": "index.ts",
     "type": "module",
-    "version": "1.0.50",
+    "version": "1.0.51",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
@@ -41,10 +41,12 @@
     "publishConfig": {
         "registry": "https://npm.pkg.github.com"
     },
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "typescript": "^5.9.3"
+    },
     "dependencies": {
-        "typescript": "^5.0.0",
-        "react": "19.0.0",
-        "react-dom": "19.0.0",
         "@tailwindcss/postcss": "^4.2.2",
         "@types/bun": "latest",
         "@types/node": "^24.10.0",
