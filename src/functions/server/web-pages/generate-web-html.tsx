@@ -143,14 +143,39 @@ export default async function genWebHTML({
 
     let html = `<!DOCTYPE html>\n`;
 
+    // const stream = await renderToReadableStream(final_component, {
+    //     onError(error: any) {
+    //         if (error.message.includes('unique "key" prop')) return;
+    //         console.error(error);
+    //     },
+    // });
+
+    // const htmlBody = await new Response(stream).text();
+
+    const originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error,
+        info: console.info,
+        debug: console.debug,
+    };
+
+    console.log = () => {};
+    console.warn = () => {};
+    console.error = () => {};
+    console.info = () => {};
+    console.debug = () => {};
+
     const stream = await renderToReadableStream(final_component, {
         onError(error: any) {
             if (error.message.includes('unique "key" prop')) return;
-            console.error(error);
+            originalConsole.error(error);
         },
     });
 
     const htmlBody = await new Response(stream).text();
+
+    Object.assign(console, originalConsole);
 
     html += htmlBody;
 

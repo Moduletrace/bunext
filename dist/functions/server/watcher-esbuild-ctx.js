@@ -10,8 +10,6 @@ export default async function watcherEsbuildCTX() {
         recursive: true,
         persistent: true,
     }, async (event, filename) => {
-        // log.info(`event: ${event}`);
-        // log.info(`filename: ${filename}`);
         if (!filename)
             return;
         if (filename.match(/^\.\w+/)) {
@@ -105,7 +103,7 @@ async function fullRebuild(params) {
         watcherEsbuildCTX();
     }
 }
-function reloadWatcher(params) {
+function reloadWatcher() {
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();
