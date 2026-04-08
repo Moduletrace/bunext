@@ -25,5 +25,9 @@ declare global {
     var SKIPPED_BROWSER_MODULES: Set<string>;
     var BUNDLER_CTX: BuildContext | undefined;
     var DIR_NAMES: ReturnType<typeof grabDirNames>;
+    var REACT_IMPORTS_MAP: {
+        imports: Record<string, string>;
+    };
+    var REACT_DOM_SERVER: any;
 }
 export default function bunextInit(): Promise<void>;

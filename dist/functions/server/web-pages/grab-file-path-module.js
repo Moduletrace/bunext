@@ -14,7 +14,7 @@ export default async function grabFilePathModule({ file_path, out_file, }) {
         format: "esm",
         target: "es2020",
         platform: "node",
-        external: ["react", "react-dom"],
+        // external: ["react", "react-dom"],
         minify: true,
         define: {
             "process.env.NODE_ENV": JSON.stringify(dev ? "development" : "production"),

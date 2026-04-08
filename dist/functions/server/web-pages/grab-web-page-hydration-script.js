@@ -75,6 +75,16 @@ export default async function (params) {
     script += `            } else if (oldCSSLink) {\n`;
     script += `                oldCSSLink.remove();\n`;
     script += `            }\n`;
+    // script += `            const newScriptPath = \`/\${data.target_map.path}?t=\${Date.now()}\`;\n\n`;
+    // script += `            try {\n`;
+    // script += `                const mod = await import(newScriptPath);\n`;
+    // script += `                if (typeof mod.default === "function" || typeof window.__BUNEXT_RERENDER__ === "function") {\n`;
+    // script += `                    window.__BUNEXT_RERENDER__?.();\n`;
+    // script += `                }\n`;
+    // script += `            } catch (importErr) {\n`;
+    // script += `                console.error("HMR import failed, reloading:", importErr.message);\n`;
+    // script += `                window.location.reload();\n`;
+    // script += `            }\n`;
     script += `            const newScriptPath = \`/\${data.target_map.path}?t=\${Date.now()}\`;\n\n`;
     script += `            const oldScript = document.getElementById("${AppData["BunextClientHydrationScriptID"]}");\n`;
     script += `            if (oldScript) {\n`;

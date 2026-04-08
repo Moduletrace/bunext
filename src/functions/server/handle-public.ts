@@ -31,7 +31,14 @@ export default async function ({ req }: Params): Promise<Response> {
     }
 }
 
-export function readFileResponse({ file_path }: { file_path: string }) {
+type FileResponse = {
+    file_path: string;
+    cache?: {
+        duration?: "infinite" | number;
+    };
+};
+
+export function readFileResponse({ file_path, cache }: FileResponse) {
     if (!existsSync(file_path)) {
         return new Response(`Public File Doesn't Exist`, {
             status: 404,
@@ -40,7 +47,15 @@ export function readFileResponse({ file_path }: { file_path: string }) {
 
     const file = Bun.file(file_path);
 
-    // let res_opts: ResponseInit = {};
+    const headers = new Headers();
 
-    return new Response(file);
+    if (cache?.duration == "infinite" || (cache && !cache.duration)) {
+        headers.set("Cache-Control", "public, max-age=31536000, immutable");
+    } else if (cache?.duration) {
+        headers.set("Cache-Control", `public, max-age=${cache.duration}`);
+    }
+
+    return new Response(file, {
+        headers,
+    });
 }

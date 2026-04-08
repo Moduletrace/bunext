@@ -6,16 +6,9 @@ import grabWebPageHydrationScript from "./grab-web-page-hydration-script";
 import grabWebMetaHTML from "./grab-web-meta-html";
 import { log } from "../../../utils/log";
 import { AppData } from "../../../data/app-data";
-import { readFileSync } from "fs";
-import path from "path";
 import _ from "lodash";
 import grabDirNames from "../../../utils/grab-dir-names";
 const { ROOT_DIR } = grabDirNames();
-let _reactVersion = "19";
-try {
-    _reactVersion = JSON.parse(readFileSync(path.join(process.cwd(), "node_modules/react/package.json"), "utf-8")).version;
-}
-catch { }
 export default async function genWebHTML({ component, pageProps, bundledMap, module, routeParams, debug, root_module, }) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } = grabContants();
     const { renderToReadableStream } = await import(`${ROOT_DIR}/node_modules/react-dom/server.js`);
@@ -46,47 +39,23 @@ export default async function genWebHTML({ component, pageProps, bundledMap, mod
     const Head = module?.Head;
     const RootHead = root_module?.Head;
     const dev = isDevelopment();
-    const devSuffix = dev ? "?dev" : "";
-    // const browser_imports: Record<string, string> = {
-    //     react: `/.bunext/react`,
-    //     "react-dom": `/.bunext/react-dom`,
-    //     "react-dom/client": `/.bunext/react-dom-client`,
-    //     "react/jsx-runtime": `/.bunext/react-jsx-runtime`,
-    //     "react/jsx-dev-runtime": `/.bunext/react-jsx-dev-runtime`,
-    // };
-    // const browser_imports: Record<string, string> = {
-    //     react: `https://esm.sh/react@${_reactVersion}`,
-    //     "react-dom": `https://esm.sh/react-dom@${_reactVersion}`,
-    //     "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client`,
-    //     "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime`,
-    //     "react/jsx-dev-runtime": `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`,
-    // };
-    // if (dev) {
-    //     browser_imports["react/jsx-dev-runtime"] =
-    //         `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`;
-    // }
-    // const importMap = JSON.stringify({
-    //     imports: browser_imports,
-    // });
     const final_meta = _.merge(root_meta, page_meta);
     let final_component = (_jsxs("html", { ...html_props, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8", "data-bunext-head": true }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0", "data-bunext-head": true }), final_meta ? grabWebMetaHTML({ meta: final_meta }) : null, bundledMap?.css_path ? (_jsx("link", { rel: "stylesheet", href: `/${bundledMap.css_path}`, "data-bunext-head": true })) : null, _jsx("script", { dangerouslySetInnerHTML: {
                             __html: `window.${ClientWindowPagePropsName} = ${serializedProps}`,
-                        }, "data-bunext-head": true }), RootHead ? (_jsx(RootHead, { serverRes: pageProps, ctx: routeParams })) : null, Head ? _jsx(Head, { serverRes: pageProps, ctx: routeParams }) : null, bundledMap?.path ? (_jsx(_Fragment, { children: _jsx("script", { src: `/${bundledMap.path}`, type: "module", id: AppData["BunextClientHydrationScriptID"], defer: true, "data-bunext-head": true }) })) : null, is_dev ? (_jsx("script", { defer: true, dangerouslySetInnerHTML: {
+                        }, "data-bunext-head": true }), RootHead ? (_jsx(RootHead, { serverRes: pageProps, ctx: routeParams })) : null, Head ? _jsx(Head, { serverRes: pageProps, ctx: routeParams }) : null, bundledMap?.path ? (_jsxs(_Fragment, { children: [_jsx("script", { type: "importmap", dangerouslySetInnerHTML: {
+                                    __html: JSON.stringify(global.REACT_IMPORTS_MAP),
+                                }, defer: true, "data-bunext-head": true }), _jsx("script", { src: `/${bundledMap.path}`, type: "module", id: AppData["BunextClientHydrationScriptID"], defer: true, "data-bunext-head": true })] })) : null, is_dev ? (_jsx("script", { defer: true, dangerouslySetInnerHTML: {
                             __html: page_hydration_script,
                         }, "data-bunext-head": true })) : null] }), _jsx("body", { children: _jsx("div", { id: ClientRootElementIDName, suppressHydrationWarning: !dev, children: component }) })] }));
     let html = `<!DOCTYPE html>\n`;
     const stream = await renderToReadableStream(final_component, {
         onError(error) {
-            // This is where you "omit" or handle the errors
-            // You can log it silently or ignore it
             if (error.message.includes('unique "key" prop'))
                 return;
             console.error(error);
         },
     });
-    // 2. Convert the Web Stream to a String (Bun-optimized)
     const htmlBody = await new Response(stream).text();
     html += htmlBody;
-    // html += renderToString(final_component);
     return html;
 }

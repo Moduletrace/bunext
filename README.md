@@ -61,8 +61,8 @@ The goal is a framework that is:
 
 - [Bun](https://bun.sh) v1.0 or later
 - TypeScript 5.0+
-- react 18.0+
-- react-dom 18.0+
+
+> **React is managed by Bunext.** You do not need to install `react` or `react-dom` — Bunext enforces its own pinned React version and removes any user-installed copies at startup to prevent version conflicts. Installing this package is all you need.
 
 ---
 
@@ -101,12 +101,6 @@ bun add -g @moduletrace/bunext
 
 ```bash
 bun add github:moduletrace/bunext
-```
-
-### Install react and react-dom
-
-```bash
-bun add react react-dom
 ```
 
 ---

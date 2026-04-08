@@ -19,13 +19,21 @@ export default async function ({ req }) {
         });
     }
 }
-export function readFileResponse({ file_path }) {
+export function readFileResponse({ file_path, cache }) {
     if (!existsSync(file_path)) {
         return new Response(`Public File Doesn't Exist`, {
             status: 404,
         });
     }
     const file = Bun.file(file_path);
-    // let res_opts: ResponseInit = {};
-    return new Response(file);
+    const headers = new Headers();
+    if (cache?.duration == "infinite" || (cache && !cache.duration)) {
+        headers.set("Cache-Control", "public, max-age=31536000, immutable");
+    }
+    else if (cache?.duration) {
+        headers.set("Cache-Control", `public, max-age=${cache.duration}`);
+    }
+    return new Response(file, {
+        headers,
+    });
 }

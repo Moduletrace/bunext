@@ -15,6 +15,7 @@ import type { BuildContext } from "esbuild";
 import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
+import reactModulesBundler from "./bundler/react-modules-bundler";
 
 /**
  * # Declare Global Variables
@@ -36,6 +37,8 @@ declare global {
     var SKIPPED_BROWSER_MODULES: Set<string>;
     var BUNDLER_CTX: BuildContext | undefined;
     var DIR_NAMES: ReturnType<typeof grabDirNames>;
+    var REACT_IMPORTS_MAP: { imports: Record<string, string> };
+    var REACT_DOM_SERVER: any;
 }
 
 const dirNames = grabDirNames();
@@ -48,8 +51,11 @@ export default async function bunextInit() {
     global.PAGE_FILES = [];
     global.SKIPPED_BROWSER_MODULES = new Set<string>();
     global.DIR_NAMES = dirNames;
+    global.REACT_IMPORTS_MAP = { imports: {} };
 
     await init();
+    // await bunReactModulesBundler();
+    await reactModulesBundler();
     log.banner();
 
     const router = new Bun.FileSystemRouter({

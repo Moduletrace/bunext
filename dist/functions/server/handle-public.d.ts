@@ -2,7 +2,11 @@ type Params = {
     req: Request;
 };
 export default function ({ req }: Params): Promise<Response>;
-export declare function readFileResponse({ file_path }: {
+type FileResponse = {
     file_path: string;
-}): Response;
+    cache?: {
+        duration?: "infinite" | number;
+    };
+};
+export declare function readFileResponse({ file_path, cache }: FileResponse): Response;
 export {};

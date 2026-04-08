@@ -7,6 +7,7 @@ import cron from "./server/cron";
 import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
+import reactModulesBundler from "./bundler/react-modules-bundler";
 const dirNames = grabDirNames();
 const { PAGES_DIR } = dirNames;
 export default async function bunextInit() {
@@ -16,7 +17,10 @@ export default async function bunextInit() {
     global.PAGE_FILES = [];
     global.SKIPPED_BROWSER_MODULES = new Set();
     global.DIR_NAMES = dirNames;
+    global.REACT_IMPORTS_MAP = { imports: {} };
     await init();
+    // await bunReactModulesBundler();
+    await reactModulesBundler();
     log.banner();
     const router = new Bun.FileSystemRouter({
         style: "nextjs",

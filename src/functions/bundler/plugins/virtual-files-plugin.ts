@@ -24,6 +24,22 @@ export default function virtualFilesPlugin({ entryToPage }: Params) {
                 };
             });
 
+            build.onResolve(
+                { filter: /node_modules\/react(-dom)?/ },
+                (args) => ({
+                    path: args.path.includes("react-dom")
+                        ? args.path.includes("client")
+                            ? "react-dom/client"
+                            : "react-dom"
+                        : args.path.includes("jsx-dev")
+                          ? "react/jsx-dev-runtime"
+                          : args.path.includes("jsx")
+                            ? "react/jsx-runtime"
+                            : "react",
+                    external: true,
+                }),
+            );
+
             build.onLoad(
                 { filter: /.*/, namespace: "hydration-virtual" },
                 (args) => {

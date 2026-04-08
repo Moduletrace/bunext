@@ -16,8 +16,6 @@ type Params = {
 };
 
 export default async function allPagesESBuildContextBundler(params?: Params) {
-    // return await allPagesESBuildContextBundlerFiles(params);
-
     const pages = grabAllPages({ exclude_api: true });
 
     global.PAGE_FILES = pages;
@@ -62,6 +60,7 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
         entryNames: "[dir]/[hash]",
         metafile: true,
         plugins: [
+            forceExternalReact(),
             tailwindEsbuildPlugin,
             virtualFilesPlugin({
                 entryToPage,
@@ -74,18 +73,29 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
         jsx: "automatic",
         splitting: true,
         treeShaking: true,
-        logLevel: "silent",
-        // logLevel: "silent",
-        // logLevel: dev ? "error" : "silent",
-        // external: [
-        //     "react",
-        //     "react-dom",
-        //     "react-dom/client",
-        //     "react/jsx-runtime",
-        //     "react/jsx-dev-runtime",
-        // ],
-        // jsxDev: dev,
+        external: [
+            "react",
+            "react-dom",
+            "react-dom/client",
+            "react/jsx-runtime",
+            "react/jsx-dev-runtime",
+        ],
     });
 
     await global.BUNDLER_CTX.rebuild();
+}
+
+function forceExternalReact(): esbuild.Plugin {
+    return {
+        name: "force-external-react",
+        setup(build) {
+            build.onResolve({ filter: /^react(-dom)?(\/.*)?$/ }, (args) => {
+                if (args.pluginData?.externalReact) return null;
+                return {
+                    path: args.path,
+                    external: true,
+                };
+            });
+        },
+    };
 }

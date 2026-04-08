@@ -50,6 +50,8 @@ export default async function grabClientHydrationScript({
     let txt = ``;
 
     txt += `import { hydrateRoot } from "${ROOT_DIR}/node_modules/react-dom/client.js";\n`;
+    // txt += `import react from "${ROOT_DIR}/node_modules/react/index.js";\n`;
+
     if (root_file_path) {
         txt += `import Root from "${root_file_path}";\n`;
     }

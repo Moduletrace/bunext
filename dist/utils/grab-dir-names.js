@@ -13,6 +13,7 @@ export default function grabDirNames() {
     const BUNX_HYDRATION_SRC_DIR = path.resolve(BUNX_CWD_DIR, "client", "hydration-src");
     const BUNEXT_PUBLIC_DIR = path.join(BUNX_CWD_DIR, "public");
     const HYDRATION_DST_DIR = path.join(BUNEXT_PUBLIC_DIR, "pages");
+    const BUNEXT_VENDOR_DIR = path.join(BUNEXT_PUBLIC_DIR, "vendor");
     const BUNEXT_CACHE_DIR = path.join(BUNEXT_PUBLIC_DIR, "cache");
     const HYDRATION_DST_DIR_MAP_JSON_FILE_NAME = "map.json";
     const HYDRATION_DST_DIR_MAP_JSON_FILE = path.join(HYDRATION_DST_DIR, HYDRATION_DST_DIR_MAP_JSON_FILE_NAME);
@@ -104,6 +105,8 @@ export default function grabDirNames() {
         BUNX_CWD_MODULE_CACHE_DIR,
         BUNX_CWD_PAGES_REWRITE_DIR,
         HYDRATION_DST_DIR_MAP_JSON_FILE_NAME,
+        BUNEXT_VENDOR_DIR,
+        BUNEXT_PUBLIC_DIR,
         // NODE_MODULES_DIR,
         // REACT_MODULE_DIR,
         // REACT_DOM_MODULE_DIR,

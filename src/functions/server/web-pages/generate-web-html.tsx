@@ -6,22 +6,10 @@ import grabWebPageHydrationScript from "./grab-web-page-hydration-script";
 import grabWebMetaHTML from "./grab-web-meta-html";
 import { log } from "../../../utils/log";
 import { AppData } from "../../../data/app-data";
-import { readFileSync } from "fs";
-import path from "path";
 import _ from "lodash";
 import grabDirNames from "../../../utils/grab-dir-names";
 
 const { ROOT_DIR } = grabDirNames();
-
-let _reactVersion = "19";
-try {
-    _reactVersion = JSON.parse(
-        readFileSync(
-            path.join(process.cwd(), "node_modules/react/package.json"),
-            "utf-8",
-        ),
-    ).version;
-} catch {}
 
 export default async function genWebHTML({
     component,
@@ -75,32 +63,6 @@ export default async function genWebHTML({
     const RootHead = root_module?.Head;
 
     const dev = isDevelopment();
-    const devSuffix = dev ? "?dev" : "";
-
-    // const browser_imports: Record<string, string> = {
-    //     react: `/.bunext/react`,
-    //     "react-dom": `/.bunext/react-dom`,
-    //     "react-dom/client": `/.bunext/react-dom-client`,
-    //     "react/jsx-runtime": `/.bunext/react-jsx-runtime`,
-    //     "react/jsx-dev-runtime": `/.bunext/react-jsx-dev-runtime`,
-    // };
-
-    // const browser_imports: Record<string, string> = {
-    //     react: `https://esm.sh/react@${_reactVersion}`,
-    //     "react-dom": `https://esm.sh/react-dom@${_reactVersion}`,
-    //     "react-dom/client": `https://esm.sh/react-dom@${_reactVersion}/client`,
-    //     "react/jsx-runtime": `https://esm.sh/react@${_reactVersion}/jsx-runtime`,
-    //     "react/jsx-dev-runtime": `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`,
-    // };
-
-    // if (dev) {
-    //     browser_imports["react/jsx-dev-runtime"] =
-    //         `https://esm.sh/react@${_reactVersion}/jsx-dev-runtime`;
-    // }
-
-    // const importMap = JSON.stringify({
-    //     imports: browser_imports,
-    // });
 
     const final_meta = _.merge(root_meta, page_meta);
 
@@ -115,8 +77,6 @@ export default async function genWebHTML({
                 />
 
                 {final_meta ? grabWebMetaHTML({ meta: final_meta }) : null}
-
-                {/* <link rel="preconnect" href="https://esm.sh" /> */}
 
                 {bundledMap?.css_path ? (
                     <link
@@ -140,14 +100,16 @@ export default async function genWebHTML({
 
                 {bundledMap?.path ? (
                     <>
-                        {/* <script
+                        <script
                             type="importmap"
-                        dangerouslySetInnerHTML={{
-                                __html: importMap,
+                            dangerouslySetInnerHTML={{
+                                __html: JSON.stringify(
+                                    global.REACT_IMPORTS_MAP,
+                                ),
                             }}
                             defer
                             data-bunext-head
-                        /> */}
+                        />
                         <script
                             src={`/${bundledMap.path}`}
                             type="module"
@@ -183,19 +145,14 @@ export default async function genWebHTML({
 
     const stream = await renderToReadableStream(final_component, {
         onError(error: any) {
-            // This is where you "omit" or handle the errors
-            // You can log it silently or ignore it
             if (error.message.includes('unique "key" prop')) return;
             console.error(error);
         },
     });
 
-    // 2. Convert the Web Stream to a String (Bun-optimized)
     const htmlBody = await new Response(stream).text();
 
     html += htmlBody;
-
-    // html += renderToString(final_component);
 
     return html;
 }
