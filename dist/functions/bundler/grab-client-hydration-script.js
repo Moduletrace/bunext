@@ -44,7 +44,7 @@ export default async function grabClientHydrationScript({ page_local_path, }) {
     txt += `    window.${ClientRootComponentWindowName}.render(component);\n`;
     txt += `} else {\n`;
     txt += `    const root = hydrateRoot(document.getElementById("${ClientRootElementIDName}"), component, { onRecoverableError: () => {\n\n`;
-    // txt += `        console.log(\`Hydration Error.\`)\n\n`;
+    txt += `        console.log(\`Hydration Error.\`)\n\n`;
     txt += `    } });\n\n`;
     txt += `    window.${ClientRootComponentWindowName} = root;\n`;
     txt += `    window.__BUNEXT_RERENDER__ = (NewPage) => {\n`;

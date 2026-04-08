@@ -48,34 +48,34 @@ export default async function genWebHTML({ component, pageProps, bundledMap, mod
                             __html: page_hydration_script,
                         }, "data-bunext-head": true })) : null] }), _jsx("body", { children: _jsx("div", { id: ClientRootElementIDName, suppressHydrationWarning: !dev, children: component }) })] }));
     let html = `<!DOCTYPE html>\n`;
+    // const stream = await renderToReadableStream(final_component, {
+    //     onError(error: any) {
+    //         if (error.message.includes('unique "key" prop')) return;
+    //         console.error(error);
+    //     },
+    // });
+    // const htmlBody = await new Response(stream).text();
+    const originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error,
+        info: console.info,
+        debug: console.debug,
+    };
+    console.log = () => { };
+    console.warn = () => { };
+    console.error = () => { };
+    console.info = () => { };
+    console.debug = () => { };
     const stream = await renderToReadableStream(final_component, {
         onError(error) {
             if (error.message.includes('unique "key" prop'))
                 return;
-            console.error(error);
+            originalConsole.error(error);
         },
     });
     const htmlBody = await new Response(stream).text();
-    // const originalConsole = {
-    //     log: console.log,
-    //     warn: console.warn,
-    //     error: console.error,
-    //     info: console.info,
-    //     debug: console.debug,
-    // };
-    // console.log = () => {};
-    // console.warn = () => {};
-    // console.error = () => {};
-    // console.info = () => {};
-    // console.debug = () => {};
-    // const stream = await renderToReadableStream(final_component, {
-    //     onError(error: any) {
-    //         if (error.message.includes('unique "key" prop')) return;
-    //         originalConsole.error(error);
-    //     },
-    // });
-    // const htmlBody = await new Response(stream).text();
-    // Object.assign(console, originalConsole);
+    Object.assign(console, originalConsole);
     html += htmlBody;
     return html;
 }

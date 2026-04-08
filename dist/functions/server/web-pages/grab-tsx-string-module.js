@@ -2,6 +2,7 @@ import isDevelopment from "../../../utils/is-development";
 import * as esbuild from "esbuild";
 import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
+import tailwindEsbuildPlugin from "./tailwind-esbuild-plugin";
 export default async function grabTsxStringModule({ tsx, }) {
     const dev = isDevelopment();
     const now = Date.now();
@@ -29,6 +30,7 @@ export default async function grabTsxStringModule({ tsx, }) {
         },
         jsx: "automatic",
         outfile: target_cache_file_path,
+        plugins: [tailwindEsbuildPlugin],
     });
     Loader.registry.delete(target_cache_file_path);
     const mod = await import(`${target_cache_file_path}?t=${now}`);

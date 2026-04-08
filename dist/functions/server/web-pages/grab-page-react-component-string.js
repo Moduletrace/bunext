@@ -4,9 +4,6 @@ export default function grabPageReactComponentString({ file_path, root_file_path
     try {
         let tsx = ``;
         const server_res_json = JSON.stringify(EJSON.stringify(server_res || {}) ?? "{}");
-        // Import directly from the source page files. The generated TSX is
-        // bundled before execution, which keeps Root, Page, and any __root
-        // context consumers inside one module graph for SSR.
         if (root_file_path) {
             tsx += `import Root from "${root_file_path}"\n`;
         }

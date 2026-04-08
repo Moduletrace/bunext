@@ -5,6 +5,11 @@ import { log } from "../../../utils/log";
 import grabPageModules from "./grab-page-modules";
 import grabPageCombinedServerRes from "./grab-page-combined-server-res";
 class NotFoundError extends Error {
+    status = 404;
+    constructor(message) {
+        super(message);
+        this.name = "NotFoundError";
+    }
 }
 export default async function grabPageComponent({ req, file_path: passed_file_path, debug, return_server_res_only, }) {
     const url = req?.url ? new URL(req.url) : undefined;
@@ -69,11 +74,16 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         };
     }
     catch (error) {
-        log.error(`Error Grabbing Page Component: ${error.message}`);
+        const is404 = error instanceof NotFoundError ||
+            error?.name === "NotFoundError" ||
+            error?.status === 404;
+        if (!is404) {
+            log.error(`Error Grabbing Page Component: ${error.message}`);
+        }
         return await grabPageErrorComponent({
             error,
             routeParams,
-            is404: error instanceof NotFoundError,
+            is404,
             url,
         });
     }
