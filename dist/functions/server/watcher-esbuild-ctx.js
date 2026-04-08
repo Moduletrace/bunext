@@ -30,7 +30,7 @@ export default async function watcherEsbuildCTX() {
             });
             return;
         }
-        const excluded_match = /node_modules\/|^public\/|^\.bunext\/|^\.git\/|^dist\/|bun\.lockb$/;
+        const excluded_match = /node_modules\/|^public\/|^\.bunext\/|^\.git\/|^\.?dist\/|bun\.lockb$/;
         if (filename.match(excluded_match))
             return;
         if (filename.match(/bunext.config\.ts/)) {
@@ -61,11 +61,11 @@ export default async function watcherEsbuildCTX() {
             return;
         }
         if (!filename.match(/^src\/pages\/|\.css$/))
-            return;
+            return reloadWatcher();
         if (filename.match(/\/(--|\()/))
-            return;
+            return reloadWatcher();
         if (filename.match(/ /))
-            return;
+            return reloadWatcher();
         if (global.RECOMPILING)
             return;
         const action = does_file_exist ? "created" : "deleted";
@@ -100,6 +100,12 @@ async function fullRebuild(params) {
     catch (error) {
         log.error(error);
     }
+    if (global.PAGES_SRC_WATCHER) {
+        global.PAGES_SRC_WATCHER.close();
+        watcherEsbuildCTX();
+    }
+}
+function reloadWatcher(params) {
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();

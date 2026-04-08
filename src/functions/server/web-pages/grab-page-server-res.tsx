@@ -49,11 +49,13 @@ export default async function grabPageServerRes({
                 ...routeParams,
                 query: { ...routeParams.query, ...query },
             });
+
             return {
                 ...serverData,
                 ...default_props,
             };
         }
+
         return {
             ...default_props,
         };

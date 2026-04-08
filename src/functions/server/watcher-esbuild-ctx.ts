@@ -40,7 +40,7 @@ export default async function watcherEsbuildCTX() {
             }
 
             const excluded_match =
-                /node_modules\/|^public\/|^\.bunext\/|^\.git\/|^dist\/|bun\.lockb$/;
+                /node_modules\/|^public\/|^\.bunext\/|^\.git\/|^\.?dist\/|bun\.lockb$/;
 
             if (filename.match(excluded_match)) return;
 
@@ -84,9 +84,9 @@ export default async function watcherEsbuildCTX() {
                 return;
             }
 
-            if (!filename.match(/^src\/pages\/|\.css$/)) return;
-            if (filename.match(/\/(--|\()/)) return;
-            if (filename.match(/ /)) return;
+            if (!filename.match(/^src\/pages\/|\.css$/)) return reloadWatcher();
+            if (filename.match(/\/(--|\()/)) return reloadWatcher();
+            if (filename.match(/ /)) return reloadWatcher();
 
             if (global.RECOMPILING) return;
 
@@ -132,6 +132,13 @@ async function fullRebuild(params?: { msg?: string }) {
         log.error(error);
     }
 
+    if (global.PAGES_SRC_WATCHER) {
+        global.PAGES_SRC_WATCHER.close();
+        watcherEsbuildCTX();
+    }
+}
+
+function reloadWatcher(params?: { msg?: string }) {
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();
