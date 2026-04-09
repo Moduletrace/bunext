@@ -33,10 +33,6 @@ export default async function initPages(params) {
                 tsx,
                 page_file_path: page.local_path,
             });
-            // const component = await grabPageComponent({
-            //     file_path: page.local_path,
-            //     skip_server_res: true,
-            // });
         }
         await grabTsxStringModule({ tsx_map });
     }

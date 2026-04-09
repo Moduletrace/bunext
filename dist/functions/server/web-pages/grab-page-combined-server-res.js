@@ -13,14 +13,12 @@ export default async function grabPageCombinedServerRes({ file_path, debug, url,
         ? await import(`${root_server_file_path}?t=${now}`)
         : undefined;
     const root_server_fn = root_server_module?.default || root_server_module?.server;
-    const rootServerRes = root_server_fn
-        ? await grabPageServerRes({
-            server_function: root_server_fn,
-            url,
-            query,
-            routeParams,
-        })
-        : undefined;
+    const rootServerRes = await grabPageServerRes({
+        server_function: root_server_fn,
+        url,
+        query,
+        routeParams,
+    });
     if (debug) {
         log.info(`rootServerRes:`, rootServerRes);
     }
@@ -29,14 +27,12 @@ export default async function grabPageCombinedServerRes({ file_path, debug, url,
         ? await import(`${server_file_path}?t=${now}`)
         : undefined;
     const server_fn = server_module?.default || server_module?.server;
-    const serverRes = server_fn
-        ? await grabPageServerRes({
-            server_function: server_fn,
-            url,
-            query,
-            routeParams,
-        })
-        : undefined;
+    const serverRes = await grabPageServerRes({
+        server_function: server_fn,
+        url,
+        query,
+        routeParams,
+    });
     const mergedServerRes = _.merge(rootServerRes || {}, serverRes || {});
     return { serverRes: mergedServerRes };
 }

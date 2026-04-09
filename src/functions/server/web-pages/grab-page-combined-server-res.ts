@@ -38,14 +38,12 @@ export default async function grabPageCombinedServerRes({
         root_server_module?.default || root_server_module?.server;
 
     const rootServerRes: BunextPageModuleServerReturn | undefined =
-        root_server_fn
-            ? await grabPageServerRes({
-                  server_function: root_server_fn,
-                  url,
-                  query,
-                  routeParams,
-              })
-            : undefined;
+        await grabPageServerRes({
+            server_function: root_server_fn,
+            url,
+            query,
+            routeParams,
+        });
 
     if (debug) {
         log.info(`rootServerRes:`, rootServerRes);
@@ -58,14 +56,13 @@ export default async function grabPageCombinedServerRes({
 
     const server_fn = server_module?.default || server_module?.server;
 
-    const serverRes: BunextPageModuleServerReturn | undefined = server_fn
-        ? await grabPageServerRes({
-              server_function: server_fn,
-              url,
-              query,
-              routeParams,
-          })
-        : undefined;
+    const serverRes: BunextPageModuleServerReturn | undefined =
+        await grabPageServerRes({
+            server_function: server_fn,
+            url,
+            query,
+            routeParams,
+        });
 
     const mergedServerRes = _.merge(rootServerRes || {}, serverRes || {});
 

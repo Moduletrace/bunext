@@ -25,6 +25,7 @@ declare global {
     var CONFIG: BunextConfig;
     var SERVER: Server<any> | undefined;
     var RECOMPILING: boolean;
+    var BUILDING_SSR: boolean;
     var IS_SERVER_COMPONENT: boolean;
     var WATCHER_TIMEOUT: any;
     var ROUTER: FileSystemRouter;

@@ -23,7 +23,7 @@ export default async function grabPageServerRes({ url, query, routeParams, serve
         query,
     };
     try {
-        if (routeParams) {
+        if (routeParams && server_function) {
             const serverData = await server_function({
                 ...routeParams,
                 query: { ...routeParams.query, ...query },

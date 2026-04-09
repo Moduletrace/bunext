@@ -10,7 +10,7 @@ import { log } from "../../../utils/log";
 
 type Params = {
     url?: URL;
-    server_function: BunextPageServerFn;
+    server_function?: BunextPageServerFn;
     query?: Record<string, string>;
     routeParams?: BunxRouteParams;
 };
@@ -44,7 +44,7 @@ export default async function grabPageServerRes({
     };
 
     try {
-        if (routeParams) {
+        if (routeParams && server_function) {
             const serverData = await server_function({
                 ...routeParams,
                 query: { ...routeParams.query, ...query },

@@ -3,8 +3,8 @@ import * as esbuild from "esbuild";
 import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
 import tailwindEsbuildPlugin from "./tailwind-esbuild-plugin";
-import { existsSync, unlinkSync } from "fs";
-const { PAGES_DIR, BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
+import { existsSync, rmSync, unlinkSync } from "fs";
+const { PAGES_DIR, BUNX_CWD_MODULE_CACHE_DIR, ROOT_DIR } = grabDirNames();
 function toModPath(page_file_path) {
     return path.join(BUNX_CWD_MODULE_CACHE_DIR, page_file_path.replace(PAGES_DIR, "").replace(/\.(t|j)sx?$/, ".js"));
 }
@@ -16,20 +16,18 @@ async function buildEntries({ entries, clean_cache }) {
     const toBuild = [];
     for (const entry of entries) {
         const mod_file_path = toModPath(entry.page_file_path);
-        if (!global.REACT_DOM_MODULE_CACHE.has(entry.page_file_path) &&
-            !(await Bun.file(mod_file_path).exists())) {
+        // try {
+        //     if (clean_cache && existsSync(mod_file_path)) {
+        //         console.log(`Removing ${mod_file_path}`);
+        //         await Bun.file(mod_file_path).delete();
+        //     }
+        // } catch (error) {}
+        const does_mod_file_path_exists = existsSync(mod_file_path);
+        if (!does_mod_file_path_exists) {
             toBuild.push({
                 tsx: entry.tsx,
                 mod_file_path,
             });
-        }
-        else {
-            try {
-                if (clean_cache && existsSync(mod_file_path)) {
-                    unlinkSync(mod_file_path);
-                }
-            }
-            catch (error) { }
         }
     }
     if (toBuild.length === 0)
@@ -44,7 +42,10 @@ async function buildEntries({ entries, clean_cache }) {
             const entryPaths = new Set(Object.keys(virtualEntries));
             build.onResolve({ filter: /.*/ }, (args) => {
                 if (entryPaths.has(args.path)) {
-                    return { path: args.path, namespace: "virtual" };
+                    return {
+                        path: args.path,
+                        namespace: "virtual",
+                    };
                 }
             });
             build.onLoad({ filter: /.*/, namespace: "virtual" }, (args) => ({
@@ -52,10 +53,36 @@ async function buildEntries({ entries, clean_cache }) {
                 resolveDir: process.cwd(),
                 loader: "tsx",
             }));
+            build.onEnd((result) => {
+                if (result.errors.length > 0) {
+                    console.log(`Build Errors =>`, result.errors);
+                    return;
+                }
+                // const artifacts: any[] = Object.entries(
+                //     result.metafile!.outputs,
+                // )
+                //     .filter(([, meta]) => meta.entryPoint)
+                //     .map(([outputPath, meta]) => {
+                //         return {
+                //             path: outputPath,
+                //             hash: path.basename(
+                //                 outputPath,
+                //                 path.extname(outputPath),
+                //             ),
+                //             type: outputPath.endsWith(".css")
+                //                 ? "text/css"
+                //                 : "text/javascript",
+                //             entrypoint: meta.entryPoint,
+                //             css_path: meta.cssBundle,
+                //         };
+                //     });
+                // console.log("artifacts", artifacts);
+            });
         },
     };
-    await esbuild.build({
-        entryPoints: Object.keys(virtualEntries),
+    const entryPoints = Object.keys(virtualEntries);
+    const build = await esbuild.build({
+        entryPoints,
         bundle: true,
         format: "esm",
         target: "es2020",
@@ -73,7 +100,8 @@ async function buildEntries({ entries, clean_cache }) {
         jsx: "automatic",
         outdir: BUNX_CWD_MODULE_CACHE_DIR,
         plugins: [virtualPlugin, tailwindEsbuildPlugin],
-        logLevel: "silent",
+        metafile: true,
+        // logLevel: "silent",
     });
 }
 async function loadEntry(page_file_path) {
@@ -102,7 +130,10 @@ export default async function grabTsxStringModule(params) {
         return Promise.all(params.tsx_map.map((entry) => loadEntry(entry.page_file_path)));
     }
     try {
-        await buildEntries({ entries: [params], clean_cache: true });
+        await buildEntries({
+            entries: [params],
+            clean_cache: true,
+        });
     }
     catch (error) {
         console.error(`SSR Single Build Error\n`);
