@@ -34,5 +34,6 @@ declare global {
         main: any;
         css: string;
     }>;
+    var BUNDLER_CTX_DISPOSED: boolean | undefined;
 }
 export default function bunextInit(): Promise<void>;

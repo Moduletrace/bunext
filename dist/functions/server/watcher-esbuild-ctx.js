@@ -47,7 +47,13 @@ export default async function watcherEsbuildCTX() {
                 if (filename.match(/.*\.server\.tsx?/)) {
                     global.IS_SERVER_COMPONENT = true;
                 }
-                await global.BUNDLER_CTX?.rebuild();
+                if (global.BUNDLER_CTX && !global.BUNDLER_CTX_DISPOSED) {
+                    await global.BUNDLER_CTX.rebuild();
+                }
+                else {
+                    await fullRebuild({ msg: `Restarting Bundler ...` });
+                    global.BUNDLER_CTX_DISPOSED = false;
+                }
                 if (filename.match(/(404|500)\.tsx?/)) {
                     for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
                         const controller = global.HMR_CONTROLLERS[i];

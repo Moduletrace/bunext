@@ -4,7 +4,6 @@ import grabDirNames from "../../../utils/grab-dir-names";
 import path from "path";
 import tailwindEsbuildPlugin from "./tailwind-esbuild-plugin";
 import { existsSync, unlinkSync } from "fs";
-import { log } from "../../../utils/log";
 const { PAGES_DIR, BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
 function toModPath(page_file_path) {
     return path.join(BUNX_CWD_MODULE_CACHE_DIR, page_file_path.replace(PAGES_DIR, "").replace(/\.(t|j)sx?$/, ".js"));
@@ -74,6 +73,7 @@ async function buildEntries({ entries, clean_cache }) {
         jsx: "automatic",
         outdir: BUNX_CWD_MODULE_CACHE_DIR,
         plugins: [virtualPlugin, tailwindEsbuildPlugin],
+        logLevel: "silent",
     });
 }
 async function loadEntry(page_file_path) {
@@ -92,10 +92,22 @@ async function loadEntry(page_file_path) {
 }
 export default async function grabTsxStringModule(params) {
     if (isBatch(params)) {
-        await buildEntries({ entries: params.tsx_map });
+        try {
+            await buildEntries({ entries: params.tsx_map });
+        }
+        catch (error) {
+            console.error(`SSR Batch Build Error\n`);
+            console.log(error);
+        }
         return Promise.all(params.tsx_map.map((entry) => loadEntry(entry.page_file_path)));
     }
-    await buildEntries({ entries: [params], clean_cache: true });
+    try {
+        await buildEntries({ entries: [params], clean_cache: true });
+    }
+    catch (error) {
+        console.error(`SSR Single Build Error\n`);
+        console.log(error);
+    }
     return loadEntry(params.page_file_path);
 }
 // export default async function grabTsxStringModule<T extends any = any>({

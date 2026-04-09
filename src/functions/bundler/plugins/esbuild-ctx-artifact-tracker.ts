@@ -1,11 +1,11 @@
-import type { Plugin } from "esbuild";
+import { type Plugin } from "esbuild";
 import type { PageFiles } from "../../../types";
 import { log } from "../../../utils/log";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
 
 let buildStart = 0;
 let build_starts = 0;
-const MAX_BUILD_STARTS = 10;
+const MAX_BUILD_STARTS = 2;
 
 type Params = {
     entryToPage: Map<
@@ -24,15 +24,21 @@ export default function esbuildCTXArtifactTracker({
     const artifactTracker: Plugin = {
         name: "artifact-tracker",
         setup(build) {
-            build.onStart(() => {
+            build.onStart(async () => {
                 build_starts++;
                 buildStart = performance.now();
 
                 if (build_starts == MAX_BUILD_STARTS) {
                     const error_msg = `Build Failed. Please check all your components and imports.`;
                     log.error(error_msg);
+
+                    global.BUNDLER_CTX_DISPOSED = true;
+
                     global.RECOMPILING = false;
                     global.IS_SERVER_COMPONENT = false;
+
+                    await global.BUNDLER_CTX?.dispose();
+                    global.BUNDLER_CTX = undefined;
                 }
             });
 
@@ -47,6 +53,22 @@ export default function esbuildCTXArtifactTracker({
                     // }
                     return;
                 }
+
+                // if (result.errors.length) {
+                //     console.error(
+                //         esbuild.formatMessagesSync(result.errors, {
+                //             kind: "error",
+                //         }),
+                //     );
+                // }
+
+                // if (result.warnings.length) {
+                //     console.warn(
+                //         esbuild.formatMessagesSync(result.warnings, {
+                //             kind: "warning",
+                //         }),
+                //     );
+                // }
 
                 const artifacts = grabArtifactsFromBundledResults({
                     result,

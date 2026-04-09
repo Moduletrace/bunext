@@ -8,7 +8,6 @@ import type {
     GrabTSXModuleSingleParams,
 } from "../../../types";
 import { existsSync, unlinkSync } from "fs";
-import { log } from "../../../utils/log";
 
 const { PAGES_DIR, BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
 
@@ -102,6 +101,7 @@ async function buildEntries({ entries, clean_cache }: BuildEntriesParams) {
         jsx: "automatic",
         outdir: BUNX_CWD_MODULE_CACHE_DIR,
         plugins: [virtualPlugin, tailwindEsbuildPlugin],
+        logLevel: "silent",
     });
 }
 
@@ -128,13 +128,24 @@ export default async function grabTsxStringModule<T>(
     params: Params,
 ): Promise<T | T[]> {
     if (isBatch(params)) {
-        await buildEntries({ entries: params.tsx_map });
+        try {
+            await buildEntries({ entries: params.tsx_map });
+        } catch (error) {
+            console.error(`SSR Batch Build Error\n`);
+            console.log(error);
+        }
         return Promise.all(
             params.tsx_map.map((entry) => loadEntry<T>(entry.page_file_path)),
         );
     }
 
-    await buildEntries({ entries: [params], clean_cache: true });
+    try {
+        await buildEntries({ entries: [params], clean_cache: true });
+    } catch (error) {
+        console.error(`SSR Single Build Error\n`);
+        console.log(error);
+    }
+
     return loadEntry<T>(params.page_file_path);
 }
 

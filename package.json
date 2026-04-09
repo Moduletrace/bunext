@@ -1,6 +1,6 @@
 {
     "name": "@moduletrace/bunext",
-    "version": "1.0.60",
+    "version": "1.0.61",
     "main": "dist/index.js",
     "module": "index.ts",
     "dependencies": {

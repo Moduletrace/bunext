@@ -42,6 +42,7 @@ declare global {
     var REACT_IMPORTS_MAP: { imports: Record<string, string> };
     var REACT_DOM_SERVER: any;
     var REACT_DOM_MODULE_CACHE: Map<string, { main: any; css: string }>;
+    var BUNDLER_CTX_DISPOSED: boolean | undefined;
 }
 
 const dirNames = grabDirNames();

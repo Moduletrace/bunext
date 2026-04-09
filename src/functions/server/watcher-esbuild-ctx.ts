@@ -60,7 +60,12 @@ export default async function watcherEsbuildCTX() {
                         global.IS_SERVER_COMPONENT = true;
                     }
 
-                    await global.BUNDLER_CTX?.rebuild();
+                    if (global.BUNDLER_CTX && !global.BUNDLER_CTX_DISPOSED) {
+                        await global.BUNDLER_CTX.rebuild();
+                    } else {
+                        await fullRebuild({ msg: `Restarting Bundler ...` });
+                        global.BUNDLER_CTX_DISPOSED = false;
+                    }
 
                     if (filename.match(/(404|500)\.tsx?/)) {
                         for (
