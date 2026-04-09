@@ -94,6 +94,7 @@ async function fullRebuild(params?: { msg?: string }) {
         log.error(error);
     } finally {
         global.RECOMPILING = false;
+        global.IS_SERVER_COMPONENT = false;
     }
 
     if (global.PAGES_SRC_WATCHER) {

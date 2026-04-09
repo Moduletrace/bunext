@@ -14,6 +14,7 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                     const error_msg = `Build Failed. Please check all your components and imports.`;
                     log.error(error_msg);
                     global.RECOMPILING = false;
+                    global.IS_SERVER_COMPONENT = false;
                 }
             });
             build.onEnd((result) => {
@@ -49,6 +50,7 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                 const elapsed = (performance.now() - buildStart).toFixed(0);
                 log.success(`[Built] in ${elapsed}ms`);
                 global.RECOMPILING = false;
+                global.IS_SERVER_COMPONENT = false;
                 build_starts = 0;
             });
         },

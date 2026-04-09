@@ -15,6 +15,7 @@ type Params = {
     url?: URL;
     query?: any;
     routeParams?: BunxRouteParams;
+    skip_server_res?: boolean;
 };
 
 export default async function grabPageModules({
@@ -23,6 +24,7 @@ export default async function grabPageModules({
     url,
     query,
     routeParams,
+    skip_server_res,
 }: Params) {
     const now = Date.now();
 
@@ -37,19 +39,19 @@ export default async function grabPageModules({
         log.info(`module:`, module);
     }
 
-    const { serverRes } = await grabPageCombinedServerRes({
-        file_path,
-        debug,
-        query,
-        routeParams,
-        url,
-    });
+    const { serverRes } = skip_server_res
+        ? {}
+        : await grabPageCombinedServerRes({
+              file_path,
+              debug,
+              query,
+              routeParams,
+              url,
+          });
 
     const { component } =
         (await grabPageBundledReactComponent({
             file_path,
-            root_file_path,
-            server_res: serverRes,
         })) || {};
 
     if (!component) {

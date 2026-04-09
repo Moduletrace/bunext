@@ -19,7 +19,9 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
         if (!match?.filePath) {
             const default_module = await import(presetComponent);
             const Component = default_module.default;
-            const default_jsx = (_jsx(Component, { children: _jsx("span", { children: error.message }) }));
+            const default_jsx = () => {
+                return _jsx(Component, { children: _jsx("span", { children: error.message }) });
+            };
             return {
                 component: default_jsx,
                 module: default_module,
@@ -54,7 +56,7 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
                 flexDirection: "column",
             }, children: [_jsx("h1", { children: is404 ? "404 Not Found" : "500 Internal Server Error" }), _jsx("span", { children: error.message })] }));
         return {
-            component: _jsx(DefaultNotFound, {}),
+            component: DefaultNotFound,
             routeParams,
             module: { default: DefaultNotFound },
             serverRes: default_server_res,

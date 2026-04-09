@@ -9,12 +9,15 @@ import { AppData } from "../../../data/app-data";
 import _ from "lodash";
 import grabDirNames from "../../../utils/grab-dir-names";
 const { ROOT_DIR } = grabDirNames();
-export default async function genWebHTML({ component, pageProps, bundledMap, module, routeParams, debug, root_module, }) {
+export default async function genWebHTML({ component: Main, pageProps, bundledMap, module, routeParams, debug, root_module, }) {
     const { ClientRootElementIDName, ClientWindowPagePropsName } = grabContants();
     const { renderToReadableStream } = await import(`${ROOT_DIR}/node_modules/react-dom/server.js`);
     const is_dev = isDevelopment();
     if (debug) {
-        log.info("component", component);
+        log.info("component", Main);
+    }
+    if (!Main) {
+        throw new Error(`Main Component not found!`);
     }
     const serializedProps = (EJSON.stringify(pageProps || {}) || "{}").replace(/<\//g, "<\\/");
     const page_hydration_script = await grabWebPageHydrationScript();
@@ -46,7 +49,7 @@ export default async function genWebHTML({ component, pageProps, bundledMap, mod
                                     __html: JSON.stringify(global.REACT_IMPORTS_MAP),
                                 }, defer: true, "data-bunext-head": true }), _jsx("script", { src: `/${bundledMap.path}`, type: "module", id: AppData["BunextClientHydrationScriptID"], defer: true, "data-bunext-head": true })] })) : null, is_dev ? (_jsx("script", { defer: true, dangerouslySetInnerHTML: {
                             __html: page_hydration_script,
-                        }, "data-bunext-head": true })) : null] }), _jsx("body", { children: _jsx("div", { id: ClientRootElementIDName, suppressHydrationWarning: !dev, children: component }) })] }));
+                        }, "data-bunext-head": true })) : null] }), _jsx("body", { children: _jsx("div", { id: ClientRootElementIDName, suppressHydrationWarning: !dev, children: _jsx(Main, { ...pageProps }) }) })] }));
     let html = `<!DOCTYPE html>\n`;
     // const stream = await renderToReadableStream(final_component, {
     //     onError(error: any) {

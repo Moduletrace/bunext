@@ -13,6 +13,7 @@ export default async function () {
         recursive: true,
         force: true,
     });
+
     rmSync(dirNames.BUNX_CWD_MODULE_CACHE_DIR, {
         recursive: true,
         force: true,

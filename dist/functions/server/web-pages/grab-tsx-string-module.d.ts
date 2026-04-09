@@ -1,5 +1,4 @@
-type Params = {
-    tsx: string;
-};
-export default function grabTsxStringModule<T extends any = any>({ tsx, }: Params): Promise<T>;
+import type { GrabTSXModuleBatchParams, GrabTSXModuleSingleParams } from "../../../types";
+type Params = GrabTSXModuleSingleParams | GrabTSXModuleBatchParams;
+export default function grabTsxStringModule<T>(params: Params): Promise<T | T[]>;
 export {};

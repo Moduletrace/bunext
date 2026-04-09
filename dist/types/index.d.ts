@@ -1,5 +1,5 @@
 import type { MatchedRoute, Server, WebSocketHandler } from "bun";
-import type { DetailedHTMLProps, FC, HtmlHTMLAttributes, JSX, PropsWithChildren, ReactNode } from "react";
+import type { DetailedHTMLProps, FC, HtmlHTMLAttributes, PropsWithChildren } from "react";
 export type ServerProps = {
     params: Record<string, string>;
     searchParams: Record<string, string>;
@@ -128,7 +128,7 @@ export type PageDistGenParams = {
     page_file: string;
 };
 export type LivePageDistGenParams = {
-    component: ReactNode;
+    component?: FC;
     pageProps?: any;
     module?: BunextPageModule;
     root_module?: BunextRootModule;
@@ -247,7 +247,7 @@ export type BunextPageModuleMetadata = {
     description?: string;
 };
 export type GrabPageComponentRes = {
-    component?: JSX.Element;
+    component?: FC;
     serverRes?: BunextPageModuleServerReturn;
     routeParams?: BunxRouteParams;
     bundledMap?: BundlerCTXMap;
@@ -257,7 +257,7 @@ export type GrabPageComponentRes = {
 };
 export type BunextRootModule = BunextPageModule;
 export type GrabPageReactBundledComponentRes = {
-    component: JSX.Element;
+    component?: FC;
     server_res?: BunextPageModuleServerReturn;
     tsx?: string;
 };
@@ -288,3 +288,14 @@ export type BunextCacheFileMeta = {
     expiry_seconds?: number;
 };
 export type BunextRootComponentProps = PropsWithChildren & BunextPageProps;
+export type GrabTSXModuleSingleParams = {
+    tsx: string;
+    page_file_path: string;
+};
+export type GrabTSXModuleBatchParams = {
+    tsx_map: GrabTSXModuleBatchMap[];
+};
+export type GrabTSXModuleBatchMap = {
+    tsx: string;
+    page_file_path: string;
+};

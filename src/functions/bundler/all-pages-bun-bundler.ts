@@ -129,6 +129,7 @@ export default async function allPagesBunBundler(params?: Params) {
     log.success(`[Built] in ${elapsed}ms`);
 
     global.RECOMPILING = false;
+    global.IS_SERVER_COMPONENT = false;
 
     return artifacts;
 }

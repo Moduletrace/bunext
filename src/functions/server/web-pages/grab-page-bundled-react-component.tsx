@@ -2,36 +2,43 @@ import type { GrabPageReactBundledComponentRes } from "../../../types";
 import grabPageReactComponentString from "./grab-page-react-component-string";
 import grabTsxStringModule from "./grab-tsx-string-module";
 import { log } from "../../../utils/log";
+import type { FC } from "react";
+import grabRootFilePath from "./grab-root-file-path";
 
 type Params = {
     file_path: string;
-    root_file_path?: string;
-    server_res?: any;
+    return_tsx_only?: boolean;
 };
 
 export default async function grabPageBundledReactComponent({
     file_path,
-    root_file_path,
-    server_res,
+    return_tsx_only,
 }: Params): Promise<GrabPageReactBundledComponentRes | undefined> {
     try {
+        const { root_file_path } = grabRootFilePath();
+
         let tsx = grabPageReactComponentString({
             file_path,
             root_file_path,
-            server_res,
         });
 
         if (!tsx) {
             return undefined;
         }
 
-        const mod = await grabTsxStringModule({ tsx });
-        const Main = mod.default;
-        const component = <Main />;
+        if (return_tsx_only) {
+            return { tsx };
+        }
+
+        const mod: any = await grabTsxStringModule({
+            tsx,
+            page_file_path: file_path,
+        });
+
+        const Main = mod.default as FC;
 
         return {
-            component,
-            server_res,
+            component: Main,
             tsx,
         };
     } catch (error: any) {

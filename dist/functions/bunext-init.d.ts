@@ -10,6 +10,7 @@ declare global {
     var CONFIG: BunextConfig;
     var SERVER: Server<any> | undefined;
     var RECOMPILING: boolean;
+    var IS_SERVER_COMPONENT: boolean;
     var WATCHER_TIMEOUT: any;
     var ROUTER: FileSystemRouter;
     var HMR_CONTROLLERS: GlobalHMRControllerObject[];
@@ -29,5 +30,9 @@ declare global {
         imports: Record<string, string>;
     };
     var REACT_DOM_SERVER: any;
+    var REACT_DOM_MODULE_CACHE: Map<string, {
+        main: any;
+        css: string;
+    }>;
 }
 export default function bunextInit(): Promise<void>;

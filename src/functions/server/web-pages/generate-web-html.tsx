@@ -12,7 +12,7 @@ import grabDirNames from "../../../utils/grab-dir-names";
 const { ROOT_DIR } = grabDirNames();
 
 export default async function genWebHTML({
-    component,
+    component: Main,
     pageProps,
     bundledMap,
     module,
@@ -30,7 +30,11 @@ export default async function genWebHTML({
     const is_dev = isDevelopment();
 
     if (debug) {
-        log.info("component", component);
+        log.info("component", Main);
+    }
+
+    if (!Main) {
+        throw new Error(`Main Component not found!`);
     }
 
     const serializedProps = (EJSON.stringify(pageProps || {}) || "{}").replace(
@@ -135,7 +139,7 @@ export default async function genWebHTML({
                     id={ClientRootElementIDName}
                     suppressHydrationWarning={!dev}
                 >
-                    {component}
+                    <Main {...pageProps} />
                 </div>
             </body>
         </html>

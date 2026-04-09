@@ -11,7 +11,7 @@ class NotFoundError extends Error {
         this.name = "NotFoundError";
     }
 }
-export default async function grabPageComponent({ req, file_path: passed_file_path, debug, return_server_res_only, }) {
+export default async function grabPageComponent({ req, file_path: passed_file_path, debug, return_server_res_only, skip_server_res, }) {
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
     let routeParams = undefined;
@@ -63,6 +63,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             query: match?.query,
             routeParams,
             url,
+            skip_server_res,
         });
         return {
             component,
@@ -79,6 +80,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             error?.status === 404;
         if (!is404) {
             log.error(`Error Grabbing Page Component: ${error.message}`);
+            log.error(`Page: ${passed_file_path || url?.pathname}`);
         }
         return await grabPageErrorComponent({
             error,

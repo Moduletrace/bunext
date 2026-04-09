@@ -45,9 +45,9 @@ export default async function grabPageErrorComponent({
                 presetComponent
             );
             const Component = default_module.default as FC<any>;
-            const default_jsx = (
-                <Component>{<span>{error.message}</span>}</Component>
-            );
+            const default_jsx: FC = () => {
+                return <Component>{<span>{error.message}</span>}</Component>;
+            };
 
             return {
                 component: default_jsx,
@@ -95,7 +95,7 @@ export default async function grabPageErrorComponent({
         );
 
         return {
-            component: <DefaultNotFound />,
+            component: DefaultNotFound,
             routeParams,
             module: { default: DefaultNotFound },
             serverRes: default_server_res,

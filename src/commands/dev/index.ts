@@ -4,11 +4,12 @@ import { log } from "../../utils/log";
 import bunextInit from "../../functions/bunext-init";
 import grabDirNames from "../../utils/grab-dir-names";
 import { rmSync } from "fs";
-import allPagesBunBundler from "../../functions/bundler/all-pages-bun-bundler";
-import allPagesESBuildContextBundler from "../../functions/bundler/all-pages-esbuild-context-bundler";
-import serverPostBuildFn from "../../functions/server/server-post-build-fn";
 
-const { HYDRATION_DST_DIR, BUNX_CWD_PAGES_REWRITE_DIR } = grabDirNames();
+const {
+    HYDRATION_DST_DIR,
+    BUNX_CWD_PAGES_REWRITE_DIR,
+    BUNX_CWD_MODULE_CACHE_DIR,
+} = grabDirNames();
 
 export default function () {
     return new Command("dev")

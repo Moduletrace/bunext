@@ -1,23 +1,27 @@
-import { jsx as _jsx } from "react/jsx-runtime";
 import grabPageReactComponentString from "./grab-page-react-component-string";
 import grabTsxStringModule from "./grab-tsx-string-module";
 import { log } from "../../../utils/log";
-export default async function grabPageBundledReactComponent({ file_path, root_file_path, server_res, }) {
+import grabRootFilePath from "./grab-root-file-path";
+export default async function grabPageBundledReactComponent({ file_path, return_tsx_only, }) {
     try {
+        const { root_file_path } = grabRootFilePath();
         let tsx = grabPageReactComponentString({
             file_path,
             root_file_path,
-            server_res,
         });
         if (!tsx) {
             return undefined;
         }
-        const mod = await grabTsxStringModule({ tsx });
+        if (return_tsx_only) {
+            return { tsx };
+        }
+        const mod = await grabTsxStringModule({
+            tsx,
+            page_file_path: file_path,
+        });
         const Main = mod.default;
-        const component = _jsx(Main, {});
         return {
-            component,
-            server_res,
+            component: Main,
             tsx,
         };
     }

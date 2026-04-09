@@ -32,6 +32,7 @@ export default function esbuildCTXArtifactTracker({
                     const error_msg = `Build Failed. Please check all your components and imports.`;
                     log.error(error_msg);
                     global.RECOMPILING = false;
+                    global.IS_SERVER_COMPONENT = false;
                 }
             });
 
@@ -75,6 +76,7 @@ export default function esbuildCTXArtifactTracker({
                 log.success(`[Built] in ${elapsed}ms`);
 
                 global.RECOMPILING = false;
+                global.IS_SERVER_COMPONENT = false;
 
                 build_starts = 0;
             });

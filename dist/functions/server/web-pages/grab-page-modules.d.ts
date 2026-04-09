@@ -5,10 +5,11 @@ type Params = {
     url?: URL;
     query?: any;
     routeParams?: BunxRouteParams;
+    skip_server_res?: boolean;
 };
-export default function grabPageModules({ file_path, debug, url, query, routeParams, }: Params): Promise<{
-    component: import("react").JSX.Element;
-    serverRes: import("../../../types").BunextPageModuleServerReturn;
+export default function grabPageModules({ file_path, debug, url, query, routeParams, skip_server_res, }: Params): Promise<{
+    component: import("react").FC;
+    serverRes: import("../../../types").BunextPageModuleServerReturn | undefined;
     module: BunextPageModule;
     root_module: BunextPageModule | undefined;
 }>;

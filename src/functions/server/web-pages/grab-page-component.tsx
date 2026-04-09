@@ -20,6 +20,7 @@ type Params = {
     file_path?: string;
     debug?: boolean;
     return_server_res_only?: boolean;
+    skip_server_res?: boolean;
 };
 
 export default async function grabPageComponent({
@@ -27,6 +28,7 @@ export default async function grabPageComponent({
     file_path: passed_file_path,
     debug,
     return_server_res_only,
+    skip_server_res,
 }: Params): Promise<GrabPageComponentRes> {
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
@@ -96,6 +98,7 @@ export default async function grabPageComponent({
                 query: match?.query,
                 routeParams,
                 url,
+                skip_server_res,
             });
 
         return {
@@ -114,6 +117,7 @@ export default async function grabPageComponent({
 
         if (!is404) {
             log.error(`Error Grabbing Page Component: ${error.message}`);
+            log.error(`Page: ${passed_file_path || url?.pathname}`);
         }
 
         return await grabPageErrorComponent({

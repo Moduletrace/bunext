@@ -137,5 +137,6 @@ export default async function allPagesBundler(params) {
     const elapsed = (performance.now() - buildStart).toFixed(0);
     log.success(`[Built] in ${elapsed}ms`);
     global.RECOMPILING = false;
+    global.IS_SERVER_COMPONENT = false;
     build_starts = 0;
 }

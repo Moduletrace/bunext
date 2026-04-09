@@ -72,6 +72,7 @@ async function fullRebuild(params) {
     }
     finally {
         global.RECOMPILING = false;
+        global.IS_SERVER_COMPONENT = false;
     }
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();

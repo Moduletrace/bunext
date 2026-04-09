@@ -1,6 +1,7 @@
 import _ from "lodash";
 import type { GlobalHMRControllerObject } from "../../types";
 import grabPageComponent from "./web-pages/grab-page-component";
+import initPages from "../bundler/init-pages";
 
 export default async function serverPostBuildFn() {
     // if (!global.IS_FIRST_BUNDLE_READY) {
@@ -23,10 +24,12 @@ export default async function serverPostBuildFn() {
 
         const mock_req = new Request(controller.page_url);
 
-        const { serverRes } = await grabPageComponent({
-            req: mock_req,
-            return_server_res_only: true,
-        });
+        const { serverRes } = global.IS_SERVER_COMPONENT
+            ? await grabPageComponent({
+                  req: mock_req,
+                  return_server_res_only: true,
+              })
+            : {};
 
         const final_artifact: Omit<GlobalHMRControllerObject, "controller"> = {
             ..._.omit(controller, ["controller"]),
@@ -58,5 +61,11 @@ export default async function serverPostBuildFn() {
         } catch {
             global.HMR_CONTROLLERS.splice(i, 1);
         }
+
+        global.REACT_DOM_MODULE_CACHE.delete(target_artifact.local_path);
+
+        initPages({
+            target_page_file: target_artifact.local_path,
+        });
     }
 }

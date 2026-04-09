@@ -8,6 +8,7 @@ import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
 import reactModulesBundler from "./bundler/react-modules-bundler";
+import initPages from "./bundler/init-pages";
 const dirNames = grabDirNames();
 const { PAGES_DIR } = dirNames;
 export default async function bunextInit() {
@@ -18,10 +19,10 @@ export default async function bunextInit() {
     global.SKIPPED_BROWSER_MODULES = new Set();
     global.DIR_NAMES = dirNames;
     global.REACT_IMPORTS_MAP = { imports: {} };
-    await init();
-    // await bunReactModulesBundler();
-    await reactModulesBundler();
+    global.REACT_DOM_MODULE_CACHE = new Map();
     log.banner();
+    await init();
+    await reactModulesBundler();
     const router = new Bun.FileSystemRouter({
         style: "nextjs",
         dir: PAGES_DIR,
@@ -29,13 +30,21 @@ export default async function bunextInit() {
     global.ROUTER = router;
     const is_dev = isDevelopment();
     if (is_dev) {
+        log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
+        });
+        initPages({
+            log_time: true,
         });
         watcherEsbuildCTX();
     }
     else {
+        log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler();
+        initPages({
+            log_time: true,
+        });
         cron();
     }
 }

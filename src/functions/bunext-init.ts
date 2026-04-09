@@ -16,6 +16,7 @@ import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
 import reactModulesBundler from "./bundler/react-modules-bundler";
+import initPages from "./bundler/init-pages";
 
 /**
  * # Declare Global Variables
@@ -24,6 +25,7 @@ declare global {
     var CONFIG: BunextConfig;
     var SERVER: Server<any> | undefined;
     var RECOMPILING: boolean;
+    var IS_SERVER_COMPONENT: boolean;
     var WATCHER_TIMEOUT: any;
     var ROUTER: FileSystemRouter;
     var HMR_CONTROLLERS: GlobalHMRControllerObject[];
@@ -39,6 +41,7 @@ declare global {
     var DIR_NAMES: ReturnType<typeof grabDirNames>;
     var REACT_IMPORTS_MAP: { imports: Record<string, string> };
     var REACT_DOM_SERVER: any;
+    var REACT_DOM_MODULE_CACHE: Map<string, { main: any; css: string }>;
 }
 
 const dirNames = grabDirNames();
@@ -52,11 +55,12 @@ export default async function bunextInit() {
     global.SKIPPED_BROWSER_MODULES = new Set<string>();
     global.DIR_NAMES = dirNames;
     global.REACT_IMPORTS_MAP = { imports: {} };
+    global.REACT_DOM_MODULE_CACHE = new Map<string, any>();
+
+    log.banner();
 
     await init();
-    // await bunReactModulesBundler();
     await reactModulesBundler();
-    log.banner();
 
     const router = new Bun.FileSystemRouter({
         style: "nextjs",
@@ -68,12 +72,20 @@ export default async function bunextInit() {
     const is_dev = isDevelopment();
 
     if (is_dev) {
+        log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
         });
+        initPages({
+            log_time: true,
+        });
         watcherEsbuildCTX();
     } else {
+        log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler();
+        initPages({
+            log_time: true,
+        });
         cron();
     }
 }

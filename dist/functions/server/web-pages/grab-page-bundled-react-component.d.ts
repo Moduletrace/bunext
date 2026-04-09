@@ -1,8 +1,7 @@
 import type { GrabPageReactBundledComponentRes } from "../../../types";
 type Params = {
     file_path: string;
-    root_file_path?: string;
-    server_res?: any;
+    return_tsx_only?: boolean;
 };
-export default function grabPageBundledReactComponent({ file_path, root_file_path, server_res, }: Params): Promise<GrabPageReactBundledComponentRes | undefined>;
+export default function grabPageBundledReactComponent({ file_path, return_tsx_only, }: Params): Promise<GrabPageReactBundledComponentRes | undefined>;
 export {};
