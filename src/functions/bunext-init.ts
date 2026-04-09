@@ -16,7 +16,7 @@ import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
 import reactModulesBundler from "./bundler/react-modules-bundler";
-import initPages from "./bundler/init-pages";
+// import initPages from "./bundler/init-pages";
 
 /**
  * # Declare Global Variables
@@ -32,6 +32,7 @@ declare global {
     var HMR_CONTROLLERS: GlobalHMRControllerObject[];
     var LAST_BUILD_TIME: number;
     var BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
+    var SSR_BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
     var BUNDLER_REBUILDS: 0;
     var PAGES_SRC_WATCHER: FSWatcher | undefined;
     var CURRENT_VERSION: string | undefined;
@@ -39,6 +40,7 @@ declare global {
     var ROOT_FILE_UPDATED: boolean;
     var SKIPPED_BROWSER_MODULES: Set<string>;
     var BUNDLER_CTX: BuildContext | undefined;
+    var SSR_BUNDLER_CTX: BuildContext | undefined;
     var DIR_NAMES: ReturnType<typeof grabDirNames>;
     var REACT_IMPORTS_MAP: { imports: Record<string, string> };
     var REACT_DOM_SERVER: any;
@@ -52,6 +54,7 @@ const { PAGES_DIR } = dirNames;
 export default async function bunextInit() {
     global.HMR_CONTROLLERS = [];
     global.BUNDLER_CTX_MAP = {};
+    global.SSR_BUNDLER_CTX_MAP = {};
     global.BUNDLER_REBUILDS = 0;
     global.PAGE_FILES = [];
     global.SKIPPED_BROWSER_MODULES = new Set<string>();
@@ -78,16 +81,16 @@ export default async function bunextInit() {
         await allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
         });
-        initPages({
-            log_time: true,
-        });
+        // initPages({
+        //     log_time: true,
+        // });
         watcherEsbuildCTX();
     } else {
         log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler();
-        initPages({
-            log_time: true,
-        });
+        // initPages({
+        //     log_time: true,
+        // });
         cron();
     }
 }

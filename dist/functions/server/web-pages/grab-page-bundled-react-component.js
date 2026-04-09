@@ -2,8 +2,16 @@ import grabPageReactComponentString from "./grab-page-react-component-string";
 import grabTsxStringModule from "./grab-tsx-string-module";
 import { log } from "../../../utils/log";
 import grabRootFilePath from "./grab-root-file-path";
+import path from "path";
+import grabDirNames from "../../../utils/grab-dir-names";
+const { ROOT_DIR } = grabDirNames();
 export default async function grabPageBundledReactComponent({ file_path, return_tsx_only, }) {
     try {
+        if (global.SSR_BUNDLER_CTX_MAP?.[file_path]) {
+            const mod = await import(path.join(ROOT_DIR, global.SSR_BUNDLER_CTX_MAP[file_path].path));
+            const Main = mod.default;
+            return { component: Main };
+        }
         const { root_file_path } = grabRootFilePath();
         let tsx = grabPageReactComponentString({
             file_path,

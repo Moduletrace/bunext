@@ -4,6 +4,10 @@ import grabTsxStringModule from "./grab-tsx-string-module";
 import { log } from "../../../utils/log";
 import type { FC } from "react";
 import grabRootFilePath from "./grab-root-file-path";
+import path from "path";
+import grabDirNames from "../../../utils/grab-dir-names";
+
+const { ROOT_DIR } = grabDirNames();
 
 type Params = {
     file_path: string;
@@ -15,6 +19,16 @@ export default async function grabPageBundledReactComponent({
     return_tsx_only,
 }: Params): Promise<GrabPageReactBundledComponentRes | undefined> {
     try {
+        if (global.SSR_BUNDLER_CTX_MAP?.[file_path]) {
+            const mod = await import(
+                path.join(ROOT_DIR, global.SSR_BUNDLER_CTX_MAP[file_path].path)
+            );
+
+            const Main = mod.default as FC;
+
+            return { component: Main };
+        }
+
         const { root_file_path } = grabRootFilePath();
 
         let tsx = grabPageReactComponentString({

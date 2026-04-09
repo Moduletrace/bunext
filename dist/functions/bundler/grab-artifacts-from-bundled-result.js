@@ -3,19 +3,18 @@ import * as esbuild from "esbuild";
 import grabDirNames from "../../utils/grab-dir-names";
 import { log } from "../../utils/log";
 const { ROOT_DIR } = grabDirNames();
-export default function grabArtifactsFromBundledResults({ result, entryToPage, }) {
+export default function grabArtifactsFromBundledResults({ result, entryToPage, virtual_match = "hydration-virtual", }) {
     if (result.errors.length > 0)
         return;
+    const virtual_regex = new RegExp(`^${virtual_match}:`);
     const artifacts = Object.entries(result.metafile.outputs)
         .filter(([, meta]) => meta.entryPoint)
         .map(([outputPath, meta]) => {
-        const entrypoint = meta.entryPoint?.match(/^hydration-virtual:/)
-            ? meta.entryPoint?.replace(/^hydration-virtual:/, "")
+        const entrypoint = meta.entryPoint?.match(virtual_regex)
+            ? meta.entryPoint?.replace(virtual_regex, "")
             : meta.entryPoint
                 ? path.join(ROOT_DIR, meta.entryPoint)
                 : "";
-        // const entrypoint = path.join(ROOT_DIR, meta.entryPoint || "");
-        // console.log("entrypoint", entrypoint);
         const target_page = entryToPage.get(entrypoint);
         if (!target_page || !meta.entryPoint) {
             return undefined;

@@ -5,8 +5,6 @@ import cleanupArtifacts from "./cleanup-artifacts";
 export default async function rebuildBundler(params) {
     try {
         global.ROUTER.reload();
-        // await global.BUNDLER_CTX?.dispose();
-        // global.BUNDLER_CTX = undefined;
         const new_artifacts = await allPagesBunBundler({
             page_file_paths: params?.target_file_paths,
         });

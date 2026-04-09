@@ -1,6 +1,7 @@
 import {} from "esbuild";
 import { log } from "../../../utils/log";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
+import pagesSSRContextBundler from "../pages-ssr-context-bundler";
 let buildStart = 0;
 let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
@@ -17,6 +18,8 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                     global.BUNDLER_CTX_DISPOSED = true;
                     global.RECOMPILING = false;
                     global.IS_SERVER_COMPONENT = false;
+                    await global.SSR_BUNDLER_CTX?.dispose();
+                    global.SSR_BUNDLER_CTX = undefined;
                     await global.BUNDLER_CTX?.dispose();
                     global.BUNDLER_CTX = undefined;
                 }
@@ -60,16 +63,18 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                         }
                     }
                     post_build_fn?.({ artifacts });
-                    // writeFileSync(
-                    //     HYDRATION_DST_DIR_MAP_JSON_FILE,
-                    //     JSON.stringify(artifacts, null, 4),
-                    // );
                 }
                 const elapsed = (performance.now() - buildStart).toFixed(0);
                 log.success(`[Built] in ${elapsed}ms`);
                 global.RECOMPILING = false;
                 global.IS_SERVER_COMPONENT = false;
                 build_starts = 0;
+                if (global.SSR_BUNDLER_CTX) {
+                    global.SSR_BUNDLER_CTX.rebuild();
+                }
+                else {
+                    pagesSSRContextBundler();
+                }
             });
         },
     };

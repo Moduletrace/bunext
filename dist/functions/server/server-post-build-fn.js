@@ -1,10 +1,6 @@
 import _ from "lodash";
 import grabPageComponent from "./web-pages/grab-page-component";
-import initPages from "../bundler/init-pages";
 export default async function serverPostBuildFn() {
-    // if (!global.IS_FIRST_BUNDLE_READY) {
-    //     global.IS_FIRST_BUNDLE_READY = true;
-    // }
     if (!global.HMR_CONTROLLERS?.[0] || !global.BUNDLER_CTX_MAP) {
         return;
     }
@@ -45,9 +41,5 @@ export default async function serverPostBuildFn() {
         catch {
             global.HMR_CONTROLLERS.splice(i, 1);
         }
-        global.REACT_DOM_MODULE_CACHE.delete(target_artifact.local_path);
-        initPages({
-            target_page_file: target_artifact.local_path,
-        });
     }
 }

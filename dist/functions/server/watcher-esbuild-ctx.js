@@ -4,7 +4,6 @@ import grabDirNames from "../../utils/grab-dir-names";
 import { log } from "../../utils/log";
 import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server-post-build-fn";
-import initPages from "../bundler/init-pages";
 const { ROOT_DIR } = grabDirNames();
 export default async function watcherEsbuildCTX() {
     const pages_src_watcher = watch(ROOT_DIR, {
@@ -101,6 +100,9 @@ async function fullRebuild(params) {
         await global.BUNDLER_CTX?.dispose();
         global.BUNDLER_CTX = undefined;
         global.BUNDLER_CTX_MAP = {};
+        await global.SSR_BUNDLER_CTX?.dispose();
+        global.SSR_BUNDLER_CTX = undefined;
+        global.SSR_BUNDLER_CTX_MAP = {};
         allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
         });
@@ -112,12 +114,10 @@ async function fullRebuild(params) {
         global.PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();
     }
-    initPages();
 }
 function reloadWatcher() {
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();
     }
-    initPages();
 }

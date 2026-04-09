@@ -4,7 +4,6 @@ import grabDirNames from "../../utils/grab-dir-names";
 import { log } from "../../utils/log";
 import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server-post-build-fn";
-import initPages from "../bundler/init-pages";
 
 const { ROOT_DIR } = grabDirNames();
 
@@ -129,8 +128,11 @@ async function fullRebuild(params?: { msg?: string }) {
 
         await global.BUNDLER_CTX?.dispose();
         global.BUNDLER_CTX = undefined;
-
         global.BUNDLER_CTX_MAP = {};
+
+        await global.SSR_BUNDLER_CTX?.dispose();
+        global.SSR_BUNDLER_CTX = undefined;
+        global.SSR_BUNDLER_CTX_MAP = {};
 
         allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
@@ -143,8 +145,6 @@ async function fullRebuild(params?: { msg?: string }) {
         global.PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();
     }
-
-    initPages();
 }
 
 function reloadWatcher() {
@@ -152,6 +152,4 @@ function reloadWatcher() {
         global.PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();
     }
-
-    initPages();
 }

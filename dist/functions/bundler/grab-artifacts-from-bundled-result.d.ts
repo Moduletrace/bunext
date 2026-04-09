@@ -5,6 +5,7 @@ type Params = {
     entryToPage: Map<string, PageFiles & {
         tsx: string;
     }>;
+    virtual_match?: string;
 };
-export default function grabArtifactsFromBundledResults({ result, entryToPage, }: Params): BundlerCTXMap[] | undefined;
+export default function grabArtifactsFromBundledResults({ result, entryToPage, virtual_match, }: Params): BundlerCTXMap[] | undefined;
 export {};
