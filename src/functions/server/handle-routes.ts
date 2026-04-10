@@ -7,12 +7,13 @@ import grabRouteParams from "../../utils/grab-route-params";
 import grabConstants from "../../utils/grab-constants";
 import grabRouter from "../../utils/grab-router";
 import isDevelopment from "../../utils/is-development";
+import _ from "lodash";
 
 type Params = {
     req: Request;
 };
 
-export default async function ({ req }: Params): Promise<Response> {
+export default async function ({ req }: Params): Promise<Response | undefined> {
     const url = new URL(req.url);
     const is_dev = isDevelopment();
 
@@ -89,7 +90,11 @@ export default async function ({ req }: Params): Promise<Response> {
         return res;
     }
 
-    return Response.json(res, {
-        ...(res.bunext_api_route_res_options || undefined),
-    });
+    if (res) {
+        return Response.json(_.omit(res, "bunext_api_route_res_options"), {
+            ...(res.bunext_api_route_res_options || undefined),
+        });
+    }
+
+    return undefined;
 }
