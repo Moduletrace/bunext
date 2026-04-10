@@ -297,7 +297,7 @@ export type GrabTSXModuleBatchMap = {
 };
 export type BunextAPIRouteHandler<T extends BunextAPIRouteJSONRes = {
     [k: string]: any;
-}> = (params: BunxRouteParams) => Promise<Response | T> | Response | T;
+}> = (params: BunxRouteParams) => Promise<Response | (T & Pick<BunextAPIRouteJSONRes, "bunext_api_route_res_options">)> | Response | (T & Pick<BunextAPIRouteJSONRes, "bunext_api_route_res_options">);
 export type BunextAPIRouteJSONRes = {
     bunext_api_route_res_options?: ResponseInit;
 } & {
