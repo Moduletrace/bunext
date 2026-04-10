@@ -1,4 +1,5 @@
 import type {
+    APIResponseObject,
     BunextAPIRouteHandler,
     BunextServerRouteConfig,
     BunxRouteParams,
