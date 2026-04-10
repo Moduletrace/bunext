@@ -340,6 +340,24 @@ export type GrabTSXModuleBatchMap = {
     page_file_path: string;
 };
 
+export type BunextAPIRouteJSONRes = {
+    bunext_api_route_res_options?: ResponseInit;
+    bunext_api_route_res_transform_fn?: (
+        res: Response,
+    ) => Promise<Response> | Response;
+} & {
+    [k: string]: any;
+};
+
+export type BunextAPIRouteHandlerObjectReturn<T> =
+    | Response
+    | (T &
+          Pick<
+              BunextAPIRouteJSONRes,
+              | "bunext_api_route_res_options"
+              | "bunext_api_route_res_transform_fn"
+          >);
+
 export type BunextAPIRouteHandler<
     T extends BunextAPIRouteJSONRes = {
         [k: string]: any;
@@ -347,15 +365,6 @@ export type BunextAPIRouteHandler<
 > = (
     params: BunxRouteParams,
 ) =>
-    | Promise<
-          | Response
-          | (T & Pick<BunextAPIRouteJSONRes, "bunext_api_route_res_options">)
-      >
+    | Promise<BunextAPIRouteHandlerObjectReturn<T>>
     | Response
-    | (T & Pick<BunextAPIRouteJSONRes, "bunext_api_route_res_options">);
-
-export type BunextAPIRouteJSONRes = {
-    bunext_api_route_res_options?: ResponseInit;
-} & {
-    [k: string]: any;
-};
+    | BunextAPIRouteHandlerObjectReturn<T>;

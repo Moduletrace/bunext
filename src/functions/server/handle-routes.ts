@@ -91,9 +91,21 @@ export default async function ({ req }: Params): Promise<Response | undefined> {
     }
 
     if (res) {
-        return Response.json(_.omit(res, "bunext_api_route_res_options"), {
-            ...(res.bunext_api_route_res_options || undefined),
-        });
+        let final_res = Response.json(
+            _.omit(res, [
+                "bunext_api_route_res_options",
+                "bunext_api_route_res_transform_fn",
+            ]),
+            {
+                ...(res.bunext_api_route_res_options || undefined),
+            },
+        );
+
+        if (res.bunext_api_route_res_transform_fn) {
+            final_res = await res.bunext_api_route_res_transform_fn(final_res);
+        }
+
+        return final_res;
     }
 
     return undefined;
