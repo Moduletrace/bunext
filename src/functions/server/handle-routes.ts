@@ -1,5 +1,8 @@
-import type { Server } from "bun";
-import type { BunextServerRouteConfig, BunxRouteParams } from "../../types";
+import type {
+    BunextAPIRouteHandler,
+    BunextServerRouteConfig,
+    BunxRouteParams,
+} from "../../types";
 import grabRouteParams from "../../utils/grab-route-params";
 import grabConstants from "../../utils/grab-constants";
 import grabRouter from "../../utils/grab-router";
@@ -50,8 +53,8 @@ export default async function ({ req }: Params): Promise<Response> {
         const size = parseInt(contentLength, 10);
 
         if (
-            (config?.maxRequestBodyMB &&
-                size > config.maxRequestBodyMB * MBInBytes) ||
+            (config?.max_request_body_mb &&
+                size > config.max_request_body_mb * MBInBytes) ||
             size > ServerDefaultRequestBodyLimitBytes
         ) {
             return Response.json(
@@ -69,13 +72,24 @@ export default async function ({ req }: Params): Promise<Response> {
         }
     }
 
-    const res: Response = await module["default"]({
-        ...routeParams,
-    } as BunxRouteParams);
+    const target_module = (module["default"] ||
+        module["handler"]) as BunextAPIRouteHandler;
 
-    if (is_dev) {
-        res.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+    const res = await target_module?.({
+        ...routeParams,
+    });
+
+    if (res instanceof Response) {
+        if (is_dev) {
+            res.headers.set(
+                "Cache-Control",
+                "no-cache, no-store, must-revalidate",
+            );
+        }
+        return res;
     }
 
-    return res;
+    return Response.json(res, {
+        ...(res.bunext_api_route_res_options || undefined),
+    });
 }

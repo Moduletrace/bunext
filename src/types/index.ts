@@ -142,12 +142,7 @@ export type APIResponseObject<
 };
 
 export type BunextServerRouteConfig = {
-    maxRequestBodyMB?: number;
-};
-
-export type PageDistGenParams = {
-    pageName: string;
-    page_file: string;
+    max_request_body_mb?: number;
 };
 
 export type LivePageDistGenParams = {
@@ -343,4 +338,14 @@ export type GrabTSXModuleBatchParams = {
 export type GrabTSXModuleBatchMap = {
     tsx: string;
     page_file_path: string;
+};
+
+export type BunextAPIRouteHandler<
+    T extends BunextAPIRouteJSONRes = BunextAPIRouteJSONRes & {
+        [k: string]: any;
+    },
+> = (params: BunxRouteParams) => Promise<Response | T> | Response | T;
+
+export type BunextAPIRouteJSONRes = {
+    bunext_api_route_res_options?: ResponseInit;
 };

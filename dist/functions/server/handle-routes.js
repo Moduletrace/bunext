@@ -28,8 +28,8 @@ export default async function ({ req }) {
     const contentLength = req.headers.get("content-length");
     if (contentLength) {
         const size = parseInt(contentLength, 10);
-        if ((config?.maxRequestBodyMB &&
-            size > config.maxRequestBodyMB * MBInBytes) ||
+        if ((config?.max_request_body_mb &&
+            size > config.max_request_body_mb * MBInBytes) ||
             size > ServerDefaultRequestBodyLimitBytes) {
             return Response.json({
                 success: false,
@@ -42,11 +42,18 @@ export default async function ({ req }) {
             });
         }
     }
-    const res = await module["default"]({
+    const target_module = (module["default"] ||
+        module["handler"]);
+    const res = await target_module?.({
         ...routeParams,
     });
-    if (is_dev) {
-        res.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+    if (res instanceof Response) {
+        if (is_dev) {
+            res.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+        }
+        return res;
     }
-    return res;
+    return Response.json(res, {
+        ...(res.bunext_api_route_res_options || undefined),
+    });
 }
