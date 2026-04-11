@@ -24,8 +24,8 @@ export default async function generateWebPageGetCachePage({
 }: Params) {
     const config = _.merge(root_module?.config, module?.config);
 
-    const cache_page = config?.cachePage || serverRes?.cachePage || false;
-    const expiry_seconds = config?.cacheExpiry || serverRes?.cacheExpiry;
+    const cache_page = config?.cachePage || serverRes?.cache_page || false;
+    const expiry_seconds = config?.cacheExpiry || serverRes?.cache_expiry;
 
     if (cache_page && routeParams?.url) {
         try {

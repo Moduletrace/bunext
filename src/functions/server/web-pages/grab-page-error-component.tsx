@@ -32,7 +32,7 @@ export default async function grabPageErrorComponent({
         : BUNX_ROOT_500_PRESET_COMPONENT;
 
     const default_server_res = {
-        responseOptions: {
+        response_options: {
             status: is404 ? 404 : 500,
         },
     };

@@ -3,8 +3,8 @@ import { log } from "../../../utils/log";
 import writeCache from "../../cache/write-cache";
 export default async function generateWebPageGetCachePage({ module, routeParams, serverRes, root_module, html, }) {
     const config = _.merge(root_module?.config, module?.config);
-    const cache_page = config?.cachePage || serverRes?.cachePage || false;
-    const expiry_seconds = config?.cacheExpiry || serverRes?.cacheExpiry;
+    const cache_page = config?.cachePage || serverRes?.cache_page || false;
+    const expiry_seconds = config?.cacheExpiry || serverRes?.cache_expiry;
     if (cache_page && routeParams?.url) {
         try {
             const is_cache = typeof cache_page == "boolean"

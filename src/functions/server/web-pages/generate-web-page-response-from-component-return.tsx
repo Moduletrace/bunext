@@ -40,10 +40,10 @@ export default async function generateWebPageResponseFromComponentReturn({
     }
 
     const res_opts: ResponseInit = {
-        ...serverRes?.responseOptions,
+        ...serverRes?.response_options,
         headers: {
             "Content-Type": "text/html",
-            ...serverRes?.responseOptions?.headers,
+            ...serverRes?.response_options?.headers,
         },
     };
 
@@ -68,8 +68,12 @@ export default async function generateWebPageResponseFromComponentReturn({
 
     const res = new Response(html, res_opts);
 
-    if (routeParams?.resTransform) {
-        return await routeParams.resTransform(res);
+    if (routeParams?.res_transform) {
+        return await routeParams.res_transform(res);
+    }
+
+    if (serverRes?.res_transform) {
+        return await serverRes.res_transform(res);
     }
 
     return res;

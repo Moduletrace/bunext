@@ -23,10 +23,10 @@ export default async function generateWebPageResponseFromComponentReturn({ compo
             : serverRes.redirect.status_code || 302);
     }
     const res_opts = {
-        ...serverRes?.responseOptions,
+        ...serverRes?.response_options,
         headers: {
             "Content-Type": "text/html",
-            ...serverRes?.responseOptions?.headers,
+            ...serverRes?.response_options?.headers,
         },
     };
     if (is_dev) {
@@ -47,8 +47,11 @@ export default async function generateWebPageResponseFromComponentReturn({ compo
         });
     }
     const res = new Response(html, res_opts);
-    if (routeParams?.resTransform) {
-        return await routeParams.resTransform(res);
+    if (routeParams?.res_transform) {
+        return await routeParams.res_transform(res);
+    }
+    if (serverRes?.res_transform) {
+        return await serverRes.res_transform(res);
     }
     return res;
 }

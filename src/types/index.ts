@@ -90,7 +90,7 @@ export type BunxRouteParams = {
     /**
      * Intercept and Transform the response object
      */
-    resTransform?: (res: Response) => Promise<Response> | Response;
+    res_transform?: (res: Response) => Promise<Response> | Response;
     server?: Server<any>;
 };
 
@@ -238,17 +238,18 @@ export type BunextPageModuleServerReturn<
     props?: T;
     query?: Q;
     redirect?: BunextPageModuleServerRedirect;
-    responseOptions?: ResponseInit;
+    response_options?: ResponseInit;
     /**
      * Whether to cache the current page
      */
-    cachePage?: BunextCachePageType;
+    cache_page?: BunextCachePageType;
     /**
      * Expiry time of the cache in seconds
      */
-    cacheExpiry?: number;
+    cache_expiry?: number;
     url?: BunextPageModuleServerReturnURLObject;
     error?: string;
+    res_transform?: (res: Response) => Promise<Response> | Response;
 };
 
 export type BunextCachePageType =
