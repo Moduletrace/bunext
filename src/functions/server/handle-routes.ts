@@ -8,6 +8,10 @@ import grabConstants from "../../utils/grab-constants";
 import grabRouter from "../../utils/grab-router";
 import isDevelopment from "../../utils/is-development";
 import _ from "lodash";
+import path from "path";
+import grabDirNames from "../../utils/grab-dir-names";
+
+const { ROOT_DIR } = grabDirNames();
 
 type Params = {
     req: Request;
@@ -42,10 +46,23 @@ export default async function ({ req }: Params): Promise<Response | undefined> {
 
     const routeParams: BunxRouteParams = await grabRouteParams({ req });
 
+    let module: any;
     const now = Date.now();
-    const import_path = is_dev ? `${match.filePath}?t=${now}` : match.filePath;
 
-    const module = await import(import_path);
+    if (global.SSR_BUNDLER_CTX_MAP?.[match.filePath]?.path) {
+        const target_import = path.join(
+            ROOT_DIR,
+            global.SSR_BUNDLER_CTX_MAP[match.filePath].path,
+        );
+
+        module = await import(`${target_import}?t=${now}`);
+    } else {
+        const import_path = is_dev
+            ? `${match.filePath}?t=${now}`
+            : match.filePath;
+        module = await import(import_path);
+    }
+
     const config = module.config as BunextServerRouteConfig | undefined;
 
     const contentLength = req.headers.get("content-length");

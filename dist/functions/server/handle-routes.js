@@ -3,6 +3,9 @@ import grabConstants from "../../utils/grab-constants";
 import grabRouter from "../../utils/grab-router";
 import isDevelopment from "../../utils/is-development";
 import _ from "lodash";
+import path from "path";
+import grabDirNames from "../../utils/grab-dir-names";
+const { ROOT_DIR } = grabDirNames();
 export default async function ({ req }) {
     const url = new URL(req.url);
     const is_dev = isDevelopment();
@@ -22,9 +25,18 @@ export default async function ({ req }) {
         });
     }
     const routeParams = await grabRouteParams({ req });
+    let module;
     const now = Date.now();
-    const import_path = is_dev ? `${match.filePath}?t=${now}` : match.filePath;
-    const module = await import(import_path);
+    if (global.SSR_BUNDLER_CTX_MAP?.[match.filePath]?.path) {
+        const target_import = path.join(ROOT_DIR, global.SSR_BUNDLER_CTX_MAP[match.filePath].path);
+        module = await import(`${target_import}?t=${now}`);
+    }
+    else {
+        const import_path = is_dev
+            ? `${match.filePath}?t=${now}`
+            : match.filePath;
+        module = await import(import_path);
+    }
     const config = module.config;
     const contentLength = req.headers.get("content-length");
     if (contentLength) {

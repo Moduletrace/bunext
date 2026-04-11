@@ -16,7 +16,7 @@ type Params = {
 };
 
 export default async function pagesSSRContextBundler(params?: Params) {
-    const pages = grabAllPages({ exclude_api: true });
+    const pages = grabAllPages();
     const dev = isDevelopment();
 
     if (global.SSR_BUNDLER_CTX) {
@@ -28,6 +28,12 @@ export default async function pagesSSRContextBundler(params?: Params) {
     const { root_file_path } = grabRootFilePath();
 
     for (const page of pages) {
+        if (page.local_path.match(/\/pages\/api\//)) {
+            const ts = await Bun.file(page.local_path).text();
+            entryToPage.set(page.local_path, { ...page, tsx: ts });
+            continue;
+        }
+
         const tsx = grabPageReactComponentString({
             file_path: page.local_path,
             root_file_path,
@@ -72,7 +78,7 @@ export default async function pagesSSRContextBundler(params?: Params) {
             "react/jsx-runtime",
             "react/jsx-dev-runtime",
         ],
-        logLevel: "silent",
+        // logLevel: "silent",
     });
 
     await global.SSR_BUNDLER_CTX.rebuild();

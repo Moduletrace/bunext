@@ -50,13 +50,10 @@ export default async function watcherEsbuildCTX() {
             }
 
             const target_files_match = /\.(tsx?|jsx?|css)$/;
-            const rebuild_skip_paths = /\/pages\/api\//;
+            // const rebuild_skip_paths = /\/pages\/api\//;
 
             if (event !== "rename") {
-                if (
-                    filename.match(target_files_match) &&
-                    !filename.match(rebuild_skip_paths)
-                ) {
+                if (filename.match(target_files_match)) {
                     if (global.RECOMPILING) return;
                     global.RECOMPILING = true;
 

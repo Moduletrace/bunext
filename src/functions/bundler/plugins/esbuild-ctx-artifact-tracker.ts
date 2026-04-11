@@ -3,8 +3,9 @@ import type { PageFiles } from "../../../types";
 import { log } from "../../../utils/log";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
 import pagesSSRContextBundler from "../pages-ssr-context-bundler";
+import buildOnstartErrorHandler from "../build-on-start-error-handler";
 
-let buildStart = 0;
+let build_start = 0;
 let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
 
@@ -27,59 +28,21 @@ export default function esbuildCTXArtifactTracker({
         setup(build) {
             build.onStart(async () => {
                 build_starts++;
-                buildStart = performance.now();
-
+                build_start = performance.now();
                 if (build_starts == MAX_BUILD_STARTS) {
-                    const error_msg = `Build Failed. Please check all your components and imports.`;
-                    log.error(error_msg);
-
-                    global.BUNDLER_CTX_DISPOSED = true;
-
-                    global.RECOMPILING = false;
-                    global.IS_SERVER_COMPONENT = false;
-
-                    await global.SSR_BUNDLER_CTX?.dispose();
-                    global.SSR_BUNDLER_CTX = undefined;
-
-                    await global.BUNDLER_CTX?.dispose();
-                    global.BUNDLER_CTX = undefined;
+                    await buildOnstartErrorHandler();
                 }
             });
 
             build.onEnd((result) => {
                 if (result.errors.length > 0) {
-                    // for (const error of result.errors) {
-                    //     const loc = error.location;
-                    //     const location = loc
-                    //         ? ` ${loc.file}:${loc.line}:${loc.column}`
-                    //         : "";
-                    //     log.error(`[Build]${location} ${error.text}`);
-                    // }
                     return;
                 }
-
-                // if (result.errors.length) {
-                //     console.error(
-                //         esbuild.formatMessagesSync(result.errors, {
-                //             kind: "error",
-                //         }),
-                //     );
-                // }
-
-                // if (result.warnings.length) {
-                //     console.warn(
-                //         esbuild.formatMessagesSync(result.warnings, {
-                //             kind: "warning",
-                //         }),
-                //     );
-                // }
 
                 const artifacts = grabArtifactsFromBundledResults({
                     result,
                     entryToPage,
                 });
-
-                // console.log("artifacts", artifacts);
 
                 if (artifacts?.[0] && artifacts.length > 0) {
                     for (let i = 0; i < artifacts.length; i++) {
@@ -93,7 +56,7 @@ export default function esbuildCTXArtifactTracker({
                     post_build_fn?.({ artifacts });
                 }
 
-                const elapsed = (performance.now() - buildStart).toFixed(0);
+                const elapsed = (performance.now() - build_start).toFixed(0);
                 log.success(`[Built] in ${elapsed}ms`);
 
                 global.RECOMPILING = false;

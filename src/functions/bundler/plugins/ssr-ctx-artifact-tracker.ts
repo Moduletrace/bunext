@@ -1,9 +1,9 @@
 import { type Plugin } from "esbuild";
 import type { PageFiles } from "../../../types";
-import { log } from "../../../utils/log";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
+import buildOnstartErrorHandler from "../build-on-start-error-handler";
 
-let buildStart = 0;
+let build_start = 0;
 let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
 
@@ -26,16 +26,15 @@ export default function ssrCTXArtifactTracker({
         setup(build) {
             build.onStart(async () => {
                 build_starts++;
-                buildStart = performance.now();
-
+                build_start = performance.now();
                 if (build_starts == MAX_BUILD_STARTS) {
-                    // const error_msg = `SSR Build Failed. Please check all your components and imports.`;
-                    // log.error(error_msg);
+                    await buildOnstartErrorHandler();
                 }
             });
 
             build.onEnd((result) => {
                 if (result.errors.length > 0) {
+                    console.log("result.errors", result.errors);
                     return;
                 }
 

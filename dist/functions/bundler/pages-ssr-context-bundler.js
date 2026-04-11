@@ -9,7 +9,7 @@ import ssrVirtualFilesPlugin from "./plugins/ssr-virtual-files-plugin";
 import ssrCTXArtifactTracker from "./plugins/ssr-ctx-artifact-tracker";
 const { BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
 export default async function pagesSSRContextBundler(params) {
-    const pages = grabAllPages({ exclude_api: true });
+    const pages = grabAllPages();
     const dev = isDevelopment();
     if (global.SSR_BUNDLER_CTX) {
         await global.SSR_BUNDLER_CTX.dispose();
@@ -18,6 +18,11 @@ export default async function pagesSSRContextBundler(params) {
     const entryToPage = new Map();
     const { root_file_path } = grabRootFilePath();
     for (const page of pages) {
+        if (page.local_path.match(/\/pages\/api\//)) {
+            const ts = await Bun.file(page.local_path).text();
+            entryToPage.set(page.local_path, { ...page, tsx: ts });
+            continue;
+        }
         const tsx = grabPageReactComponentString({
             file_path: page.local_path,
             root_file_path,
@@ -57,7 +62,7 @@ export default async function pagesSSRContextBundler(params) {
             "react/jsx-runtime",
             "react/jsx-dev-runtime",
         ],
-        logLevel: "silent",
+        // logLevel: "silent",
     });
     await global.SSR_BUNDLER_CTX.rebuild();
 }
