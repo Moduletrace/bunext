@@ -16,7 +16,7 @@ type Params = {
 };
 
 export default async function pagesSSRContextBundler(params?: Params) {
-    const pages = grabAllPages();
+    const pages = grabAllPages({ exclude_api: true });
     const dev = isDevelopment();
 
     if (global.SSR_BUNDLER_CTX) {
@@ -52,7 +52,7 @@ export default async function pagesSSRContextBundler(params?: Params) {
         bundle: true,
         minify: !dev,
         format: "esm",
-        target: "es2020",
+        target: "esnext",
         platform: "node",
         define: {
             "process.env.NODE_ENV": JSON.stringify(

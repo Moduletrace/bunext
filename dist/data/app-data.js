@@ -4,4 +4,5 @@ export const AppData = {
     BunextStaticFilesCacheExpiry: 60 * 60 * 24 * 7,
     ClientHMRPath: "__bunext_client_hmr__",
     BunextClientHydrationScriptID: "bunext-client-hydration-script",
+    BunextTmpFileExt: ".bunext_tmp.tsx",
 };

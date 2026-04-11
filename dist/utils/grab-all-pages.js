@@ -9,6 +9,9 @@ export default function grabAllPages(params) {
     if (params?.exclude_api) {
         return pages.filter((p) => !Boolean(p.url_path.startsWith("/api/")));
     }
+    if (params?.api_only) {
+        return pages.filter((p) => Boolean(p.url_path.startsWith("/api/")));
+    }
     return pages;
 }
 function grabPageDirRecursively({ page_dir }) {

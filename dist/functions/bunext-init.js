@@ -14,6 +14,7 @@ export default async function bunextInit() {
     global.HMR_CONTROLLERS = [];
     global.BUNDLER_CTX_MAP = {};
     global.SSR_BUNDLER_CTX_MAP = {};
+    global.API_ROUTES_BUNDLER_CTX_MAP = {};
     global.BUNDLER_REBUILDS = 0;
     global.REBUILD_RETRIES = 0;
     global.PAGE_FILES = [];

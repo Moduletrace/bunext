@@ -44,15 +44,18 @@ export default async function ({ req }: Params): Promise<Response | undefined> {
         );
     }
 
-    const routeParams: BunxRouteParams = await grabRouteParams({ req });
+    const routeParams: BunxRouteParams = await grabRouteParams({
+        req,
+        query: match.query,
+    });
 
     let module: any;
     const now = Date.now();
 
-    if (global.SSR_BUNDLER_CTX_MAP?.[match.filePath]?.path) {
+    if (is_dev && global.API_ROUTES_BUNDLER_CTX_MAP?.[match.filePath]?.path) {
         const target_import = path.join(
             ROOT_DIR,
-            global.SSR_BUNDLER_CTX_MAP[match.filePath].path,
+            global.API_ROUTES_BUNDLER_CTX_MAP[match.filePath].path,
         );
 
         module = await import(`${target_import}?t=${now}`);
@@ -127,3 +130,35 @@ export default async function ({ req }: Params): Promise<Response | undefined> {
 
     return undefined;
 }
+
+// const relative_path = match.filePath.replace(API_DIR, "");
+// const relative_module_js_file = relative_path.replace(/\.tsx?$/, ".js");
+// const bun_module_file = path.join(
+//     BUNX_CWD_MODULE_CACHE_DIR,
+//     "api",
+//     relative_module_js_file,
+// );
+
+// if (existsSync(bun_module_file)) {
+//     module = await import(`${bun_module_file}?t=${now}`);
+// } else {
+//     const import_path = is_dev
+//         ? `${match.filePath}?t=${now}`
+//         : match.filePath;
+//     module = await import(import_path);
+// }
+
+// if (is_dev) {
+//     const tmp_path = `${match.filePath}.${now}${AppData["BunextTmpFileExt"]}`;
+//     cpSync(match.filePath, tmp_path);
+//     module = await import(`${tmp_path}?t=${now}`);
+//     try {
+//         unlinkSync(tmp_path);
+//     } catch (error) {}
+// } else {
+//     // const import_path = is_dev ? `${match.filePath}?t=${now}` : match.filePath;
+//     module = await import(match.filePath);
+// }
+
+// const import_path = is_dev ? `${match.filePath}?t=${now}` : match.filePath;
+// module = await import(import_path);

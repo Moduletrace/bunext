@@ -4,6 +4,7 @@ import { log } from "../../../utils/log";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
 import pagesSSRContextBundler from "../pages-ssr-context-bundler";
 import buildOnstartErrorHandler from "../build-on-start-error-handler";
+import apiRoutesContextBundler from "../api-routes-context-bundler";
 
 let build_start = 0;
 let build_starts = 0;
@@ -68,6 +69,12 @@ export default function esbuildCTXArtifactTracker({
                     global.SSR_BUNDLER_CTX.rebuild();
                 } else {
                     pagesSSRContextBundler();
+                }
+
+                if (global.API_ROUTES_BUNDLER_CTX) {
+                    global.API_ROUTES_BUNDLER_CTX.rebuild();
+                } else {
+                    apiRoutesContextBundler();
                 }
             });
         },

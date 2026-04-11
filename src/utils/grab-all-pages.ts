@@ -7,6 +7,7 @@ import pagePathTransform from "./page-path-transform";
 
 type Params = {
     exclude_api?: boolean;
+    api_only?: boolean;
 };
 
 export default function grabAllPages(params?: Params) {
@@ -16,6 +17,10 @@ export default function grabAllPages(params?: Params) {
 
     if (params?.exclude_api) {
         return pages.filter((p) => !Boolean(p.url_path.startsWith("/api/")));
+    }
+
+    if (params?.api_only) {
+        return pages.filter((p) => Boolean(p.url_path.startsWith("/api/")));
     }
 
     return pages;

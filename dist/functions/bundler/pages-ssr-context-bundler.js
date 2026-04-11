@@ -9,7 +9,7 @@ import ssrVirtualFilesPlugin from "./plugins/ssr-virtual-files-plugin";
 import ssrCTXArtifactTracker from "./plugins/ssr-ctx-artifact-tracker";
 const { BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
 export default async function pagesSSRContextBundler(params) {
-    const pages = grabAllPages();
+    const pages = grabAllPages({ exclude_api: true });
     const dev = isDevelopment();
     if (global.SSR_BUNDLER_CTX) {
         await global.SSR_BUNDLER_CTX.dispose();
@@ -38,7 +38,7 @@ export default async function pagesSSRContextBundler(params) {
         bundle: true,
         minify: !dev,
         format: "esm",
-        target: "es2020",
+        target: "esnext",
         platform: "node",
         define: {
             "process.env.NODE_ENV": JSON.stringify(dev ? "development" : "production"),

@@ -33,6 +33,7 @@ declare global {
     var LAST_BUILD_TIME: number;
     var BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
     var SSR_BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
+    var API_ROUTES_BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
     var BUNDLER_REBUILDS: 0;
     var PAGES_SRC_WATCHER: FSWatcher | undefined;
     var CURRENT_VERSION: string | undefined;
@@ -41,6 +42,7 @@ declare global {
     var SKIPPED_BROWSER_MODULES: Set<string>;
     var BUNDLER_CTX: BuildContext | undefined;
     var SSR_BUNDLER_CTX: BuildContext | undefined;
+    var API_ROUTES_BUNDLER_CTX: BuildContext | undefined;
     var DIR_NAMES: ReturnType<typeof grabDirNames>;
     var REACT_IMPORTS_MAP: { imports: Record<string, string> };
     var REACT_DOM_SERVER: any;
@@ -57,6 +59,7 @@ export default async function bunextInit() {
     global.HMR_CONTROLLERS = [];
     global.BUNDLER_CTX_MAP = {};
     global.SSR_BUNDLER_CTX_MAP = {};
+    global.API_ROUTES_BUNDLER_CTX_MAP = {};
     global.BUNDLER_REBUILDS = 0;
     global.REBUILD_RETRIES = 0;
     global.PAGE_FILES = [];

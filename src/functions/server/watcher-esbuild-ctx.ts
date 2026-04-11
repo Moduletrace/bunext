@@ -5,6 +5,7 @@ import { log } from "../../utils/log";
 import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server-post-build-fn";
 import fullRebuild from "./full-rebuild";
+import { AppData } from "../../data/app-data";
 
 const { ROOT_DIR } = grabDirNames();
 
@@ -19,6 +20,10 @@ export default async function watcherEsbuildCTX() {
             if (!filename) return;
 
             if (filename.match(/^\.\w+/)) {
+                return;
+            }
+
+            if (filename.endsWith(AppData["BunextTmpFileExt"])) {
                 return;
             }
 
