@@ -31,9 +31,9 @@ declare global {
     var ROUTER: FileSystemRouter;
     var HMR_CONTROLLERS: GlobalHMRControllerObject[];
     var LAST_BUILD_TIME: number;
-    var BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
-    var SSR_BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
-    var API_ROUTES_BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap } | undefined;
+    var BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap };
+    var SSR_BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap };
+    var API_ROUTES_BUNDLER_CTX_MAP: { [k: string]: BundlerCTXMap };
     var BUNDLER_REBUILDS: 0;
     var PAGES_SRC_WATCHER: FSWatcher | undefined;
     var CURRENT_VERSION: string | undefined;

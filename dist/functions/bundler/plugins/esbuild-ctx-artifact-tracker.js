@@ -4,6 +4,7 @@ import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-resu
 import pagesSSRContextBundler from "../pages-ssr-context-bundler";
 import buildOnstartErrorHandler from "../build-on-start-error-handler";
 import apiRoutesContextBundler from "../api-routes-context-bundler";
+import _ from "lodash";
 let build_start = 0;
 let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
@@ -31,7 +32,7 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                         const artifact = artifacts[i];
                         if (artifact?.local_path && global.BUNDLER_CTX_MAP) {
                             global.BUNDLER_CTX_MAP[artifact.local_path] =
-                                artifact;
+                                _.merge(global.BUNDLER_CTX_MAP[artifact.local_path], artifact);
                         }
                     }
                     post_build_fn?.({ artifacts });

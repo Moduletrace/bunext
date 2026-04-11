@@ -24,12 +24,15 @@ export default async function serverPostBuildFn() {
         const target_artifact =
             global.BUNDLER_CTX_MAP[controller.target_map.local_path];
 
-        const mock_req = new Request(controller.page_url);
+        const mock_req = target_artifact.req
+            ? target_artifact.req.clone()
+            : new Request(controller.page_url);
 
         const { serverRes } = global.IS_SERVER_COMPONENT
             ? await grabPageComponent({
                   req: mock_req,
                   return_server_res_only: true,
+                  is_hydration: true,
               })
             : {};
 

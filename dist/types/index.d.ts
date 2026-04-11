@@ -272,6 +272,7 @@ export type BundlerCTXMap = {
     url_path: string;
     file_name: string;
     css_path?: string;
+    req?: Request;
 };
 export type GlobalHMRControllerObject = {
     controller: ReadableStreamDefaultController<string>;

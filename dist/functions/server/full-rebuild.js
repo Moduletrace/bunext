@@ -12,10 +12,8 @@ export default async function fullRebuild(params) {
         global.ROUTER.reload();
         await global.BUNDLER_CTX?.dispose();
         global.BUNDLER_CTX = undefined;
-        global.BUNDLER_CTX_MAP = {};
         await global.SSR_BUNDLER_CTX?.dispose();
         global.SSR_BUNDLER_CTX = undefined;
-        global.SSR_BUNDLER_CTX_MAP = {};
         allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
         });

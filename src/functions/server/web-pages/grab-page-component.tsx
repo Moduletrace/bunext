@@ -23,6 +23,7 @@ type Params = {
     retry?: boolean;
     return_server_res_only?: boolean;
     skip_server_res?: boolean;
+    is_hydration?: boolean;
 };
 
 export default async function grabPageComponent(
@@ -34,6 +35,7 @@ export default async function grabPageComponent(
         debug,
         return_server_res_only,
         skip_server_res,
+        is_hydration,
     } = params;
 
     const url = req?.url ? new URL(req.url) : undefined;
@@ -72,13 +74,17 @@ export default async function grabPageComponent(
             throw new Error(errMsg);
         }
 
-        const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
+        const bundledMap = global.BUNDLER_CTX_MAP[file_path];
 
         if (!bundledMap?.path) {
             console.log(global.BUNDLER_CTX_MAP);
             const errMsg = `No Bundled File Path for this request path!`;
             log.error(errMsg);
             throw new Error(errMsg);
+        }
+
+        if (req && !is_hydration) {
+            global.BUNDLER_CTX_MAP[file_path].req = req;
         }
 
         if (debug) {

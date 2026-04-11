@@ -6,6 +6,7 @@ type Params = {
     retry?: boolean;
     return_server_res_only?: boolean;
     skip_server_res?: boolean;
+    is_hydration?: boolean;
 };
 export default function grabPageComponent(params: Params): Promise<GrabPageComponentRes>;
 export {};

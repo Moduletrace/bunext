@@ -13,7 +13,7 @@ class NotFoundError extends Error {
     }
 }
 export default async function grabPageComponent(params) {
-    const { req, file_path: passed_file_path, debug, return_server_res_only, skip_server_res, } = params;
+    const { req, file_path: passed_file_path, debug, return_server_res_only, skip_server_res, is_hydration, } = params;
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
     let routeParams = undefined;
@@ -39,12 +39,15 @@ export default async function grabPageComponent(params) {
             // log.error(errMsg);
             throw new Error(errMsg);
         }
-        const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
+        const bundledMap = global.BUNDLER_CTX_MAP[file_path];
         if (!bundledMap?.path) {
             console.log(global.BUNDLER_CTX_MAP);
             const errMsg = `No Bundled File Path for this request path!`;
             log.error(errMsg);
             throw new Error(errMsg);
+        }
+        if (req && !is_hydration) {
+            global.BUNDLER_CTX_MAP[file_path].req = req;
         }
         if (debug) {
             log.info(`bundledMap:`, bundledMap);
