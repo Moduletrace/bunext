@@ -4,6 +4,7 @@ import _ from "lodash";
 import { log } from "../../../utils/log";
 import grabPageModules from "./grab-page-modules";
 import grabPageCombinedServerRes from "./grab-page-combined-server-res";
+import fullRebuild from "../full-rebuild";
 class NotFoundError extends Error {
     status = 404;
     constructor(message) {
@@ -11,7 +12,8 @@ class NotFoundError extends Error {
         this.name = "NotFoundError";
     }
 }
-export default async function grabPageComponent({ req, file_path: passed_file_path, debug, return_server_res_only, skip_server_res, }) {
+export default async function grabPageComponent(params) {
+    const { req, file_path: passed_file_path, debug, return_server_res_only, skip_server_res, } = params;
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
     let routeParams = undefined;
@@ -65,6 +67,7 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             url,
             skip_server_res,
         });
+        global.IS_404_PAGE = false;
         return {
             component,
             serverRes,
@@ -72,13 +75,33 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
             module,
             bundledMap,
             root_module,
+            success: true,
         };
     }
     catch (error) {
         const is404 = error instanceof NotFoundError ||
             error?.name === "NotFoundError" ||
             error?.status === 404;
-        if (!is404) {
+        if (!params.retry) {
+            while (global.REBUILD_RETRIES < 2) {
+                global.REBUILD_RETRIES = global.REBUILD_RETRIES + 1;
+                await fullRebuild();
+                await Bun.sleep(200);
+                const component_retried = await grabPageComponent({
+                    ...params,
+                    retry: true,
+                });
+                if (component_retried.success) {
+                    global.REBUILD_RETRIES = 0;
+                    return component_retried;
+                }
+            }
+            global.REBUILD_RETRIES = 0;
+        }
+        if (is404) {
+            global.IS_404_PAGE = true;
+        }
+        else {
             log.error(`Error Grabbing Page Component: ${error.message}`);
             log.error(`Page: ${passed_file_path || url?.pathname}`);
         }
@@ -90,28 +113,3 @@ export default async function grabPageComponent({ req, file_path: passed_file_pa
         });
     }
 }
-// let root_module: any;
-// if (root_file) {
-//     if (isDevelopment()) {
-//         root_module = await grabFilePathModule({
-//             file_path: root_file,
-//         });
-//     } else {
-//         root_module = root_file ? await import(root_file) : undefined;
-//     }
-// }
-// const RootComponent = root_module?.default as FC<any> | undefined;
-// let module: BunextPageModule;
-// if (isDevelopment()) {
-//     module = await grabFilePathModule({ file_path });
-// } else {
-//     module = await import(file_path);
-// }
-// const Component = main_module.default as FC<any>;
-// const component = RootComponent ? (
-//     <RootComponent {...serverRes}>
-//         <Component {...serverRes} />
-//     </RootComponent>
-// ) : (
-//     <Component {...serverRes} />
-// );

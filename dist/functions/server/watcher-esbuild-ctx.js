@@ -4,6 +4,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import { log } from "../../utils/log";
 import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server-post-build-fn";
+import fullRebuild from "./full-rebuild";
 const { ROOT_DIR } = grabDirNames();
 export default async function watcherEsbuildCTX() {
     const pages_src_watcher = watch(ROOT_DIR, {
@@ -38,8 +39,10 @@ export default async function watcherEsbuildCTX() {
             return;
         }
         const target_files_match = /\.(tsx?|jsx?|css)$/;
+        const rebuild_skip_paths = /\/pages\/api\//;
         if (event !== "rename") {
-            if (filename.match(target_files_match)) {
+            if (filename.match(target_files_match) &&
+                !filename.match(rebuild_skip_paths)) {
                 if (global.RECOMPILING)
                     return;
                 global.RECOMPILING = true;
@@ -47,7 +50,12 @@ export default async function watcherEsbuildCTX() {
                     global.IS_SERVER_COMPONENT = true;
                 }
                 if (global.BUNDLER_CTX && !global.BUNDLER_CTX_DISPOSED) {
-                    await global.BUNDLER_CTX.rebuild();
+                    try {
+                        await global.BUNDLER_CTX.rebuild();
+                    }
+                    catch (error) {
+                        console.log(`ESBUILD Rebuild Error =>`, error);
+                    }
                 }
                 else {
                     await fullRebuild({ msg: `Restarting Bundler ...` });
@@ -88,32 +96,6 @@ export default async function watcherEsbuildCTX() {
         });
     });
     global.PAGES_SRC_WATCHER = pages_src_watcher;
-}
-async function fullRebuild(params) {
-    try {
-        const { msg } = params || {};
-        global.RECOMPILING = true;
-        if (msg) {
-            log.watch(msg);
-        }
-        global.ROUTER.reload();
-        await global.BUNDLER_CTX?.dispose();
-        global.BUNDLER_CTX = undefined;
-        global.BUNDLER_CTX_MAP = {};
-        await global.SSR_BUNDLER_CTX?.dispose();
-        global.SSR_BUNDLER_CTX = undefined;
-        global.SSR_BUNDLER_CTX_MAP = {};
-        allPagesESBuildContextBundler({
-            post_build_fn: serverPostBuildFn,
-        });
-    }
-    catch (error) {
-        log.error(error);
-    }
-    if (global.PAGES_SRC_WATCHER) {
-        global.PAGES_SRC_WATCHER.close();
-        watcherEsbuildCTX();
-    }
 }
 function reloadWatcher() {
     if (global.PAGES_SRC_WATCHER) {

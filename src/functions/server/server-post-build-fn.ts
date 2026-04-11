@@ -14,6 +14,13 @@ export default async function serverPostBuildFn() {
             continue;
         }
 
+        if (global.IS_404_PAGE) {
+            controller.controller.enqueue(
+                `event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`,
+            );
+            continue;
+        }
+
         const target_artifact =
             global.BUNDLER_CTX_MAP[controller.target_map.local_path];
 

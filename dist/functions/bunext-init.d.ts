@@ -40,5 +40,7 @@ declare global {
         css: string;
     }>;
     var BUNDLER_CTX_DISPOSED: boolean | undefined;
+    var REBUILD_RETRIES: number;
+    var IS_404_PAGE: boolean;
 }
 export default function bunextInit(): Promise<void>;

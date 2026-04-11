@@ -250,6 +250,7 @@ export type GrabPageComponentRes = {
     module?: BunextPageModule;
     root_module?: BunextRootModule;
     debug?: boolean;
+    success?: boolean;
 };
 export type BunextRootModule = BunextPageModule;
 export type GrabPageReactBundledComponentRes = {

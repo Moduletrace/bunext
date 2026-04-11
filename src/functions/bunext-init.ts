@@ -46,6 +46,8 @@ declare global {
     var REACT_DOM_SERVER: any;
     var REACT_DOM_MODULE_CACHE: Map<string, { main: any; css: string }>;
     var BUNDLER_CTX_DISPOSED: boolean | undefined;
+    var REBUILD_RETRIES: number;
+    var IS_404_PAGE: boolean;
 }
 
 const dirNames = grabDirNames();
@@ -56,6 +58,7 @@ export default async function bunextInit() {
     global.BUNDLER_CTX_MAP = {};
     global.SSR_BUNDLER_CTX_MAP = {};
     global.BUNDLER_REBUILDS = 0;
+    global.REBUILD_RETRIES = 0;
     global.PAGE_FILES = [];
     global.SKIPPED_BROWSER_MODULES = new Set<string>();
     global.DIR_NAMES = dirNames;

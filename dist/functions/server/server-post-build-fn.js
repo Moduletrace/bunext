@@ -9,6 +9,10 @@ export default async function serverPostBuildFn() {
         if (!controller?.target_map?.local_path) {
             continue;
         }
+        if (global.IS_404_PAGE) {
+            controller.controller.enqueue(`event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`);
+            continue;
+        }
         const target_artifact = global.BUNDLER_CTX_MAP[controller.target_map.local_path];
         const mock_req = new Request(controller.page_url);
         const { serverRes } = global.IS_SERVER_COMPONENT
