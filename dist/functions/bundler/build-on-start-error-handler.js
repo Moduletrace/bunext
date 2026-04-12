@@ -1,4 +1,3 @@
-import { log } from "../../utils/log";
 export default async function buildOnstartErrorHandler(params) {
     // const error_msg = `Build Failed. Please check all your components and imports.`;
     // log.error(error_msg);

@@ -35,6 +35,10 @@ export default async function handleWebPages({
             req,
         });
 
+        if (componentRes instanceof Response) {
+            return componentRes;
+        }
+
         return await generateWebPageResponseFromComponentReturn({
             ...componentRes,
         });
@@ -44,6 +48,10 @@ export default async function handleWebPages({
         const componentRes = await grabPageErrorComponent({
             error,
         });
+
+        if (componentRes instanceof Response) {
+            return componentRes;
+        }
 
         return await generateWebPageResponseFromComponentReturn(componentRes);
     }

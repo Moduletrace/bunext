@@ -5,5 +5,5 @@ type Params = {
     is404?: boolean;
     url?: URL;
 };
-export default function grabPageErrorComponent({ error, routeParams, is404, url, }: Params): Promise<GrabPageComponentRes>;
+export default function grabPageErrorComponent({ error, routeParams, is404, url, }: Params): Promise<GrabPageComponentRes | Response>;
 export {};

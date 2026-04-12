@@ -324,6 +324,7 @@ export type GlobalHMRControllerObject = {
     page_url: string;
     target_map?: BundlerCTXMap;
     page_props?: any;
+    page_reloaded?: boolean;
 };
 
 export type BunextCacheFileMeta = {

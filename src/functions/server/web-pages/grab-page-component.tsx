@@ -6,6 +6,7 @@ import { log } from "../../../utils/log";
 import grabPageModules from "./grab-page-modules";
 import grabPageCombinedServerRes from "./grab-page-combined-server-res";
 import fullRebuild from "../full-rebuild";
+import serverPostBuildFn from "../server-post-build-fn";
 
 class NotFoundError extends Error {
     status = 404;
@@ -28,7 +29,7 @@ type Params = {
 
 export default async function grabPageComponent(
     params: Params,
-): Promise<GrabPageComponentRes> {
+): Promise<GrabPageComponentRes | Response> {
     const {
         req,
         file_path: passed_file_path,
@@ -77,7 +78,6 @@ export default async function grabPageComponent(
         const bundledMap = global.BUNDLER_CTX_MAP[file_path];
 
         if (!bundledMap?.path) {
-            console.log(global.BUNDLER_CTX_MAP);
             const errMsg = `No Bundled File Path for this request path!`;
             log.error(errMsg);
             throw new Error(errMsg);
@@ -103,17 +103,20 @@ export default async function grabPageComponent(
             return { serverRes };
         }
 
-        const { component, module, serverRes, root_module } =
-            await grabPageModules({
-                file_path,
-                debug,
-                query: match?.query,
-                routeParams,
-                url,
-                skip_server_res,
-            });
+        const page_modules = await grabPageModules({
+            file_path,
+            debug,
+            query: match?.query,
+            routeParams,
+            url,
+            skip_server_res,
+        });
 
-        global.IS_404_PAGE = false;
+        if (page_modules instanceof Response) {
+            return page_modules;
+        }
+
+        const { component, module, serverRes, root_module } = page_modules;
 
         return {
             component,
@@ -141,8 +144,12 @@ export default async function grabPageComponent(
                     retry: true,
                 });
 
-                if (component_retried.success) {
+                if (
+                    component_retried instanceof Response ||
+                    component_retried.success
+                ) {
                     global.REBUILD_RETRIES = 0;
+                    await serverPostBuildFn();
                     return component_retried;
                 }
             }

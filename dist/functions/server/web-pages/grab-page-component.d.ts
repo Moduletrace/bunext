@@ -8,5 +8,5 @@ type Params = {
     skip_server_res?: boolean;
     is_hydration?: boolean;
 };
-export default function grabPageComponent(params: Params): Promise<GrabPageComponentRes>;
+export default function grabPageComponent(params: Params): Promise<GrabPageComponentRes | Response>;
 export {};

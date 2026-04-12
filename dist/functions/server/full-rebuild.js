@@ -15,7 +15,9 @@ export default async function fullRebuild(params) {
         await global.SSR_BUNDLER_CTX?.dispose();
         global.SSR_BUNDLER_CTX = undefined;
         allPagesESBuildContextBundler({
-            post_build_fn: serverPostBuildFn,
+            post_build_fn: () => {
+                serverPostBuildFn();
+            },
         });
     }
     catch (error) {

@@ -1,5 +1,3 @@
-import { log } from "../../utils/log";
-
 type Params = {};
 
 export default async function buildOnstartErrorHandler(params?: Params) {

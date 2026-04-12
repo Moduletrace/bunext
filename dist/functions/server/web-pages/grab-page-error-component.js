@@ -31,12 +31,16 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
         }
         const file_path = match.filePath;
         const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
-        const { component, module, serverRes, root_module } = await grabPageModules({
+        const page_component = await grabPageModules({
             file_path: file_path,
             query: match?.query,
             routeParams,
             url,
         });
+        if (page_component instanceof Response) {
+            return page_component;
+        }
+        const { component, module, serverRes, root_module } = page_component;
         return {
             component,
             routeParams,

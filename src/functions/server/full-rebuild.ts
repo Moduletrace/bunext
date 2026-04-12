@@ -22,7 +22,9 @@ export default async function fullRebuild(params?: { msg?: string }) {
         global.SSR_BUNDLER_CTX = undefined;
 
         allPagesESBuildContextBundler({
-            post_build_fn: serverPostBuildFn,
+            post_build_fn: () => {
+                serverPostBuildFn();
+            },
         });
     } catch (error: any) {
         log.error(error);

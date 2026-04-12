@@ -15,6 +15,10 @@ export default async function watcherEsbuildCTX() {
         if (filename.match(/^\.\w+/)) {
             return;
         }
+        if (global.BUNDLER_CTX_DISPOSED) {
+            await fullRebuild({ msg: `Restarting Bundler ...` });
+            global.BUNDLER_CTX_DISPOSED = false;
+        }
         if (filename.endsWith(AppData["BunextTmpFileExt"])) {
             return;
         }
@@ -50,17 +54,13 @@ export default async function watcherEsbuildCTX() {
                 if (filename.match(/.*\.server\.tsx?/)) {
                     global.IS_SERVER_COMPONENT = true;
                 }
-                if (global.BUNDLER_CTX && !global.BUNDLER_CTX_DISPOSED) {
+                if (global.BUNDLER_CTX) {
                     try {
                         await global.BUNDLER_CTX.rebuild();
                     }
                     catch (error) {
                         console.log(`ESBUILD Rebuild Error =>`, error);
                     }
-                }
-                else {
-                    await fullRebuild({ msg: `Restarting Bundler ...` });
-                    global.BUNDLER_CTX_DISPOSED = false;
                 }
                 if (filename.match(/(404|500)\.tsx?/)) {
                     for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {

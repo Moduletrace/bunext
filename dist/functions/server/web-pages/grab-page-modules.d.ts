@@ -1,4 +1,5 @@
-import type { BunextPageModule, BunxRouteParams } from "../../../types";
+import type { BunextPageModule, BunextPageModuleServerReturn, BunxRouteParams } from "../../../types";
+import type { FC } from "react";
 type Params = {
     file_path: string;
     debug?: boolean;
@@ -7,10 +8,11 @@ type Params = {
     routeParams?: BunxRouteParams;
     skip_server_res?: boolean;
 };
-export default function grabPageModules({ file_path, debug, url, query, routeParams, skip_server_res, }: Params): Promise<{
-    component: import("react").FC;
-    serverRes: import("../../../types").BunextPageModuleServerReturn | undefined;
+type Return = {
+    component: FC;
+    serverRes: BunextPageModuleServerReturn | undefined;
     module: BunextPageModule;
     root_module: BunextPageModule | undefined;
-}>;
+};
+export default function grabPageModules({ file_path, debug, url, query, routeParams, skip_server_res, }: Params): Promise<Return | Response>;
 export {};

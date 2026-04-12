@@ -2,39 +2,66 @@ import _ from "lodash";
 import type { GlobalHMRControllerObject } from "../../types";
 import grabPageComponent from "./web-pages/grab-page-component";
 
-export default async function serverPostBuildFn() {
+type Params = {
+    reload_all_controllers?: boolean;
+};
+
+export default async function serverPostBuildFn(params?: Params) {
     if (!global.HMR_CONTROLLERS?.[0] || !global.BUNDLER_CTX_MAP) {
         return;
     }
 
+    const reload_payload = { reload: true };
+    const reload_enqueue = `event: update\ndata: ${JSON.stringify(reload_payload)}\n\n`;
+
     for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
         const controller = global.HMR_CONTROLLERS[i];
 
-        if (!controller?.target_map?.local_path) {
+        if (!controller) {
             continue;
         }
 
-        if (global.IS_404_PAGE) {
-            controller.controller.enqueue(
-                `event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`,
-            );
+        if (!controller.target_map?.local_path) {
+            // if (global.IS_404_PAGE) {
+            //     controller.controller.enqueue(reload_enqueue);
+            // }
+            // if (!global.HMR_CONTROLLERS[i].page_reloaded) {
+            //     controller.controller.enqueue(reload_enqueue);
+            //     global.HMR_CONTROLLERS[i].page_reloaded = true;
+            // }
+            continue;
+        }
+
+        if (params?.reload_all_controllers) {
+            controller.controller.enqueue(reload_enqueue);
             continue;
         }
 
         const target_artifact =
             global.BUNDLER_CTX_MAP[controller.target_map.local_path];
 
+        if (!target_artifact.local_path) {
+            controller.controller.enqueue(reload_enqueue);
+            continue;
+        }
+
         const mock_req = target_artifact.req
             ? target_artifact.req.clone()
             : new Request(controller.page_url);
 
-        const { serverRes } = global.IS_SERVER_COMPONENT
+        const page_component = global.IS_SERVER_COMPONENT
             ? await grabPageComponent({
                   req: mock_req,
                   return_server_res_only: true,
                   is_hydration: true,
               })
             : {};
+
+        if (page_component instanceof Response) {
+            continue;
+        }
+
+        const { serverRes } = page_component;
 
         const final_artifact: Omit<GlobalHMRControllerObject, "controller"> = {
             ..._.omit(controller, ["controller"]),
@@ -53,7 +80,7 @@ export default async function serverPostBuildFn() {
             let final_data: { [k: string]: any } = {};
 
             if (global.ROOT_FILE_UPDATED) {
-                final_data = { reload: true };
+                final_data = reload_payload;
             } else {
                 final_data = final_artifact;
             }

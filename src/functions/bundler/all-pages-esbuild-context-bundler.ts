@@ -4,7 +4,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import isDevelopment from "../../utils/is-development";
 import tailwindEsbuildPlugin from "../server/web-pages/tailwind-esbuild-plugin";
 import grabClientHydrationScript from "./grab-client-hydration-script";
-import type { PageFiles } from "../../types";
+import type { BundlerCTXMap, PageFiles } from "../../types";
 import path from "path";
 import virtualFilesPlugin from "./plugins/virtual-files-plugin";
 import esbuildCTXArtifactTracker from "./plugins/esbuild-ctx-artifact-tracker";
@@ -12,7 +12,9 @@ import esbuildCTXArtifactTracker from "./plugins/esbuild-ctx-artifact-tracker";
 const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR } = grabDirNames();
 
 type Params = {
-    post_build_fn?: (params: { artifacts: any[] }) => Promise<void> | void;
+    post_build_fn?: (params: {
+        artifacts: BundlerCTXMap[];
+    }) => Promise<void> | void;
 };
 
 export default async function allPagesESBuildContextBundler(params?: Params) {
