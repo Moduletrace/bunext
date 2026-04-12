@@ -12,6 +12,9 @@ export default async function (params) {
     const supress_condition = errors_to_supress
         .map((e) => `args[0].includes("${e}")`)
         .join(" || ");
+    script += `let retries = 0;\n`;
+    script += `let retries_exhausted = false;\n`;
+    script += `const MAX_RETRIES = 1;\n`;
     script += `const _ce = console.error.bind(console);\n`;
     script += `console.error = (...args) => {\n`;
     script += `    if (typeof args[0] === "string" && (${supress_condition})) return;\n`;
@@ -23,8 +26,15 @@ export default async function (params) {
     script += `    const overlay = document.createElement("div");\n`;
     script += `    overlay.id = "__bunext_error_overlay";\n`;
     script += `    overlay.style.cssText = "position:fixed;inset:0;z-index:99999;background:#1a1a1a;color:#ff6b6b;font-family:monospace;font-size:14px;padding:24px;overflow:auto;";\n`;
-    script += `    overlay.innerHTML = \`<div style="max-width:900px;margin:0 auto"><div style="font-size:18px;font-weight:bold;margin-bottom:12px;color:#ff4444">Runtime Error</div><div style="color:#fff;margin-bottom:16px">\${message}</div>\${source ? \`<div style="color:#888;margin-bottom:16px">\${source}</div>\` : ""}\${stack ? \`<pre style="background:#111;padding:16px;border-radius:6px;overflow:auto;color:#ffa07a;white-space:pre-wrap">\${stack}</pre>\` : ""}<button onclick="this.closest('#__bunext_error_overlay').remove()" style="margin-top:16px;padding:8px 16px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer">Dismiss</button></div>\`;\n`;
+    script += `    overlay.innerHTML = \`<div style="max-width:900px;margin:auto"><div style="font-size:18px;font-weight:bold;margin-bottom:12px;color:#ff4444">Runtime Error</div><div style="color:#fff;margin-bottom:16px">\${message}</div>\${source ? \`<div style="color:#888;margin-bottom:16px">\${source}</div>\` : ""}\${stack ? \`<pre style="background:#111;padding:16px;border-radius:6px;overflow:auto;color:#ffa07a;white-space:pre-wrap">\${stack}</pre>\` : ""}<button onclick="this.closest('#__bunext_error_overlay').remove()" style="margin-top:16px;padding:8px 16px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer">Dismiss</button></div>\`;\n`;
     script += `    document.body.appendChild(overlay);\n`;
+    script += `    if (retries < MAX_RETRIES) {\n`;
+    script += `        retries++\n`;
+    script += `        console.log(\`Retrying \${retries} ...\`)\n`;
+    script += `        fetch("${AppData["BunextHMRRetryRoute"]}")\n`;
+    script += `    } else {\n`;
+    script += `        retries_exhausted = true\n`;
+    script += `    }\n`;
     script += `}\n\n`;
     script += `function __bunext_should_suppress_runtime_error(message) {\n`;
     script += `    return false;\n`;
@@ -53,7 +63,14 @@ export default async function (params) {
     script += `hmr.addEventListener("update", async (event) => {\n`;
     script += `    if (event?.data) {\n`;
     script += `        try {\n`;
-    script += `            document.getElementById("__bunext_error_overlay")?.remove();\n`;
+    script += `            if (retries_exhausted) {\n`;
+    script += `                document.getElementById("__bunext_error_overlay")?.remove();\n`;
+    script += `                retries = 0;\n`;
+    script += `                retries_exhausted = false;\n`;
+    script += `            }\n`;
+    // script += `            if (retries >= MAX_RETRIES && document.getElementById("__bunext_error_overlay")) {\n`;
+    // script += `                retries = 0;\n`;
+    // script += `            }\n`;
     script += `            const data = JSON.parse(event.data);\n`;
     // script += `            console.log("data", data);\n`;
     script += `            if (data.reload) {\n`;
@@ -98,7 +115,9 @@ export default async function (params) {
     // script += `               window.location.reload();\n`;
     // script += `            }\n`;
     // script += `            console.log("newScript", newScript);\n`;
+    // script += `            document.getElementById("__bunext_error_overlay")?.remove();\n`;
     script += `            document.head.appendChild(newScript);\n\n`;
+    // script += `            retries = 0;\n\n`;
     script += `        } catch (err) {\n`;
     script += `            console.error("HMR update failed, falling back to reload:", err.message);\n`;
     script += `            window.location.reload();\n`;

@@ -3,6 +3,7 @@ import grabDirNames from "./grab-dir-names";
 import path from "path";
 import AppNames from "./grab-app-names";
 import pagePathTransform from "./page-path-transform";
+import checkExcludedPatterns from "./check-excluded-patterns";
 export default function grabAllPages(params) {
     const { PAGES_DIR } = grabDirNames();
     const pages = grabPageDirRecursively({ page_dir: PAGES_DIR });
@@ -31,7 +32,10 @@ function grabPageDirRecursively({ page_dir }) {
         if (page.match(new RegExp(`${AppNames["RootPagesComponentName"]}`))) {
             continue;
         }
-        if (page.match(/\(|\)|--|\/api\//)) {
+        if (checkExcludedPatterns({ path: page })) {
+            continue;
+        }
+        if (page.match(/\/api\//)) {
             continue;
         }
         if (page_name.split(".").length > 2) {
@@ -39,7 +43,7 @@ function grabPageDirRecursively({ page_dir }) {
         }
         const page_stat = statSync(full_page_path);
         if (page_stat.isDirectory()) {
-            if (page.match(/\(|\)/))
+            if (checkExcludedPatterns({ path: page }))
                 continue;
             const new_page_files = grabPageDirRecursively({
                 page_dir: full_page_path,

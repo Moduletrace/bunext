@@ -8,6 +8,7 @@ import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
 import reactModulesBundler from "./bundler/react-modules-bundler";
+import grabConstants from "../utils/grab-constants";
 const dirNames = grabDirNames();
 const { PAGES_DIR } = dirNames;
 export default async function bunextInit() {
@@ -24,6 +25,7 @@ export default async function bunextInit() {
     global.REACT_DOM_MODULE_CACHE = new Map();
     log.banner();
     await init();
+    global.CONSTANTS = grabConstants();
     await reactModulesBundler();
     const router = new Bun.FileSystemRouter({
         style: "nextjs",
@@ -36,17 +38,11 @@ export default async function bunextInit() {
         await allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
         });
-        // initPages({
-        //     log_time: true,
-        // });
         watcherEsbuildCTX();
     }
     else {
         log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler();
-        // initPages({
-        //     log_time: true,
-        // });
         cron();
     }
 }

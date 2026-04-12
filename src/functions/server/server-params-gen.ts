@@ -18,6 +18,6 @@ export default async function (): Promise<Bun.Serve.Options<any>> {
         idleTimeout: development ? 0 : undefined,
         development,
         websocket: config?.websocket,
-        ..._.omit(config?.serverOptions || {}, ["fetch"]),
+        ..._.omit(config?.server_options || {}, ["fetch"]),
     } as Bun.Serve.Options<any>;
 }

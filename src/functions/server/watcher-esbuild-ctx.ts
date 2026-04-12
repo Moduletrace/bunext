@@ -1,11 +1,9 @@
 import { watch, existsSync, statSync } from "fs";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
-import { log } from "../../utils/log";
-import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
-import serverPostBuildFn from "./server-post-build-fn";
 import fullRebuild from "./full-rebuild";
 import { AppData } from "../../data/app-data";
+import checkExcludedPatterns from "../../utils/check-excluded-patterns";
 
 const { ROOT_DIR } = grabDirNames();
 
@@ -102,7 +100,8 @@ export default async function watcherEsbuildCTX() {
             }
 
             if (!filename.match(/^src\/pages\/|\.css$/)) return reloadWatcher();
-            if (filename.match(/\/(--|\()/)) return reloadWatcher();
+            if (checkExcludedPatterns({ path: filename }))
+                return reloadWatcher();
             if (filename.match(/ /)) return reloadWatcher();
 
             if (global.RECOMPILING) return;

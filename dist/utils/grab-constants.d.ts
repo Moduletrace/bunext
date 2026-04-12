@@ -6,4 +6,5 @@ export default function grabConstants(): {
     readonly ClientRootComponentWindowName: "BUNEXT_ROOT";
     readonly MaxBundlerRebuilds: 5;
     readonly config: import("../types").BunextConfig;
+    readonly RouteIgnorePatterns: RegExp[];
 };

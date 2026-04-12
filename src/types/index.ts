@@ -49,10 +49,10 @@ export type PageModule = {
 };
 
 export type BunextConfig = {
-    distDir?: string;
-    assetsPrefix?: string;
+    dist_dir?: string;
+    assets_prefix?: string;
     origin?: string;
-    globalVars?: { [k: string]: any };
+    global_vars?: { [k: string]: any };
     port?: number;
     development?: boolean;
     middleware?: (
@@ -62,9 +62,14 @@ export type BunextConfig = {
         | Response
         | Request
         | undefined;
-    defaultCacheExpiry?: number;
+    default_cache_expiry?: number;
     websocket?: WebSocketHandler<any>;
-    serverOptions?: Omit<Bun.Serve.Options<any>, "fetch" | "routes">;
+    server_options?: Omit<Bun.Serve.Options<any>, "fetch" | "routes">;
+    /**
+     * These are patterns in the pages to exclude
+     * from the router
+     */
+    pages_exclude_patterns?: RegExp[];
 };
 
 export type BunextConfigMiddlewareParams = {

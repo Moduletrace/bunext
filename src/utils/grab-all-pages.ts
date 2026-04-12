@@ -4,6 +4,7 @@ import path from "path";
 import type { PageFiles } from "../types";
 import AppNames from "./grab-app-names";
 import pagePathTransform from "./page-path-transform";
+import checkExcludedPatterns from "./check-excluded-patterns";
 
 type Params = {
     exclude_api?: boolean;
@@ -49,7 +50,11 @@ function grabPageDirRecursively({ page_dir }: { page_dir: string }) {
             continue;
         }
 
-        if (page.match(/\(|\)|--|\/api\//)) {
+        if (checkExcludedPatterns({ path: page })) {
+            continue;
+        }
+
+        if (page.match(/\/api\//)) {
             continue;
         }
 
@@ -60,7 +65,7 @@ function grabPageDirRecursively({ page_dir }: { page_dir: string }) {
         const page_stat = statSync(full_page_path);
 
         if (page_stat.isDirectory()) {
-            if (page.match(/\(|\)/)) continue;
+            if (checkExcludedPatterns({ path: page })) continue;
             const new_page_files = grabPageDirRecursively({
                 page_dir: full_page_path,
             });

@@ -9,6 +9,11 @@ export default function grabConstants() {
     const ServerDefaultRequestBodyLimitBytes = MB_IN_BYTES * 10;
 
     const MaxBundlerRebuilds = 5;
+    const RouteIgnorePatterns = [/\/\(/];
+
+    if (config.pages_exclude_patterns) {
+        RouteIgnorePatterns.push(...config.pages_exclude_patterns);
+    }
 
     return {
         ClientRootElementIDName,
@@ -18,5 +23,6 @@ export default function grabConstants() {
         ClientRootComponentWindowName,
         MaxBundlerRebuilds,
         config,
+        RouteIgnorePatterns,
     } as const;
 }

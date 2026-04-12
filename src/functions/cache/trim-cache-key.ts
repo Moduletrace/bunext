@@ -21,7 +21,7 @@ export default async function trimCacheKey({
         const config = global.CONFIG;
 
         const default_expiry_time_seconds =
-            config.defaultCacheExpiry ||
+            config.default_cache_expiry ||
             AppData["DefaultCacheExpiryTimeSeconds"];
 
         const default_expiry_time_milliseconds =

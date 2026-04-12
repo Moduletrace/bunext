@@ -3,6 +3,7 @@ import type { FileSystemRouter, Server } from "bun";
 import grabDirNames from "../utils/grab-dir-names";
 import { type FSWatcher } from "fs";
 import type { BuildContext } from "esbuild";
+import grabConstants from "../utils/grab-constants";
 /**
  * # Declare Global Variables
  */
@@ -46,5 +47,6 @@ declare global {
     var BUNDLER_CTX_DISPOSED: boolean | undefined;
     var REBUILD_RETRIES: number;
     var IS_404_PAGE: boolean;
+    var CONSTANTS: ReturnType<typeof grabConstants>;
 }
 export default function bunextInit(): Promise<void>;

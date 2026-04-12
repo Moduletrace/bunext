@@ -6,6 +6,10 @@ export default function grabConstants() {
     const ClientRootComponentWindowName = "BUNEXT_ROOT";
     const ServerDefaultRequestBodyLimitBytes = MB_IN_BYTES * 10;
     const MaxBundlerRebuilds = 5;
+    const RouteIgnorePatterns = [/\/\(/];
+    if (config.pages_exclude_patterns) {
+        RouteIgnorePatterns.push(...config.pages_exclude_patterns);
+    }
     return {
         ClientRootElementIDName,
         ClientWindowPagePropsName,
@@ -14,5 +18,6 @@ export default function grabConstants() {
         ClientRootComponentWindowName,
         MaxBundlerRebuilds,
         config,
+        RouteIgnorePatterns,
     };
 }

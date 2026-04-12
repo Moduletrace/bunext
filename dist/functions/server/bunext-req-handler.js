@@ -1,20 +1,24 @@
 import handleWebPages from "./web-pages/handle-web-pages";
 import handleRoutes from "./handle-routes";
 import isDevelopment from "../../utils/is-development";
-import grabConstants from "../../utils/grab-constants";
 import handleHmr from "./handle-hmr";
 import handlePublic from "./handle-public";
 import handleFiles from "./handle-files";
 import handleBunextPublicAssets from "./handle-bunext-public-assets";
+import checkExcludedPatterns from "../../utils/check-excluded-patterns";
+import { AppData } from "../../data/app-data";
+import fullRebuild from "./full-rebuild";
 export default async function bunextRequestHandler({ req: initial_req, server, }) {
     const is_dev = isDevelopment();
     let req = initial_req.clone();
     try {
         const url = new URL(req.url);
-        const { config } = grabConstants();
+        if (checkExcludedPatterns({ path: url.pathname })) {
+            return Response.json({ success: false, msg: `Invalid Path` });
+        }
         let response = undefined;
-        if (config?.middleware) {
-            const middleware_res = await config.middleware({
+        if (global.CONSTANTS.config?.middleware) {
+            const middleware_res = await global.CONSTANTS.config.middleware({
                 req: initial_req,
                 url,
             });
@@ -25,10 +29,10 @@ export default async function bunextRequestHandler({ req: initial_req, server, }
                 req = middleware_res;
             }
         }
-        // const server_upgrade = server.upgrade(req);
-        // if (server_upgrade) {
-        //     return undefined;
-        // }
+        if (is_dev && url.pathname == AppData["BunextHMRRetryRoute"]) {
+            await fullRebuild({ msg: `HMR Retry Rebuild ...` });
+            return new Response("Modules Rebuilt");
+        }
         if (url.pathname === "/__hmr" && is_dev) {
             response = await handleHmr({ req });
         }

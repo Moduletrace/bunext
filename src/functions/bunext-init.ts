@@ -16,7 +16,7 @@ import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
 import reactModulesBundler from "./bundler/react-modules-bundler";
-// import initPages from "./bundler/init-pages";
+import grabConstants from "../utils/grab-constants";
 
 /**
  * # Declare Global Variables
@@ -50,6 +50,7 @@ declare global {
     var BUNDLER_CTX_DISPOSED: boolean | undefined;
     var REBUILD_RETRIES: number;
     var IS_404_PAGE: boolean;
+    var CONSTANTS: ReturnType<typeof grabConstants>;
 }
 
 const dirNames = grabDirNames();
@@ -71,6 +72,9 @@ export default async function bunextInit() {
     log.banner();
 
     await init();
+
+    global.CONSTANTS = grabConstants();
+
     await reactModulesBundler();
 
     const router = new Bun.FileSystemRouter({
@@ -87,16 +91,10 @@ export default async function bunextInit() {
         await allPagesESBuildContextBundler({
             post_build_fn: serverPostBuildFn,
         });
-        // initPages({
-        //     log_time: true,
-        // });
         watcherEsbuildCTX();
     } else {
         log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler();
-        // initPages({
-        //     log_time: true,
-        // });
         cron();
     }
 }

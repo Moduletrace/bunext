@@ -10,7 +10,7 @@ export default async function trimCacheKey({ key, }) {
             key,
         });
         const config = global.CONFIG;
-        const default_expiry_time_seconds = config.defaultCacheExpiry ||
+        const default_expiry_time_seconds = config.default_cache_expiry ||
             AppData["DefaultCacheExpiryTimeSeconds"];
         const default_expiry_time_milliseconds = default_expiry_time_seconds * 1000;
         const cache_content_path = path.join(BUNEXT_CACHE_DIR, cache_name);
