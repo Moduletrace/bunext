@@ -11,7 +11,7 @@ export default async function buildOnstartErrorHandler(params?: Params) {
     global.RECOMPILING = false;
     global.IS_SERVER_COMPONENT = false;
 
-    await Promise.all([
+    Promise.all([
         global.SSR_BUNDLER_CTX?.dispose(),
         global.BUNDLER_CTX?.dispose(),
     ]);

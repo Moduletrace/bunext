@@ -16,7 +16,7 @@ type Params = {
 };
 
 export default async function pagesSSRContextBundler(params?: Params) {
-    const pages = grabAllPages({ exclude_api: true });
+    const pages = grabAllPages();
     const dev = isDevelopment();
 
     if (global.SSR_BUNDLER_CTX) {
@@ -77,6 +77,7 @@ export default async function pagesSSRContextBundler(params?: Params) {
             "react-dom",
             "react/jsx-runtime",
             "react/jsx-dev-runtime",
+            "bun:*",
         ],
         // logLevel: "silent",
     });

@@ -44,17 +44,21 @@ export default function apiRoutesCTXArtifactTracker({ pages }) {
                         url_path,
                     };
                 });
-                if (artifacts?.[0] && artifacts.length > 0) {
-                    for (let i = 0; i < artifacts.length; i++) {
-                        const artifact = artifacts[i];
-                        if (artifact?.local_path &&
-                            global.API_ROUTES_BUNDLER_CTX_MAP) {
-                            global.API_ROUTES_BUNDLER_CTX_MAP[artifact.local_path] = artifact;
-                        }
-                    }
-                }
-                // const elapsed = (performance.now() - build_start).toFixed(0);
-                // log.success(`API Routes [Built] in ${elapsed}ms`);
+                // if (artifacts?.[0] && artifacts.length > 0) {
+                //     for (let i = 0; i < artifacts.length; i++) {
+                //         const artifact = artifacts[i];
+                //         if (
+                //             artifact?.local_path &&
+                //             global.API_ROUTES_BUNDLER_CTX_MAP
+                //         ) {
+                //             global.API_ROUTES_BUNDLER_CTX_MAP[
+                //                 artifact.local_path
+                //             ] = artifact;
+                //         }
+                //     }
+                // }
+                const elapsed = (performance.now() - build_start).toFixed(0);
+                log.success(`API Routes [Built] in ${elapsed}ms`);
             });
         },
     };

@@ -31,6 +31,7 @@ export default function esbuildCTXArtifactTracker({
             build.onStart(async () => {
                 build_starts++;
                 build_start = performance.now();
+
                 if (build_starts == MAX_BUILD_STARTS) {
                     await buildOnstartErrorHandler();
                 }
@@ -73,12 +74,6 @@ export default function esbuildCTXArtifactTracker({
                     global.SSR_BUNDLER_CTX.rebuild();
                 } else {
                     pagesSSRContextBundler();
-                }
-
-                if (global.API_ROUTES_BUNDLER_CTX) {
-                    global.API_ROUTES_BUNDLER_CTX.rebuild();
-                } else {
-                    apiRoutesContextBundler();
                 }
             });
         },

@@ -52,10 +52,10 @@ export default async function ({ req }: Params): Promise<Response | undefined> {
     let module: any;
     const now = Date.now();
 
-    if (is_dev && global.API_ROUTES_BUNDLER_CTX_MAP?.[match.filePath]?.path) {
+    if (is_dev && global.SSR_BUNDLER_CTX_MAP?.[match.filePath]?.path) {
         const target_import = path.join(
             ROOT_DIR,
-            global.API_ROUTES_BUNDLER_CTX_MAP[match.filePath].path,
+            global.SSR_BUNDLER_CTX_MAP[match.filePath].path,
         );
 
         module = await import(`${target_import}?t=${now}`);

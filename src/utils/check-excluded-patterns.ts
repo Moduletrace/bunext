@@ -1,5 +1,3 @@
-import type { APIResponseObject } from "../types";
-
 type Params = {
     path: string;
 };

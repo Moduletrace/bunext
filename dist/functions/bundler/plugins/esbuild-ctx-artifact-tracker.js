@@ -48,12 +48,6 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                 else {
                     pagesSSRContextBundler();
                 }
-                if (global.API_ROUTES_BUNDLER_CTX) {
-                    global.API_ROUTES_BUNDLER_CTX.rebuild();
-                }
-                else {
-                    apiRoutesContextBundler();
-                }
             });
         },
     };

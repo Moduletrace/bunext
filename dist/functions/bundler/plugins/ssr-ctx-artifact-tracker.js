@@ -1,6 +1,7 @@
 import {} from "esbuild";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
 import buildOnstartErrorHandler from "../build-on-start-error-handler";
+import { log } from "../../../utils/log";
 let build_start = 0;
 let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
@@ -34,7 +35,11 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
                                 artifact;
                         }
                     }
-                    post_build_fn?.({ artifacts });
+                    // post_build_fn?.({ artifacts });
+                    // const elapsed = (performance.now() - build_start).toFixed(
+                    //     0,
+                    // );
+                    // log.success(`SSR [Built] in ${elapsed}ms`);
                 }
             });
         },
