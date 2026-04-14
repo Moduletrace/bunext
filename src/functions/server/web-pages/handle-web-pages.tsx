@@ -13,7 +13,9 @@ export default async function handleWebPages({
     req,
 }: Params): Promise<Response> {
     try {
-        if (!isDevelopment()) {
+        const is_dev = isDevelopment();
+
+        if (!is_dev) {
             const url = new URL(req.url);
             const key = url.pathname + (url.search || "");
 

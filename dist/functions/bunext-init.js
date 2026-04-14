@@ -48,3 +48,9 @@ export default async function bunextInit() {
         cron();
     }
 }
+process.on("exit", (code) => {
+    Bun.spawn([process.execPath, ...process.argv.slice(1)], {
+        stdio: ["inherit", "inherit", "inherit"],
+        env: process.env,
+    });
+});

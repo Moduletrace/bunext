@@ -70,6 +70,14 @@ export default async function genWebHTML({
 
     const final_meta = _.merge(root_meta, page_meta);
 
+    // const public_envs = Object.keys(process.env).filter((e) =>
+    //     e.startsWith(`NEXT_PUBLIC_`),
+    // );
+
+    const client_process = {
+        env: {},
+    };
+
     let final_component = (
         <html {...html_props}>
             <head>
@@ -92,7 +100,7 @@ export default async function genWebHTML({
 
                 <script
                     dangerouslySetInnerHTML={{
-                        __html: `window.${ClientWindowPagePropsName} = ${serializedProps}`,
+                        __html: `window.${ClientWindowPagePropsName} = ${serializedProps};\nwindow.process = ${JSON.stringify(client_process)}`,
                     }}
                     data-bunext-head
                 />

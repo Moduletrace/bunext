@@ -6,7 +6,8 @@ import grabPageComponent from "./grab-page-component";
 import grabPageErrorComponent from "./grab-page-error-component";
 export default async function handleWebPages({ req, }) {
     try {
-        if (!isDevelopment()) {
+        const is_dev = isDevelopment();
+        if (!is_dev) {
             const url = new URL(req.url);
             const key = url.pathname + (url.search || "");
             const existing_cache = getCache({ key, paradigm: "html" });

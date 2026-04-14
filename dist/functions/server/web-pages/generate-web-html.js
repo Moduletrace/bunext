@@ -43,8 +43,14 @@ export default async function genWebHTML({ component: Main, pageProps, bundledMa
     const RootHead = root_module?.Head;
     const dev = isDevelopment();
     const final_meta = _.merge(root_meta, page_meta);
+    // const public_envs = Object.keys(process.env).filter((e) =>
+    //     e.startsWith(`NEXT_PUBLIC_`),
+    // );
+    const client_process = {
+        env: {},
+    };
     let final_component = (_jsxs("html", { ...html_props, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8", "data-bunext-head": true }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0", "data-bunext-head": true }), final_meta ? grabWebMetaHTML({ meta: final_meta }) : null, bundledMap?.css_path ? (_jsx("link", { rel: "stylesheet", href: `/${bundledMap.css_path}`, "data-bunext-head": true })) : null, _jsx("script", { dangerouslySetInnerHTML: {
-                            __html: `window.${ClientWindowPagePropsName} = ${serializedProps}`,
+                            __html: `window.${ClientWindowPagePropsName} = ${serializedProps};\nwindow.process = ${JSON.stringify(client_process)}`,
                         }, "data-bunext-head": true }), RootHead ? (_jsx(RootHead, { serverRes: pageProps, ctx: routeParams })) : null, Head ? _jsx(Head, { serverRes: pageProps, ctx: routeParams }) : null, bundledMap?.path ? (_jsxs(_Fragment, { children: [_jsx("script", { type: "importmap", dangerouslySetInnerHTML: {
                                     __html: JSON.stringify(global.REACT_IMPORTS_MAP),
                                 }, defer: true, "data-bunext-head": true }), _jsx("script", { src: `/${bundledMap.path}`, type: "module", id: AppData["BunextClientHydrationScriptID"], defer: true, "data-bunext-head": true })] })) : null, is_dev ? (_jsx("script", { defer: true, dangerouslySetInnerHTML: {

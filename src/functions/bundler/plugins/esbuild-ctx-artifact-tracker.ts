@@ -2,10 +2,9 @@ import { type Plugin } from "esbuild";
 import type { PageFiles } from "../../../types";
 import { log } from "../../../utils/log";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
-import pagesSSRContextBundler from "../pages-ssr-context-bundler";
 import buildOnstartErrorHandler from "../build-on-start-error-handler";
-import apiRoutesContextBundler from "../api-routes-context-bundler";
 import _ from "lodash";
+import pagesSSRBundler from "../pages-ssr-bundler";
 
 let build_start = 0;
 let build_starts = 0;
@@ -70,11 +69,13 @@ export default function esbuildCTXArtifactTracker({
 
                 build_starts = 0;
 
-                if (global.SSR_BUNDLER_CTX) {
-                    global.SSR_BUNDLER_CTX.rebuild();
-                } else {
-                    pagesSSRContextBundler();
-                }
+                pagesSSRBundler();
+
+                // if (global.SSR_BUNDLER_CTX) {
+                //     global.SSR_BUNDLER_CTX.rebuild();
+                // } else {
+                //     pagesSSRContextBundler();
+                // }
             });
         },
     };
