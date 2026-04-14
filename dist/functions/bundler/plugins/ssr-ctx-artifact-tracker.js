@@ -1,7 +1,5 @@
 import {} from "esbuild";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
-import buildOnstartErrorHandler from "../build-on-start-error-handler";
-import { log } from "../../../utils/log";
 let build_start = 0;
 let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
@@ -13,7 +11,9 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
                 build_starts++;
                 build_start = performance.now();
                 if (build_starts == MAX_BUILD_STARTS) {
-                    await buildOnstartErrorHandler();
+                    global.SSR_BUNDLER_CTX_DISPOSED = true;
+                    await global.SSR_BUNDLER_CTX?.dispose();
+                    global.SSR_BUNDLER_CTX = undefined;
                 }
             });
             build.onEnd((result) => {
@@ -41,6 +41,7 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
                     // );
                     // log.success(`SSR [Built] in ${elapsed}ms`);
                 }
+                global.SSR_BUNDLER_CTX_DISPOSED = false;
             });
         },
     };

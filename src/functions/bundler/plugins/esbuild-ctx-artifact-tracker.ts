@@ -8,7 +8,7 @@ import pagesSSRBundler from "../pages-ssr-bundler";
 
 let build_start = 0;
 let build_starts = 0;
-const MAX_BUILD_STARTS = 2;
+const MAX_BUILD_STARTS = 5;
 
 type Params = {
     entryToPage: Map<

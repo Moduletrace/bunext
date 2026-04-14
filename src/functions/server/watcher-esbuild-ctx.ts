@@ -4,6 +4,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import fullRebuild from "./full-rebuild";
 import { AppData } from "../../data/app-data";
 import checkExcludedPatterns from "../../utils/check-excluded-patterns";
+import pagesSSRBundler from "../bundler/pages-ssr-bundler";
 
 const { ROOT_DIR } = grabDirNames();
 
@@ -24,6 +25,10 @@ export default async function watcherEsbuildCTX() {
             if (global.BUNDLER_CTX_DISPOSED) {
                 await fullRebuild({ msg: `Restarting Bundler ...` });
                 global.BUNDLER_CTX_DISPOSED = false;
+            }
+
+            if (global.SSR_BUNDLER_CTX_DISPOSED) {
+                pagesSSRBundler();
             }
 
             if (filename.endsWith(AppData["BunextTmpFileExt"])) {

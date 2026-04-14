@@ -41,6 +41,7 @@ declare global {
         css: string;
     }>;
     var BUNDLER_CTX_DISPOSED: boolean | undefined;
+    var SSR_BUNDLER_CTX_DISPOSED: boolean | undefined;
     var REBUILD_RETRIES: number;
     var IS_404_PAGE: boolean;
     var CONSTANTS: ReturnType<typeof grabConstants>;
