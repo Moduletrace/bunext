@@ -6,6 +6,7 @@ import grabPageModules from "./grab-page-modules";
 import grabPageCombinedServerRes from "./grab-page-combined-server-res";
 import fullRebuild from "../full-rebuild";
 import serverPostBuildFn from "../server-post-build-fn";
+import isDevelopment from "../../../utils/is-development";
 class NotFoundError extends Error {
     status = 404;
     constructor(message) {
@@ -17,6 +18,7 @@ export default async function grabPageComponent(params) {
     const { req, file_path: passed_file_path, debug, return_server_res_only, skip_server_res, is_hydration, } = params;
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
+    const is_dev = isDevelopment();
     let routeParams = undefined;
     try {
         routeParams = req ? await grabRouteParams({ req }) : undefined;
@@ -88,7 +90,7 @@ export default async function grabPageComponent(params) {
         const is404 = error instanceof NotFoundError ||
             error?.name === "NotFoundError" ||
             error?.status === 404;
-        if (!params.retry) {
+        if (!params.retry && is_dev) {
             while (global.REBUILD_RETRIES < 2) {
                 global.REBUILD_RETRIES = global.REBUILD_RETRIES + 1;
                 await fullRebuild();
