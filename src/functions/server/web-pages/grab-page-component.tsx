@@ -44,6 +44,12 @@ export default async function grabPageComponent(
     const router = global.ROUTER;
     const is_dev = isDevelopment();
 
+    const forwarded_proto = req?.headers.get("x-forwarded-proto");
+
+    if (url && forwarded_proto) {
+        url.protocol = forwarded_proto;
+    }
+
     let routeParams: BunxRouteParams | undefined = undefined;
 
     try {

@@ -19,6 +19,10 @@ export default async function grabPageComponent(params) {
     const url = req?.url ? new URL(req.url) : undefined;
     const router = global.ROUTER;
     const is_dev = isDevelopment();
+    const forwarded_proto = req?.headers.get("x-forwarded-proto");
+    if (url && forwarded_proto) {
+        url.protocol = forwarded_proto;
+    }
     let routeParams = undefined;
     try {
         routeParams = req ? await grabRouteParams({ req }) : undefined;
