@@ -8,8 +8,13 @@ import type { BundlerCTXMap, PageFiles } from "../../types";
 import path from "path";
 import virtualFilesPlugin from "./plugins/virtual-files-plugin";
 import esbuildCTXArtifactTracker from "./plugins/esbuild-ctx-artifact-tracker";
+import { existsSync } from "fs";
 
-const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR } = grabDirNames();
+const {
+    HYDRATION_DST_DIR,
+    BUNX_HYDRATION_SRC_DIR,
+    BUNX_BUNDLER_ERROR_EXIT_FILE,
+} = grabDirNames();
 
 type Params = {
     post_build_fn?: (params: {
@@ -19,6 +24,10 @@ type Params = {
 
 export default async function allPagesESBuildContextBundler(params?: Params) {
     try {
+        const did_process_exit_because_of_bundler_error = existsSync(
+            BUNX_BUNDLER_ERROR_EXIT_FILE,
+        );
+
         const pages = grabAllPages({ exclude_api: true });
 
         global.PAGE_FILES = pages;
@@ -83,6 +92,9 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
                 "react/jsx-runtime",
                 "react/jsx-dev-runtime",
             ],
+            logLevel: did_process_exit_because_of_bundler_error
+                ? "silent"
+                : undefined,
         });
 
         await global.BUNDLER_CTX.rebuild();

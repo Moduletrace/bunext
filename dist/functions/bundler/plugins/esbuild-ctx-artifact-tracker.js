@@ -4,9 +4,15 @@ import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-resu
 import buildOnstartErrorHandler from "../build-on-start-error-handler";
 import _ from "lodash";
 import pagesSSRBundler from "../pages-ssr-bundler";
+import grabDirNames from "../../../utils/grab-dir-names";
+import { cpSync, existsSync, mkdirSync, rmSync } from "fs";
+import fullRebuild from "../../server/full-rebuild";
+import path from "path";
+import cleanupLogsDirs from "../../cleanup-logs-dir";
+const { BUNX_BUNDLER_ERROR_EXIT_FILE, BUNX_ERROR_LOGS_DIR } = grabDirNames();
 let build_start = 0;
 let build_starts = 0;
-const MAX_BUILD_STARTS = 5;
+const MAX_BUILD_STARTS = 2;
 export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, }) {
     const artifactTracker = {
         name: "artifact-tracker",
@@ -14,8 +20,11 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
             build.onStart(async () => {
                 build_starts++;
                 build_start = performance.now();
-                if (build_starts == MAX_BUILD_STARTS) {
+                const does_error_file_exist = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
+                if (build_starts == MAX_BUILD_STARTS &&
+                    !does_error_file_exist) {
                     await buildOnstartErrorHandler();
+                    process.exit(1);
                 }
             });
             build.onEnd((result) => {
@@ -41,7 +50,17 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                 global.RECOMPILING = false;
                 global.IS_SERVER_COMPONENT = false;
                 build_starts = 0;
-                pagesSSRBundler();
+                const does_error_file_exist = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
+                if (does_error_file_exist) {
+                    mkdirSync(BUNX_ERROR_LOGS_DIR, { recursive: true });
+                    cpSync(BUNX_BUNDLER_ERROR_EXIT_FILE, path.join(BUNX_ERROR_LOGS_DIR, `${Date.now()}.log`));
+                    rmSync(BUNX_BUNDLER_ERROR_EXIT_FILE, { force: true });
+                    cleanupLogsDirs();
+                    fullRebuild();
+                }
+                else {
+                    pagesSSRBundler();
+                }
                 // if (global.SSR_BUNDLER_CTX) {
                 //     global.SSR_BUNDLER_CTX.rebuild();
                 // } else {

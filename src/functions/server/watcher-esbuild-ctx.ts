@@ -6,7 +6,7 @@ import { AppData } from "../../data/app-data";
 import checkExcludedPatterns from "../../utils/check-excluded-patterns";
 import pagesSSRBundler from "../bundler/pages-ssr-bundler";
 
-const { ROOT_DIR } = grabDirNames();
+const { ROOT_DIR, BUNX_BUNDLER_ERROR_EXIT_FILE } = grabDirNames();
 
 export default async function watcherEsbuildCTX() {
     const pages_src_watcher = watch(
@@ -17,6 +17,11 @@ export default async function watcherEsbuildCTX() {
         },
         async (event, filename) => {
             if (!filename) return;
+
+            if (existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE)) {
+                await fullRebuild();
+                return;
+            }
 
             if (filename.match(/^\.\w+/)) {
                 return;

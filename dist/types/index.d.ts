@@ -53,6 +53,7 @@ export type BunextConfig = {
      * from the router
      */
     pages_exclude_patterns?: RegExp[];
+    max_logs?: number;
 };
 export type BunextConfigMiddlewareParams = {
     req: Request;
@@ -314,3 +315,6 @@ export type BunextAPIRouteHandlerObjectReturn<T> = Response | (T & Pick<BunextAP
 export type BunextAPIRouteHandler<T extends BunextAPIRouteJSONRes = {
     [k: string]: any;
 }> = (params: BunxRouteParams) => Promise<BunextAPIRouteHandlerObjectReturn<T>> | Response | BunextAPIRouteHandlerObjectReturn<T>;
+export type BunSpawnOptions = Bun.SpawnOptions.SpawnOptions<"inherit", "inherit", "inherit"> & {
+    cmd: string[];
+};

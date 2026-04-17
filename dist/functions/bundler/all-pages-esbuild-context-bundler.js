@@ -7,9 +7,11 @@ import grabClientHydrationScript from "./grab-client-hydration-script";
 import path from "path";
 import virtualFilesPlugin from "./plugins/virtual-files-plugin";
 import esbuildCTXArtifactTracker from "./plugins/esbuild-ctx-artifact-tracker";
-const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR } = grabDirNames();
+import { existsSync } from "fs";
+const { HYDRATION_DST_DIR, BUNX_HYDRATION_SRC_DIR, BUNX_BUNDLER_ERROR_EXIT_FILE, } = grabDirNames();
 export default async function allPagesESBuildContextBundler(params) {
     try {
+        const did_process_exit_because_of_bundler_error = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
         const pages = grabAllPages({ exclude_api: true });
         global.PAGE_FILES = pages;
         const dev = isDevelopment();
@@ -59,6 +61,9 @@ export default async function allPagesESBuildContextBundler(params) {
                 "react/jsx-runtime",
                 "react/jsx-dev-runtime",
             ],
+            logLevel: did_process_exit_because_of_bundler_error
+                ? "silent"
+                : undefined,
         });
         await global.BUNDLER_CTX.rebuild();
     }

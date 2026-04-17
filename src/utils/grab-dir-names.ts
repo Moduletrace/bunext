@@ -15,11 +15,17 @@ export default function grabDirNames() {
     );
     const BUNX_CWD_PAGES_REWRITE_DIR = path.resolve(BUNX_CWD_DIR, "pages");
     const BUNX_TMP_DIR = path.resolve(BUNX_CWD_DIR, ".tmp");
+    const BUNX_BUNDLER_ERROR_EXIT_FILE = path.resolve(
+        BUNX_TMP_DIR,
+        "BUNDLER_EXIT.txt",
+    );
     const BUNX_HYDRATION_SRC_DIR = path.resolve(
         BUNX_CWD_DIR,
         "client",
         "hydration-src",
     );
+    const BUNX_LOGS_DIR = path.resolve(BUNX_CWD_DIR, "logs");
+    const BUNX_ERROR_LOGS_DIR = path.resolve(BUNX_LOGS_DIR, "error");
 
     const BUNEXT_PUBLIC_DIR = path.join(BUNX_CWD_DIR, "public");
     const HYDRATION_DST_DIR = path.join(BUNEXT_PUBLIC_DIR, "pages");
@@ -46,71 +52,6 @@ export default function grabDirNames() {
         `${BUNX_ROOT_404_FILE_NAME}.tsx`,
     );
 
-    // const NODE_MODULES_DIR = path.resolve(
-    //     existsSync(path.join(BUNX_ROOT_DIR, "source.md"))
-    //         ? BUNX_ROOT_DIR
-    //         : ROOT_DIR,
-    //     "node_modules",
-    // );
-
-    // const REACT_MODULE_DIR = path.join(NODE_MODULES_DIR, "react");
-    // const REACT_DOM_MODULE_DIR = path.join(NODE_MODULES_DIR, "react-dom");
-
-    // const REACT_PRODUCTION_MODULE = path.join(
-    //     REACT_MODULE_DIR,
-    //     "cjs",
-    //     "react.production.js",
-    // );
-    // const REACT_DEVELOPMENT_MODULE = path.join(
-    //     REACT_MODULE_DIR,
-    //     "cjs",
-    //     "react.development.js",
-    // );
-
-    // const REACT_JSX_RUNTIME_PRODUCTION_MODULE = path.join(
-    //     REACT_MODULE_DIR,
-    //     "cjs",
-    //     "react-jsx-runtime.production.js",
-    // );
-    // const REACT_JSX_RUNTIME_DEVELOPMENT_MODULE = path.join(
-    //     REACT_MODULE_DIR,
-    //     "cjs",
-    //     "react-jsx-runtime.development.js",
-    // );
-
-    // const REACT_JSX_DEVELOPMENT_RUNTIME_PRODUCTION_MODULE = path.join(
-    //     REACT_MODULE_DIR,
-    //     "cjs",
-    //     "react-jsx-dev-runtime.production.js",
-    // );
-    // const REACT_JSX_DEVELOPMENT_RUNTIME_DEVELOPMENT_MODULE = path.join(
-    //     REACT_MODULE_DIR,
-    //     "cjs",
-    //     "react-jsx-dev-runtime.development.js",
-    // );
-
-    // const REACT_DOM_PRODUCTION_MODULE = path.join(
-    //     REACT_DOM_MODULE_DIR,
-    //     "cjs",
-    //     "react-dom.production.js",
-    // );
-    // const REACT_DOM_DEVELOPMENT_MODULE = path.join(
-    //     REACT_DOM_MODULE_DIR,
-    //     "cjs",
-    //     "react-dom.development.js",
-    // );
-
-    // const REACT_DOM_CLIENT_PRODUCTION_MODULE = path.join(
-    //     REACT_DOM_MODULE_DIR,
-    //     "cjs",
-    //     "react-dom-client.production.js",
-    // );
-    // const REACT_DOM_CLIENT_DEVELOPMENT_MODULE = path.join(
-    //     REACT_DOM_MODULE_DIR,
-    //     "cjs",
-    //     "react-dom-client.development.js",
-    // );
-
     return {
         ROOT_DIR,
         SRC_DIR,
@@ -136,18 +77,87 @@ export default function grabDirNames() {
         HYDRATION_DST_DIR_MAP_JSON_FILE_NAME,
         BUNEXT_VENDOR_DIR,
         BUNEXT_PUBLIC_DIR,
-        // NODE_MODULES_DIR,
-        // REACT_MODULE_DIR,
-        // REACT_DOM_MODULE_DIR,
-        // REACT_PRODUCTION_MODULE,
-        // REACT_DEVELOPMENT_MODULE,
-        // REACT_JSX_RUNTIME_PRODUCTION_MODULE,
-        // REACT_JSX_RUNTIME_DEVELOPMENT_MODULE,
-        // REACT_JSX_DEVELOPMENT_RUNTIME_PRODUCTION_MODULE,
-        // REACT_JSX_DEVELOPMENT_RUNTIME_DEVELOPMENT_MODULE,
-        // REACT_DOM_PRODUCTION_MODULE,
-        // REACT_DOM_DEVELOPMENT_MODULE,
-        // REACT_DOM_CLIENT_PRODUCTION_MODULE,
-        // REACT_DOM_CLIENT_DEVELOPMENT_MODULE,
+        BUNX_BUNDLER_ERROR_EXIT_FILE,
+        BUNX_ERROR_LOGS_DIR,
+        BUNX_LOGS_DIR,
     };
 }
+
+// const NODE_MODULES_DIR = path.resolve(
+//     existsSync(path.join(BUNX_ROOT_DIR, "source.md"))
+//         ? BUNX_ROOT_DIR
+//         : ROOT_DIR,
+//     "node_modules",
+// );
+
+// const REACT_MODULE_DIR = path.join(NODE_MODULES_DIR, "react");
+// const REACT_DOM_MODULE_DIR = path.join(NODE_MODULES_DIR, "react-dom");
+
+// const REACT_PRODUCTION_MODULE = path.join(
+//     REACT_MODULE_DIR,
+//     "cjs",
+//     "react.production.js",
+// );
+// const REACT_DEVELOPMENT_MODULE = path.join(
+//     REACT_MODULE_DIR,
+//     "cjs",
+//     "react.development.js",
+// );
+
+// const REACT_JSX_RUNTIME_PRODUCTION_MODULE = path.join(
+//     REACT_MODULE_DIR,
+//     "cjs",
+//     "react-jsx-runtime.production.js",
+// );
+// const REACT_JSX_RUNTIME_DEVELOPMENT_MODULE = path.join(
+//     REACT_MODULE_DIR,
+//     "cjs",
+//     "react-jsx-runtime.development.js",
+// );
+
+// const REACT_JSX_DEVELOPMENT_RUNTIME_PRODUCTION_MODULE = path.join(
+//     REACT_MODULE_DIR,
+//     "cjs",
+//     "react-jsx-dev-runtime.production.js",
+// );
+// const REACT_JSX_DEVELOPMENT_RUNTIME_DEVELOPMENT_MODULE = path.join(
+//     REACT_MODULE_DIR,
+//     "cjs",
+//     "react-jsx-dev-runtime.development.js",
+// );
+
+// const REACT_DOM_PRODUCTION_MODULE = path.join(
+//     REACT_DOM_MODULE_DIR,
+//     "cjs",
+//     "react-dom.production.js",
+// );
+// const REACT_DOM_DEVELOPMENT_MODULE = path.join(
+//     REACT_DOM_MODULE_DIR,
+//     "cjs",
+//     "react-dom.development.js",
+// );
+
+// const REACT_DOM_CLIENT_PRODUCTION_MODULE = path.join(
+//     REACT_DOM_MODULE_DIR,
+//     "cjs",
+//     "react-dom-client.production.js",
+// );
+// const REACT_DOM_CLIENT_DEVELOPMENT_MODULE = path.join(
+//     REACT_DOM_MODULE_DIR,
+//     "cjs",
+//     "react-dom-client.development.js",
+// );
+
+// NODE_MODULES_DIR,
+// REACT_MODULE_DIR,
+// REACT_DOM_MODULE_DIR,
+// REACT_PRODUCTION_MODULE,
+// REACT_DEVELOPMENT_MODULE,
+// REACT_JSX_RUNTIME_PRODUCTION_MODULE,
+// REACT_JSX_RUNTIME_DEVELOPMENT_MODULE,
+// REACT_JSX_DEVELOPMENT_RUNTIME_PRODUCTION_MODULE,
+// REACT_JSX_DEVELOPMENT_RUNTIME_DEVELOPMENT_MODULE,
+// REACT_DOM_PRODUCTION_MODULE,
+// REACT_DOM_DEVELOPMENT_MODULE,
+// REACT_DOM_CLIENT_PRODUCTION_MODULE,
+// REACT_DOM_CLIENT_DEVELOPMENT_MODULE,

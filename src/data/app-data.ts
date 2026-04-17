@@ -6,4 +6,5 @@ export const AppData = {
     BunextClientHydrationScriptID: "bunext-client-hydration-script",
     BunextTmpFileExt: ".bunext_tmp.tsx",
     BunextHMRRetryRoute: "/.bunext/hmr-retry",
+    DefaultMaxLogs: 50,
 } as const;

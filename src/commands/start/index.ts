@@ -1,17 +1,36 @@
 import { Command } from "commander";
-import startServer from "../../functions/server/start-server";
-import { log } from "../../utils/log";
-import bunextInit from "../../functions/bunext-init";
+import path from "path";
+import type { BunSpawnOptions } from "../../types";
+import writeErrorFile from "../../functions/write-error-file";
 
 export default function () {
     return new Command("start")
         .description("Start production server")
         .action(async () => {
-            process.env.NODE_ENV = "production";
-            log.info("Starting production server ...");
-
-            await bunextInit();
-
-            await startServer();
+            await start();
         });
+}
+
+async function start() {
+    const dev_spawn_file = path.resolve(__dirname, "prod-spawn.ts");
+
+    const spawn_options: BunSpawnOptions = {
+        cmd: ["bun", dev_spawn_file],
+        stdio: ["inherit", "inherit", "inherit"],
+        onExit(subprocess, exitCode, signalCode, error) {
+            writeErrorFile({ exitCode, error });
+        },
+        env: {
+            ...process.env,
+            NODE_ENV: "production",
+        },
+    };
+
+    let dev_process = Bun.spawn(spawn_options);
+
+    const exited = await dev_process.exited;
+
+    if (exited) {
+        return await start();
+    }
 }

@@ -6,4 +6,5 @@ export declare const AppData: {
     readonly BunextClientHydrationScriptID: "bunext-client-hydration-script";
     readonly BunextTmpFileExt: ".bunext_tmp.tsx";
     readonly BunextHMRRetryRoute: "/.bunext/hmr-retry";
+    readonly DefaultMaxLogs: 50;
 };

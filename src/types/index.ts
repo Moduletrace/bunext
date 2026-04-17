@@ -70,6 +70,7 @@ export type BunextConfig = {
      * from the router
      */
     pages_exclude_patterns?: RegExp[];
+    max_logs?: number;
 };
 
 export type BunextConfigMiddlewareParams = {
@@ -377,3 +378,11 @@ export type BunextAPIRouteHandler<
     | Promise<BunextAPIRouteHandlerObjectReturn<T>>
     | Response
     | BunextAPIRouteHandlerObjectReturn<T>;
+
+export type BunSpawnOptions = Bun.SpawnOptions.SpawnOptions<
+    "inherit",
+    "inherit",
+    "inherit"
+> & {
+    cmd: string[];
+};

@@ -102,9 +102,9 @@ export default async function bunextInit() {
     }
 }
 
-process.on("exit", (code) => {
-    Bun.spawn([process.execPath, ...process.argv.slice(1)], {
-        stdio: ["inherit", "inherit", "inherit"],
-        env: process.env,
-    });
-});
+// process.on("exit", (code) => {
+//     Bun.spawn([process.execPath, ...process.argv.slice(1)], {
+//         stdio: ["inherit", "inherit", "inherit"],
+//         env: process.env,
+//     });
+// });

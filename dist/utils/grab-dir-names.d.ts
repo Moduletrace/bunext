@@ -23,4 +23,7 @@ export default function grabDirNames(): {
     HYDRATION_DST_DIR_MAP_JSON_FILE_NAME: string;
     BUNEXT_VENDOR_DIR: string;
     BUNEXT_PUBLIC_DIR: string;
+    BUNX_BUNDLER_ERROR_EXIT_FILE: string;
+    BUNX_ERROR_LOGS_DIR: string;
+    BUNX_LOGS_DIR: string;
 };
