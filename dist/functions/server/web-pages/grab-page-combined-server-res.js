@@ -32,6 +32,7 @@ export default async function grabPageCombinedServerRes({ file_path, debug, url,
         url,
         query,
         routeParams,
+        props: rootServerRes?.props || null,
     });
     const mergedServerRes = _.merge(rootServerRes || {}, serverRes || {});
     return { serverRes: mergedServerRes };

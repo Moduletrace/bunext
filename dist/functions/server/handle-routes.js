@@ -81,7 +81,7 @@ export default async function ({ req }) {
         }
         return final_res;
     }
-    return undefined;
+    return Response.json({ err: `Route handler error` });
 }
 // const relative_path = match.filePath.replace(API_DIR, "");
 // const relative_module_js_file = relative_path.replace(/\.tsx?$/, ".js");

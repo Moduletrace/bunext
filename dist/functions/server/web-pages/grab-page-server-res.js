@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { log } from "../../../utils/log";
-export default async function grabPageServerRes({ url, query, routeParams, server_function, }) {
+export default async function grabPageServerRes({ url, query, routeParams, server_function, props, }) {
     const default_props = {
         url: url
             ? {
@@ -22,26 +22,22 @@ export default async function grabPageServerRes({ url, query, routeParams, serve
             : null,
         query,
     };
+    const init_props = props || null;
     try {
         if (routeParams && server_function) {
             const serverData = await server_function({
                 ...routeParams,
                 query: { ...routeParams.query, ...query },
+                props: init_props,
             });
-            return {
-                ...serverData,
-                ...default_props,
-            };
+            return _.merge(default_props, serverData);
         }
-        return {
-            ...default_props,
-        };
+        return _.merge(default_props);
     }
     catch (error) {
         log.error(`Page ${url?.pathname} Server Error => ${error.message}\n`, error);
-        return {
-            ...default_props,
+        return _.merge(default_props, {
             error: error.message,
-        };
+        });
     }
 }

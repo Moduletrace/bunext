@@ -41,7 +41,9 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
                 page_local_path: page.local_path,
             });
 
-            if (!tsx) continue;
+            if (!tsx) {
+                continue;
+            }
 
             const entryFile = path.join(
                 BUNX_HYDRATION_SRC_DIR,

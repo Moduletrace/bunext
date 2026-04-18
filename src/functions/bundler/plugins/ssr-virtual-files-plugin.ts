@@ -30,6 +30,10 @@ export default function ssrVirtualFilesPlugin({ entryToPage }: Params) {
 
                 const contents = target.tsx;
 
+                if (!contents.match(/export/)) {
+                    return null;
+                }
+
                 return {
                     contents: contents || "",
                     loader: "tsx",

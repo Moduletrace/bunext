@@ -64,6 +64,7 @@ function grabPageDirRecursively({ page_dir }: { page_dir: string }) {
             const new_page_files = grabPageDirRecursively({
                 page_dir: full_page_path,
             });
+
             pages_files.push(...new_page_files);
         } else if (page.match(/\.(ts|js)x?$/)) {
             const pages_file = grabPageFileObject({

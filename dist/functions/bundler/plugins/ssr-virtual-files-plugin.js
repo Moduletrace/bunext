@@ -16,6 +16,9 @@ export default function ssrVirtualFilesPlugin({ entryToPage }) {
                 if (!target?.tsx)
                     return null;
                 const contents = target.tsx;
+                if (!contents.match(/export/)) {
+                    return null;
+                }
                 return {
                     contents: contents || "",
                     loader: "tsx",

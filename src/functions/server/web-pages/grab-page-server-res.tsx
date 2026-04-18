@@ -13,6 +13,7 @@ type Params = {
     server_function?: BunextPageServerFn;
     query?: Record<string, string>;
     routeParams?: BunxRouteParams;
+    props?: Record<string, any> | null;
 };
 
 export default async function grabPageServerRes({
@@ -20,6 +21,7 @@ export default async function grabPageServerRes({
     query,
     routeParams,
     server_function,
+    props,
 }: Params): Promise<BunextPageModuleServerReturn> {
     const default_props: BunextPageModuleServerReturn = {
         url: url
@@ -43,31 +45,28 @@ export default async function grabPageServerRes({
         query,
     };
 
+    const init_props = props || null;
+
     try {
         if (routeParams && server_function) {
             const serverData = await server_function({
                 ...routeParams,
                 query: { ...routeParams.query, ...query },
+                props: init_props,
             });
 
-            return {
-                ...serverData,
-                ...default_props,
-            };
+            return _.merge(default_props, serverData);
         }
 
-        return {
-            ...default_props,
-        };
+        return _.merge(default_props);
     } catch (error: any) {
         log.error(
             `Page ${url?.pathname} Server Error => ${error.message}\n`,
             error,
         );
 
-        return {
-            ...default_props,
+        return _.merge(default_props, {
             error: error.message,
-        };
+        });
     }
 }

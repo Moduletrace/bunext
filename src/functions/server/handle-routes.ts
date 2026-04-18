@@ -17,7 +17,7 @@ type Params = {
     req: Request;
 };
 
-export default async function ({ req }: Params): Promise<Response | undefined> {
+export default async function ({ req }: Params): Promise<Response> {
     const url = new URL(req.url);
     const is_dev = isDevelopment();
 
@@ -128,7 +128,7 @@ export default async function ({ req }: Params): Promise<Response | undefined> {
         return final_res;
     }
 
-    return undefined;
+    return Response.json({ err: `Route handler error` });
 }
 
 // const relative_path = match.filePath.replace(API_DIR, "");

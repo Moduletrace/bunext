@@ -2,6 +2,8 @@ import { Command } from "commander";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import writeErrorFile from "../../functions/write-error-file";
+let retries = 0;
+let timeout;
 export default function () {
     return new Command("dev")
         .description("Run development server")
@@ -10,11 +12,15 @@ export default function () {
     });
 }
 async function dev() {
+    clearTimeout(timeout);
+    if (retries == 1) {
+        process.exit(1);
+    }
     const dev_spawn_file = path.resolve(__dirname, "dev-spawn.ts");
     const spawn_options = {
         cmd: ["bun", dev_spawn_file],
         stdio: ["inherit", "inherit", "inherit"],
-        onExit(subprocess, exitCode, signalCode, error) {
+        async onExit(subprocess, exitCode, signalCode, error) {
             writeErrorFile({ exitCode, error });
         },
         env: {
@@ -23,6 +29,10 @@ async function dev() {
         },
     };
     let dev_process = Bun.spawn(spawn_options);
+    retries++;
+    timeout = setTimeout(() => {
+        retries = 0;
+    }, 5000);
     const exited = await dev_process.exited;
     if (exited) {
         return await dev();

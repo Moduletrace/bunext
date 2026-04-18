@@ -16,7 +16,9 @@ export default async function pagesSSRBundler(params) {
     for (const page of pages) {
         if (page.local_path.match(/\/pages\/api\//)) {
             const ts = await Bun.file(page.local_path).text();
-            entryToPage.set(page.local_path, { ...page, tsx: ts });
+            if (ts.match(/(export default)|(export \w+ handler)/)) {
+                entryToPage.set(page.local_path, { ...page, tsx: ts });
+            }
             continue;
         }
         const tsx = grabPageReactComponentString({
@@ -24,6 +26,8 @@ export default async function pagesSSRBundler(params) {
             root_file_path,
         });
         if (!tsx)
+            continue;
+        if (!tsx.match(/export default/))
             continue;
         entryToPage.set(page.local_path, { ...page, tsx });
     }

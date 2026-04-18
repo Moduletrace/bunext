@@ -34,7 +34,7 @@ export default async function bunextRequestHandler({ req: initial_req, server, }
             return new Response("Modules Rebuilt");
         }
         if (url.pathname === "/__hmr" && is_dev) {
-            response = await handleHmr({ req });
+            return handleHmr({ req });
         }
         else if (url.pathname.startsWith("/.bunext")) {
             response = await handleBunextPublicAssets({ req });

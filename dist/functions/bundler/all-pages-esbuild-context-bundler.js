@@ -20,8 +20,9 @@ export default async function allPagesESBuildContextBundler(params) {
             const tsx = await grabClientHydrationScript({
                 page_local_path: page.local_path,
             });
-            if (!tsx)
+            if (!tsx) {
                 continue;
+            }
             const entryFile = path.join(BUNX_HYDRATION_SRC_DIR, `${page.url_path}.tsx`);
             // await Bun.write(entryFile, txt, { createPath: true });
             entryToPage.set(entryFile, { ...page, tsx });

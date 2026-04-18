@@ -223,7 +223,9 @@ export type BunextPageModuleMetaTwitter = {
 export type BunextPageServerFn<
     T extends { [k: string]: any } = { [k: string]: any },
 > = (
-    ctx: Omit<BunxRouteParams, "body">,
+    ctx: Omit<BunxRouteParams, "body"> & {
+        props?: any;
+    },
 ) => Promise<BunextPageModuleServerReturn<T>>;
 
 export type BunextRouteConfig = {

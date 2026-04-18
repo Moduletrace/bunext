@@ -7,6 +7,9 @@ import grabPageCombinedServerRes from "./grab-page-combined-server-res";
 import fullRebuild from "../full-rebuild";
 import serverPostBuildFn from "../server-post-build-fn";
 import isDevelopment from "../../../utils/is-development";
+import { existsSync } from "fs";
+import grabDirNames from "../../../utils/grab-dir-names";
+const { BUNX_BUNDLER_ERROR_EXIT_FILE } = grabDirNames();
 class NotFoundError extends Error {
     status = 404;
     constructor(message) {
@@ -24,6 +27,7 @@ export default async function grabPageComponent(params) {
         url.protocol = forwarded_proto;
     }
     let routeParams = undefined;
+    const does_error_file_exist = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
     try {
         routeParams = req ? await grabRouteParams({ req }) : undefined;
         let url_path = url ? url.pathname : undefined;
@@ -46,11 +50,26 @@ export default async function grabPageComponent(params) {
             // log.error(errMsg);
             throw new Error(errMsg);
         }
-        const bundledMap = global.BUNDLER_CTX_MAP[file_path];
+        let bundledMap = global.BUNDLER_CTX_MAP[file_path];
         if (!bundledMap?.path) {
-            const errMsg = `No Bundled File Path for this request path!`;
-            log.error(errMsg);
-            throw new Error(errMsg);
+            if (does_error_file_exist) {
+                throw new Error(`Application Error. Please Check your components. ${match?.filePath} likely exists but has no exported module.`);
+            }
+            let retries = 0;
+            const MAX_RETRIES = 2;
+            while (retries < MAX_RETRIES) {
+                await fullRebuild({
+                    msg: `Retrying Bundle map for file \`${file_path}\``,
+                });
+                bundledMap = global.BUNDLER_CTX_MAP[file_path];
+                if (bundledMap?.path)
+                    break;
+            }
+            if (!bundledMap?.path) {
+                const errMsg = `No Bundled File Path for this request path!`;
+                log.error(errMsg);
+                throw new Error(errMsg);
+            }
         }
         if (req && !is_hydration) {
             global.BUNDLER_CTX_MAP[file_path].req = req;
