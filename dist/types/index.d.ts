@@ -241,7 +241,20 @@ export type BunextPageProps<T extends {
 } = {
     [k: string]: any;
 }> = BunextPageModuleServerReturn<T, Q>;
-export type BunextPageModuleServerReturnURLObject = URL & {};
+export type BunextPageModuleServerReturnURLObject = {
+    hash: string;
+    host: string;
+    hostname: string;
+    href: string;
+    origin: string;
+    password: string;
+    pathname: string;
+    port: string;
+    protocol: string;
+    search: string;
+    searchParams: Record<string, string>;
+    username: string;
+};
 export type BunextPageModuleServerRedirect = {
     destination: string;
     permanent?: boolean;
