@@ -70,9 +70,8 @@ export default async function bunextInit() {
     global.REACT_IMPORTS_MAP = { imports: {} };
     global.REACT_DOM_MODULE_CACHE = new Map<string, any>();
 
-    log.banner();
-
     await init();
+    log.banner();
 
     global.CONSTANTS = grabConstants();
 

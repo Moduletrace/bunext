@@ -23,8 +23,8 @@ export default async function bunextInit() {
     global.DIR_NAMES = dirNames;
     global.REACT_IMPORTS_MAP = { imports: {} };
     global.REACT_DOM_MODULE_CACHE = new Map();
-    log.banner();
     await init();
+    log.banner();
     global.CONSTANTS = grabConstants();
     await reactModulesBundler();
     const router = new Bun.FileSystemRouter({
