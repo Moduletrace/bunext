@@ -5,7 +5,10 @@ import AppNames from "./grab-app-names";
 import checkExcludedPatterns from "./check-excluded-patterns";
 export default function grabAllPages(params) {
     const { PAGES_DIR } = grabDirNames();
-    const pages = grabPageDirRecursively({ page_dir: PAGES_DIR });
+    const pages = grabPageDirRecursively({
+        page_dir: PAGES_DIR,
+        include_server: params?.include_server,
+    });
     if (params?.exclude_api) {
         return pages.filter((p) => !Boolean(p.url_path.startsWith("/api/")));
     }
@@ -14,7 +17,7 @@ export default function grabAllPages(params) {
     }
     return pages;
 }
-function grabPageDirRecursively({ page_dir }) {
+function grabPageDirRecursively({ page_dir, include_server, }) {
     const pages = readdirSync(page_dir);
     const pages_files = [];
     const root_pages_file = grabPageFileObject({ file_path: `` });
@@ -28,13 +31,17 @@ function grabPageDirRecursively({ page_dir }) {
         if (!existsSync(full_page_path) || !page_name) {
             continue;
         }
-        if (page.match(new RegExp(`${AppNames["RootPagesComponentName"]}`))) {
+        if (page.match(new RegExp(`${AppNames["RootPagesComponentName"]}`)) &&
+            !page_name.match(/\.server\.tsx?/)) {
             continue;
         }
-        if (checkExcludedPatterns({ path: full_page_path })) {
+        const is_page_excluded = checkExcludedPatterns({
+            path: full_page_path,
+        });
+        if (is_page_excluded) {
             continue;
         }
-        if (page_name.match(/\.server\.tsx?/)) {
+        if (page_name.match(/\.server\.tsx?/) && !include_server) {
             continue;
         }
         const page_stat = statSync(full_page_path);
@@ -43,6 +50,7 @@ function grabPageDirRecursively({ page_dir }) {
                 continue;
             const new_page_files = grabPageDirRecursively({
                 page_dir: full_page_path,
+                include_server,
             });
             pages_files.push(...new_page_files);
         }

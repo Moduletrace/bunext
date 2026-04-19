@@ -8,12 +8,16 @@ import checkExcludedPatterns from "./check-excluded-patterns";
 type Params = {
     exclude_api?: boolean;
     api_only?: boolean;
+    include_server?: boolean;
 };
 
 export default function grabAllPages(params?: Params) {
     const { PAGES_DIR } = grabDirNames();
 
-    const pages = grabPageDirRecursively({ page_dir: PAGES_DIR });
+    const pages = grabPageDirRecursively({
+        page_dir: PAGES_DIR,
+        include_server: params?.include_server,
+    });
 
     if (params?.exclude_api) {
         return pages.filter((p) => !Boolean(p.url_path.startsWith("/api/")));
@@ -26,7 +30,13 @@ export default function grabAllPages(params?: Params) {
     return pages;
 }
 
-function grabPageDirRecursively({ page_dir }: { page_dir: string }) {
+function grabPageDirRecursively({
+    page_dir,
+    include_server,
+}: {
+    page_dir: string;
+    include_server?: boolean;
+}) {
     const pages = readdirSync(page_dir);
     const pages_files: PageFiles[] = [];
 
@@ -45,15 +55,22 @@ function grabPageDirRecursively({ page_dir }: { page_dir: string }) {
             continue;
         }
 
-        if (page.match(new RegExp(`${AppNames["RootPagesComponentName"]}`))) {
+        if (
+            page.match(new RegExp(`${AppNames["RootPagesComponentName"]}`)) &&
+            !page_name.match(/\.server\.tsx?/)
+        ) {
             continue;
         }
 
-        if (checkExcludedPatterns({ path: full_page_path })) {
+        const is_page_excluded = checkExcludedPatterns({
+            path: full_page_path,
+        });
+
+        if (is_page_excluded) {
             continue;
         }
 
-        if (page_name.match(/\.server\.tsx?/)) {
+        if (page_name.match(/\.server\.tsx?/) && !include_server) {
             continue;
         }
 
@@ -63,6 +80,7 @@ function grabPageDirRecursively({ page_dir }: { page_dir: string }) {
             if (checkExcludedPatterns({ path: full_page_path })) continue;
             const new_page_files = grabPageDirRecursively({
                 page_dir: full_page_path,
+                include_server,
             });
 
             pages_files.push(...new_page_files);

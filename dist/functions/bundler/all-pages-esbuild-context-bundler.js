@@ -61,6 +61,7 @@ export default async function allPagesESBuildContextBundler(params) {
                 "react-dom/client",
                 "react/jsx-runtime",
                 "react/jsx-dev-runtime",
+                ...(global.CONFIG.page_compiler_excludes || []),
             ],
             logLevel: did_process_exit_because_of_bundler_error
                 ? "silent"

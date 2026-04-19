@@ -71,6 +71,18 @@ export type BunextConfig = {
      */
     pages_exclude_patterns?: RegExp[];
     max_logs?: number;
+    /**
+     * Patterns to exclude from the SSR bundler. This is
+     * required for modules that aren't compatible with esbuild
+     * bundler. Eg. `sqlite-vec`
+     */
+    ssr_compiler_excludes?: string[];
+    /**
+     * Patterns to exclude from the Main page bundler. This is
+     * required for modules that aren't compatible with esbuild
+     * bundler for the browser. Eg. `react/jsx-dev-runtime`
+     */
+    page_compiler_excludes?: string[];
 };
 
 export type BunextConfigMiddlewareParams = {

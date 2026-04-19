@@ -1,8 +1,12 @@
 import {} from "esbuild";
 import grabArtifactsFromBundledResults from "../grab-artifacts-from-bundled-result";
+import { writeFileSync } from "fs";
+import path from "path";
+import grabDirNames from "../../../utils/grab-dir-names";
 let build_start = 0;
 let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
+const { BUNX_TMP_DIR } = grabDirNames();
 export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
     const artifactTracker = {
         name: "ssr-artifact-tracker",
@@ -41,6 +45,10 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
                     // );
                     // log.success(`SSR [Built] in ${elapsed}ms`);
                 }
+                try {
+                    writeFileSync(path.join(BUNX_TMP_DIR, "ctx-map.json"), JSON.stringify(global.SSR_BUNDLER_CTX_MAP, null, 4));
+                }
+                catch (error) { }
                 global.SSR_BUNDLER_CTX_DISPOSED = false;
             });
         },

@@ -7,16 +7,27 @@ import grabPageReactComponentString from "../server/web-pages/grab-page-react-co
 import grabRootFilePath from "../server/web-pages/grab-root-file-path";
 import ssrVirtualFilesPlugin from "./plugins/ssr-virtual-files-plugin";
 import ssrCTXArtifactTracker from "./plugins/ssr-ctx-artifact-tracker";
-const { BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
+import { writeFileSync } from "fs";
+import path from "path";
+import { log } from "../../utils/log";
+const { BUNX_CWD_MODULE_CACHE_DIR, BUNX_TMP_DIR } = grabDirNames();
 export default async function pagesSSRBundler(params) {
-    const pages = grabAllPages();
+    const pages = grabAllPages({
+        include_server: true,
+    });
     const dev = isDevelopment();
+    const config = global.CONFIG;
+    try {
+        writeFileSync(path.join(BUNX_TMP_DIR, "ssr-pages.json"), JSON.stringify(pages, null, 4));
+    }
+    catch (error) { }
     const entryToPage = new Map();
     const { root_file_path } = grabRootFilePath();
     for (const page of pages) {
-        if (page.local_path.match(/\/pages\/api\//)) {
+        if (page.local_path.match(/\/pages\/api\//) ||
+            page.local_path.match(/\.server\.tsx?$/)) {
             const ts = await Bun.file(page.local_path).text();
-            if (ts.match(/(export default)|(export \w+ handler)/)) {
+            if (ts.match(/(export default)|(export \w+ handler)|(export \w+ server)/)) {
                 entryToPage.set(page.local_path, { ...page, tsx: ts });
             }
             continue;
@@ -32,6 +43,11 @@ export default async function pagesSSRBundler(params) {
         entryToPage.set(page.local_path, { ...page, tsx });
     }
     const entryPoints = [...entryToPage.keys()].map((e) => `ssr-virtual:${e}`);
+    try {
+        writeFileSync(path.join(BUNX_TMP_DIR, "ssr-entry-to-page.json"), JSON.stringify(Object(entryToPage), null, 4));
+        writeFileSync(path.join(BUNX_TMP_DIR, "ssr-entrypoints.json"), JSON.stringify(entryPoints, null, 4));
+    }
+    catch (error) { }
     await esbuild.build({
         entryPoints,
         outdir: BUNX_CWD_MODULE_CACHE_DIR,
@@ -62,6 +78,9 @@ export default async function pagesSSRBundler(params) {
             "react/jsx-runtime",
             "react/jsx-dev-runtime",
             "bun:*",
+            "sqlite-vec",
+            "better-sqlite3",
+            ...(config.ssr_compiler_excludes || []),
         ],
         splitting: true,
         // logLevel: "silent",
