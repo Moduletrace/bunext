@@ -33,7 +33,7 @@ export default async function grabPageCombinedServerRes({ file_path, debug, url,
     const page_server_ctx = global.SSR_BUNDLER_CTX_MAP[server_file_path || ""];
     const final_page_server_path = page_server_ctx?.local_path
         ? path.join(ROOT_DIR, page_server_ctx.path)
-        : root_server_file_path;
+        : server_file_path;
     const server_module = final_page_server_path
         ? await import(`${final_page_server_path}?t=${now}`)
         : undefined;

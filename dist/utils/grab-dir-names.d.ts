@@ -1,4 +1,4 @@
-export default function grabDirNames(): {
+export type DirNames = {
     ROOT_DIR: string;
     SRC_DIR: string;
     PAGES_DIR: string;
@@ -27,3 +27,4 @@ export default function grabDirNames(): {
     BUNX_ERROR_LOGS_DIR: string;
     BUNX_LOGS_DIR: string;
 };
+export default function grabDirNames(): DirNames;

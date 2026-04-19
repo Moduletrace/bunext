@@ -5,7 +5,7 @@ import type {
     PageFiles,
 } from "../types";
 import type { FileSystemRouter, Server } from "bun";
-import grabDirNames from "../utils/grab-dir-names";
+import grabDirNames, { type DirNames } from "../utils/grab-dir-names";
 import { type FSWatcher } from "fs";
 import init from "./init";
 import isDevelopment from "../utils/is-development";
@@ -43,7 +43,7 @@ declare global {
     var BUNDLER_CTX: BuildContext | undefined;
     var SSR_BUNDLER_CTX: BuildContext | undefined;
     // var API_ROUTES_BUNDLER_CTX: BuildContext | undefined;
-    var DIR_NAMES: ReturnType<typeof grabDirNames>;
+    var DIR_NAMES: DirNames;
     var REACT_IMPORTS_MAP: { imports: Record<string, string> };
     var REACT_DOM_SERVER: any;
     var REACT_DOM_MODULE_CACHE: Map<string, { main: any; css: string }>;

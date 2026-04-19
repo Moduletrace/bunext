@@ -1,5 +1,21 @@
+function removeController(controller) {
+    const idx = global.HMR_CONTROLLERS.findIndex((c) => c.controller == controller);
+    if (typeof idx == "number" && idx >= 0) {
+        global.HMR_CONTROLLERS.splice(idx, 1);
+    }
+}
 export default async function ({ req }) {
-    const referer_url = new URL(req.headers.get("referer") || "");
+    const referer = req.headers.get("referer");
+    if (!referer) {
+        return new Response("Missing Referer Header", { status: 400 });
+    }
+    let referer_url;
+    try {
+        referer_url = new URL(referer);
+    }
+    catch {
+        return new Response("Invalid Referer Header", { status: 400 });
+    }
     const match = global.ROUTER.match(referer_url.pathname);
     const target_map = match?.filePath
         ? global.BUNDLER_CTX_MAP?.[match.filePath]
@@ -20,16 +36,13 @@ export default async function ({ req }) {
                 }
                 catch {
                     clearInterval(heartbeat);
+                    removeController(controller);
                 }
             }, 5000);
         },
         cancel() {
             clearInterval(heartbeat);
-            const targetControllerIndex = global.HMR_CONTROLLERS.findIndex((c) => c.controller == controller);
-            if (typeof targetControllerIndex == "number" &&
-                targetControllerIndex >= 0) {
-                global.HMR_CONTROLLERS.splice(targetControllerIndex, 1);
-            }
+            removeController(controller);
         },
     });
     return new Response(stream, {

@@ -2,6 +2,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import path from "path";
 import isDevelopment from "../../utils/is-development";
 import { existsSync } from "fs";
+import isSafePath from "../../utils/is-safe-path";
 
 const { PUBLIC_DIR } = grabDirNames();
 
@@ -19,7 +20,7 @@ export default async function ({ req }: Params): Promise<Response> {
             url.pathname.replace(/^\/public/, ""),
         );
 
-        if (!file_path.startsWith(PUBLIC_DIR + path.sep)) {
+        if (!isSafePath({ filePath: file_path, allowedDir: PUBLIC_DIR })) {
             return new Response("Forbidden", { status: 403 });
         }
 
@@ -53,6 +54,8 @@ export function readFileResponse({ file_path, cache }: FileResponse) {
         headers.set("Cache-Control", "public, max-age=31536000, immutable");
     } else if (cache?.duration) {
         headers.set("Cache-Control", `public, max-age=${cache.duration}`);
+    } else if (!isDevelopment()) {
+        headers.set("Cache-Control", "public, max-age=3600");
     }
 
     return new Response(file, {

@@ -1,6 +1,38 @@
 import path from "path";
 
-export default function grabDirNames() {
+export type DirNames = {
+    ROOT_DIR: string;
+    SRC_DIR: string;
+    PAGES_DIR: string;
+    API_DIR: string;
+    PUBLIC_DIR: string;
+    HYDRATION_DST_DIR: string;
+    BUNX_CWD_DIR: string;
+    BUNX_ROOT_DIR: string;
+    CONFIG_FILE: string;
+    BUNX_TMP_DIR: string;
+    BUNX_HYDRATION_SRC_DIR: string;
+    BUNX_ROOT_SRC_DIR: string;
+    BUNX_ROOT_PRESETS_DIR: string;
+    BUNX_ROOT_500_PRESET_COMPONENT: string;
+    BUNX_ROOT_500_FILE_NAME: string;
+    BUNX_ROOT_404_PRESET_COMPONENT: string;
+    BUNX_ROOT_404_FILE_NAME: string;
+    HYDRATION_DST_DIR_MAP_JSON_FILE: string;
+    BUNEXT_CACHE_DIR: string;
+    BUNX_CWD_MODULE_CACHE_DIR: string;
+    BUNX_CWD_PAGES_REWRITE_DIR: string;
+    HYDRATION_DST_DIR_MAP_JSON_FILE_NAME: string;
+    BUNEXT_VENDOR_DIR: string;
+    BUNEXT_PUBLIC_DIR: string;
+    BUNX_BUNDLER_ERROR_EXIT_FILE: string;
+    BUNX_ERROR_LOGS_DIR: string;
+    BUNX_LOGS_DIR: string;
+};
+
+export default function grabDirNames(): DirNames {
+    if (global.DIR_NAMES) return global.DIR_NAMES;
+
     const ROOT_DIR = process.cwd();
     const SRC_DIR = path.join(ROOT_DIR, "src");
     const PAGES_DIR = path.join(SRC_DIR, "pages");

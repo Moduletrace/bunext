@@ -1,5 +1,7 @@
 import path from "path";
 export default function grabDirNames() {
+    if (global.DIR_NAMES)
+        return global.DIR_NAMES;
     const ROOT_DIR = process.cwd();
     const SRC_DIR = path.join(ROOT_DIR, "src");
     const PAGES_DIR = path.join(SRC_DIR, "pages");

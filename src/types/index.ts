@@ -344,7 +344,7 @@ export type BundlerCTXMap = {
     url_path: string;
     file_name: string;
     css_path?: string;
-    req?: Request;
+    req_url?: string;
 };
 
 export type GlobalHMRControllerObject = {

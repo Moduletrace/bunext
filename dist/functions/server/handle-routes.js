@@ -41,12 +41,13 @@ export default async function ({ req }) {
         module = await import(import_path);
     }
     const config = module.config;
+    const maxBodyBytes = config?.max_request_body_mb
+        ? config.max_request_body_mb * MBInBytes
+        : ServerDefaultRequestBodyLimitBytes;
     const contentLength = req.headers.get("content-length");
     if (contentLength) {
         const size = parseInt(contentLength, 10);
-        if ((config?.max_request_body_mb &&
-            size > config.max_request_body_mb * MBInBytes) ||
-            size > ServerDefaultRequestBodyLimitBytes) {
+        if (size > maxBodyBytes) {
             return Response.json({
                 success: false,
                 msg: "Request Body Too Large!",
@@ -57,6 +58,21 @@ export default async function ({ req }) {
                 },
             });
         }
+    }
+    else if (req.method !== "GET" && req.method !== "HEAD") {
+        const body = await req.arrayBuffer();
+        if (body.byteLength > maxBodyBytes) {
+            return Response.json({
+                success: false,
+                msg: "Request Body Too Large!",
+            }, {
+                status: 413,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        }
+        routeParams.body = JSON.parse(new TextDecoder().decode(body) || "{}");
     }
     const target_module = (module["default"] ||
         module["handler"]);

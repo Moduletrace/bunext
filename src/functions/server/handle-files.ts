@@ -2,6 +2,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import path from "path";
 import isDevelopment from "../../utils/is-development";
 import { existsSync } from "fs";
+import isSafePath from "../../utils/is-safe-path";
 
 const { PUBLIC_DIR } = grabDirNames();
 
@@ -15,7 +16,7 @@ export default async function ({ req }: Params): Promise<Response> {
         const url = new URL(req.url);
         const file_path = path.join(PUBLIC_DIR, url.pathname);
 
-        if (!file_path.startsWith(PUBLIC_DIR + path.sep)) {
+        if (!isSafePath({ filePath: file_path, allowedDir: PUBLIC_DIR })) {
             return new Response("Forbidden", { status: 403 });
         }
 
@@ -26,7 +27,13 @@ export default async function ({ req }: Params): Promise<Response> {
         }
 
         const file = Bun.file(file_path);
-        return new Response(file);
+        const headers = new Headers();
+
+        if (!is_dev) {
+            headers.set("Cache-Control", "public, max-age=3600");
+        }
+
+        return new Response(file, { headers });
     } catch (error) {
         return new Response(`File Not Found`, {
             status: 404,

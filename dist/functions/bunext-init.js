@@ -1,4 +1,4 @@
-import grabDirNames from "../utils/grab-dir-names";
+import grabDirNames, {} from "../utils/grab-dir-names";
 import {} from "fs";
 import init from "./init";
 import isDevelopment from "../utils/is-development";

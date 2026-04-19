@@ -1,6 +1,6 @@
 import type { BundlerCTXMap, BunextConfig, GlobalHMRControllerObject, PageFiles } from "../types";
 import type { FileSystemRouter, Server } from "bun";
-import grabDirNames from "../utils/grab-dir-names";
+import { type DirNames } from "../utils/grab-dir-names";
 import { type FSWatcher } from "fs";
 import type { BuildContext } from "esbuild";
 import grabConstants from "../utils/grab-constants";
@@ -31,7 +31,7 @@ declare global {
     var SKIPPED_BROWSER_MODULES: Set<string>;
     var BUNDLER_CTX: BuildContext | undefined;
     var SSR_BUNDLER_CTX: BuildContext | undefined;
-    var DIR_NAMES: ReturnType<typeof grabDirNames>;
+    var DIR_NAMES: DirNames;
     var REACT_IMPORTS_MAP: {
         imports: Record<string, string>;
     };

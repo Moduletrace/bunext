@@ -76,15 +76,20 @@ export default async function genWebHTML({ component: Main, pageProps, bundledMa
     console.error = () => { };
     console.info = () => { };
     console.debug = () => { };
-    const stream = await renderToReadableStream(final_component, {
-        onError(error) {
-            if (error.message.includes('unique "key" prop'))
-                return;
-            originalConsole.error(error);
-        },
-    });
-    const htmlBody = await new Response(stream).text();
-    Object.assign(console, originalConsole);
+    let htmlBody;
+    try {
+        const stream = await renderToReadableStream(final_component, {
+            onError(error) {
+                if (error.message.includes('unique "key" prop'))
+                    return;
+                originalConsole.error(error);
+            },
+        });
+        htmlBody = await new Response(stream).text();
+    }
+    finally {
+        Object.assign(console, originalConsole);
+    }
     html += htmlBody;
     return html;
 }

@@ -117,7 +117,7 @@ export default async function grabPageComponent(
         }
 
         if (req && !is_hydration) {
-            global.BUNDLER_CTX_MAP[file_path].req = req;
+            global.BUNDLER_CTX_MAP[file_path].req_url = req.url;
         }
 
         if (debug) {

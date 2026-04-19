@@ -8,6 +8,8 @@ import handleBunextPublicAssets from "./handle-bunext-public-assets";
 import checkExcludedPatterns from "../../utils/check-excluded-patterns";
 import { AppData } from "../../data/app-data";
 import fullRebuild from "./full-rebuild";
+const HMR_RETRY_COOLDOWN_MS = 5000;
+let lastHmrRetryTime = 0;
 export default async function bunextRequestHandler({ req: initial_req, server, }) {
     const is_dev = isDevelopment();
     let req = initial_req.clone();
@@ -30,6 +32,11 @@ export default async function bunextRequestHandler({ req: initial_req, server, }
             }
         }
         if (is_dev && url.pathname == AppData["BunextHMRRetryRoute"]) {
+            const now = Date.now();
+            if (now - lastHmrRetryTime < HMR_RETRY_COOLDOWN_MS) {
+                return new Response("Too Many Requests", { status: 429 });
+            }
+            lastHmrRetryTime = now;
             await fullRebuild({ msg: `HMR Retry Rebuild ...` });
             return new Response("Modules Rebuilt");
         }
@@ -60,8 +67,12 @@ export default async function bunextRequestHandler({ req: initial_req, server, }
         return response;
     }
     catch (error) {
-        return new Response(`Server Error: ${error.message}`, {
-            status: 500,
-        });
+        if (is_dev) {
+            return new Response(`Server Error: ${error.message}`, {
+                status: 500,
+            });
+        }
+        console.error(`Server Error: ${error.message}`, error);
+        return new Response("Internal Server Error", { status: 500 });
     }
 }

@@ -30,8 +30,8 @@ export default async function serverPostBuildFn(params) {
             controller.controller.enqueue(reload_enqueue);
             continue;
         }
-        const mock_req = target_artifact.req
-            ? target_artifact.req.clone()
+        const mock_req = target_artifact.req_url
+            ? new Request(target_artifact.req_url)
             : new Request(controller.page_url);
         const page_component = global.IS_SERVER_COMPONENT
             ? await grabPageComponent({
