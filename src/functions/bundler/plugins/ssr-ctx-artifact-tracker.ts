@@ -40,7 +40,9 @@ export default function ssrCTXArtifactTracker({
 
             build.onEnd((result) => {
                 if (result.errors.length > 0) {
-                    console.log("result.errors", result.errors);
+                    global.SSR_BUNDLER_CTX_DISPOSED = false;
+                    build_starts = 0;
+                    console.log("SSR Build errors:", result.errors);
                     return;
                 }
 

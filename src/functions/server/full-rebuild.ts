@@ -30,6 +30,8 @@ export default async function fullRebuild(params?: { msg?: string }) {
             },
         });
     } catch (error: any) {
+        global.RECOMPILING = false;
+        global.IS_SERVER_COMPONENT = false;
         log.error(error);
     }
 

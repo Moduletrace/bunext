@@ -4,6 +4,7 @@ import grabDirNames from "../../utils/grab-dir-names";
 import writeErrorFile from "../../functions/write-error-file";
 let retries = 0;
 let timeout;
+const MAX_RETRIES = 5;
 export default function () {
     return new Command("dev")
         .description("Run development server")
@@ -13,7 +14,8 @@ export default function () {
 }
 async function dev() {
     clearTimeout(timeout);
-    if (retries == 1) {
+    if (retries >= MAX_RETRIES) {
+        console.error(`Dev server crashed ${MAX_RETRIES} times. Exiting.`);
         process.exit(1);
     }
     const dev_spawn_file = path.resolve(__dirname, "dev-spawn.ts");
@@ -32,7 +34,7 @@ async function dev() {
     retries++;
     timeout = setTimeout(() => {
         retries = 0;
-    }, 5000);
+    }, 10000);
     const exited = await dev_process.exited;
     if (exited) {
         return await dev();

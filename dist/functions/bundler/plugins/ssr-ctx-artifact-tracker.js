@@ -22,7 +22,9 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
             });
             build.onEnd((result) => {
                 if (result.errors.length > 0) {
-                    console.log("result.errors", result.errors);
+                    global.SSR_BUNDLER_CTX_DISPOSED = false;
+                    build_starts = 0;
+                    console.log("SSR Build errors:", result.errors);
                     return;
                 }
                 const artifacts = grabArtifactsFromBundledResults({

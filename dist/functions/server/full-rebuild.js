@@ -23,6 +23,8 @@ export default async function fullRebuild(params) {
         });
     }
     catch (error) {
+        global.RECOMPILING = false;
+        global.IS_SERVER_COMPONENT = false;
         log.error(error);
     }
     if (global.PAGES_SRC_WATCHER) {

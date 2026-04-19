@@ -6,6 +6,7 @@ import writeErrorFile from "../../functions/write-error-file";
 
 let retries = 0;
 let timeout: any;
+const MAX_RETRIES = 5;
 
 export default function () {
     return new Command("dev")
@@ -18,7 +19,8 @@ export default function () {
 async function dev() {
     clearTimeout(timeout);
 
-    if (retries == 1) {
+    if (retries >= MAX_RETRIES) {
+        console.error(`Dev server crashed ${MAX_RETRIES} times. Exiting.`);
         process.exit(1);
     }
 
@@ -42,7 +44,7 @@ async function dev() {
 
     timeout = setTimeout(() => {
         retries = 0;
-    }, 5000);
+    }, 10000);
 
     const exited = await dev_process.exited;
     if (exited) {

@@ -43,16 +43,35 @@ export default function esbuildCTXArtifactTracker({
                 );
 
                 if (
-                    build_starts == MAX_BUILD_STARTS &&
+                    build_starts >= MAX_BUILD_STARTS &&
                     !does_error_file_exist
                 ) {
                     await buildOnstartErrorHandler();
-                    process.exit(1);
                 }
             });
 
             build.onEnd((result) => {
                 if (result.errors.length > 0) {
+                    global.RECOMPILING = false;
+                    global.IS_SERVER_COMPONENT = false;
+                    build_starts = 0;
+
+                    log.error(`Build errors:`);
+                    for (const err of result.errors) {
+                        log.error(`  ${err.text}${err.location ? ` (${err.location.file}:${err.location.line}:${err.location.column})` : ""}`);
+                    }
+
+                    for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
+                        const controller = global.HMR_CONTROLLERS[i];
+                        try {
+                            controller?.controller?.enqueue(
+                                `event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`,
+                            );
+                        } catch {
+                            global.HMR_CONTROLLERS.splice(i, 1);
+                        }
+                    }
+
                     return;
                 }
 
@@ -98,7 +117,11 @@ export default function esbuildCTXArtifactTracker({
                     cleanupLogsDirs();
                     fullRebuild();
                 } else {
-                    pagesSSRBundler();
+                    try {
+                        pagesSSRBundler();
+                    } catch (error) {
+                        log.error(`SSR Bundler Error: ${error}`);
+                    }
                 }
 
                 // if (global.SSR_BUNDLER_CTX) {
