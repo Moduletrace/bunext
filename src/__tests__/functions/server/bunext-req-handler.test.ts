@@ -1,4 +1,4 @@
-import { describe, expect, test, mock, afterAll } from "bun:test";
+import { describe, expect, test, mock, afterAll, beforeEach } from "bun:test";
 import bunextRequestHandler from "../../../../src/functions/server/bunext-req-handler";
 
 mock.module("../../../../src/utils/is-development", () => ({
@@ -34,11 +34,21 @@ mock.module("../../../../src/functions/server/web-pages/handle-web-pages", () =>
     default: async () => new Response("web-pages")
 }));
 
-/**
- * Tests for the `bunext-req-handler` module.
- * Ensures that requests are correctly routed to the proper subsystem.
- */
 describe("bunext-req-handler", () => {
+    beforeEach(() => {
+        global.CONSTANTS = {
+            config: {
+                middleware: async ({ url }: any) => {
+                    if (url.pathname === "/blocked") {
+                        return new Response("Blocked by middleware", { status: 403 });
+                    }
+                    return undefined;
+                }
+            },
+            RouteIgnorePatterns: [],
+        } as any;
+    });
+
     afterAll(() => {
         mock.restore();
     });

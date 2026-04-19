@@ -12,6 +12,7 @@ import {
 import { FileSystemRouter } from "bun";
 import { BuildContext } from "esbuild";
 import grabDirNames from "../../utils/grab-dir-names";
+import grabConstants from "../../utils/grab-constants";
 
 // Fixture lives under test/ so the framework's directory guard allows it
 const fixtureDir = path.resolve(__dirname, "../../../test/e2e-fixture");
@@ -58,6 +59,11 @@ describe("E2E Integration", () => {
         global.HMR_CONTROLLERS = [];
         global.BUNDLER_REBUILDS = 0;
         global.PAGE_FILES = [];
+        global.CONSTANTS = grabConstants();
+        global.SSR_BUNDLER_CTX_MAP = {};
+        global.BUNDLER_CTX_MAP = {};
+        global.REACT_DOM_MODULE_CACHE = new Map<string, any>();
+        global.REBUILD_RETRIES = 0;
 
         // Set up router pointing at the fixture's pages directory
         global.ROUTER = new Bun.FileSystemRouter({

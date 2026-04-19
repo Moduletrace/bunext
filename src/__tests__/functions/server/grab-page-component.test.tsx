@@ -8,6 +8,18 @@ mock.module("../../../../src/utils/log", () => ({
     },
 }));
 
+mock.module("../../../../src/utils/is-development", () => ({
+    default: () => false
+}));
+
+mock.module("../../../../src/functions/server/full-rebuild", () => ({
+    default: async () => {}
+}));
+
+mock.module("../../../../src/functions/server/server-post-build-fn", () => ({
+    default: async () => {}
+}));
+
 import { log } from "../../../../src/utils/log";
 import grabPageComponent from "../../../../src/functions/server/web-pages/grab-page-component";
 
@@ -29,7 +41,7 @@ describe("grabPageComponent", () => {
             req: new Request("http://localhost:3000/unknown-foo-bar123"),
         });
 
-        expect(res.serverRes?.responseOptions?.status).toBe(404);
+        expect(res.serverRes?.response_options?.status).toBe(404);
         expect(log.error).not.toHaveBeenCalled();
     });
 });

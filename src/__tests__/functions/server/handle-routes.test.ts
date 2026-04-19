@@ -29,7 +29,7 @@ mock.module("/test-path", () => ({
 
 mock.module("/large-path", () => ({
     default: async () => new Response("Large OK", { status: 200 }),
-    config: { maxRequestBodyMB: 1 }
+    config: { max_request_body_mb: 1 }
 }));
 
 /**

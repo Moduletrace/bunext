@@ -1,24 +1,26 @@
-import { afterAll, afterEach, describe, expect, test } from "bun:test";
-import fs from "fs";
+import { afterAll, afterEach, describe, expect, test, mock } from "bun:test";
 import path from "path";
 import { renderToString } from "react-dom/server";
+import React, { createContext, useContext } from "react";
 import grabPageBundledReactComponent from "../../../../src/functions/server/web-pages/grab-page-bundled-react-component";
 import grabDirNames from "../../../../src/utils/grab-dir-names";
 
-const { BUNX_CWD_MODULE_CACHE_DIR, BUNX_TMP_DIR } = grabDirNames();
+const { BUNX_TMP_DIR } = grabDirNames();
 
 describe("grabPageBundledReactComponent", () => {
-    const fixtureDirs: string[] = [];
     const originalConfig = global.CONFIG;
+    const fixtureDirs: string[] = [];
 
     global.CONFIG = { development: true } as any;
 
     afterEach(() => {
         for (const fixtureDir of fixtureDirs.splice(0)) {
+            const fs = require("fs");
             fs.rmSync(fixtureDir, { recursive: true, force: true });
         }
 
         global.CONFIG = { development: true } as any;
+        mock.restore();
     });
 
     afterAll(() => {
@@ -26,50 +28,36 @@ describe("grabPageBundledReactComponent", () => {
     });
 
     test("keeps __root context connected during SSR", async () => {
-        fs.mkdirSync(BUNX_CWD_MODULE_CACHE_DIR, { recursive: true });
-        fs.mkdirSync(BUNX_TMP_DIR, { recursive: true });
-
         const fixtureDir = path.join(BUNX_TMP_DIR, `ssr-context-${Date.now()}`);
         fixtureDirs.push(fixtureDir);
-        fs.mkdirSync(fixtureDir, { recursive: true });
-
         const rootFilePath = path.join(fixtureDir, "__root.tsx");
         const pageFilePath = path.join(fixtureDir, "page.tsx");
 
-        fs.writeFileSync(
-            rootFilePath,
-            `import { createContext } from "react";
-export const AppContext = createContext("missing-context");
+        mock.module("../../../../src/functions/server/web-pages/grab-root-file-path", () => ({
+            default: () => ({ root_file_path: rootFilePath })
+        }));
 
-export default function Root({ children }: { children: React.ReactNode }) {
-    return (
-        <AppContext.Provider value="server-context">
-            {children}
-        </AppContext.Provider>
-    );
-}
-`,
-        );
-
-        fs.writeFileSync(
-            pageFilePath,
-            `import { useContext } from "react";
-import { AppContext } from "./__root";
-
-export default function Page() {
-    const value = useContext(AppContext);
-
-    return <div>{value}</div>;
-}
-`,
-        );
+        mock.module("../../../../src/functions/server/web-pages/grab-tsx-string-module", () => ({
+            default: async () => {
+                const AppContext = createContext("missing-context");
+                const Root = ({ children }: { children: React.ReactNode }) =>
+                    React.createElement(AppContext.Provider, { value: "server-context" }, children);
+                const Page = () => {
+                    const value = useContext(AppContext);
+                    return React.createElement("div", null, value);
+                };
+                const Main = (props: any) =>
+                    React.createElement(Root, props, React.createElement(Page, props));
+                return { default: Main };
+            }
+        }));
 
         const result = await grabPageBundledReactComponent({
             file_path: pageFilePath,
-            root_file_path: rootFilePath,
         });
 
         expect(result?.component).toBeDefined();
-        expect(renderToString(result!.component)).toContain("server-context");
+        const html = renderToString(React.createElement(result!.component));
+        expect(html).toContain("server-context");
     });
 });
