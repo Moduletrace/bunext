@@ -11,17 +11,16 @@ import path from "path";
 import cleanupLogsDirs from "../../cleanup-logs-dir";
 const { BUNX_BUNDLER_ERROR_EXIT_FILE, BUNX_ERROR_LOGS_DIR } = grabDirNames();
 let build_start = 0;
-let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
 export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, }) {
     const artifactTracker = {
         name: "artifact-tracker",
         setup(build) {
             build.onStart(async () => {
-                build_starts++;
+                global.MAIN_CTX_BUILD_STARTS++;
                 build_start = performance.now();
                 const does_error_file_exist = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
-                if (build_starts >= MAX_BUILD_STARTS &&
+                if (global.MAIN_CTX_BUILD_STARTS >= MAX_BUILD_STARTS &&
                     !does_error_file_exist) {
                     await buildOnstartErrorHandler();
                 }
@@ -30,7 +29,6 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                 if (result.errors.length > 0) {
                     global.RECOMPILING = false;
                     global.IS_SERVER_COMPONENT = false;
-                    build_starts = 0;
                     log.error(`Build errors:`);
                     for (const err of result.errors) {
                         log.error(`  ${err.text}${err.location ? ` (${err.location.file}:${err.location.line}:${err.location.column})` : ""}`);
@@ -64,7 +62,8 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                 log.success(`[Built] in ${elapsed}ms`);
                 global.RECOMPILING = false;
                 global.IS_SERVER_COMPONENT = false;
-                build_starts = 0;
+                global.MAIN_CTX_BUILD_STARTS = 0;
+                global.BUNDLER_CTX_DISPOSED = false;
                 const does_error_file_exist = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
                 if (does_error_file_exist) {
                     mkdirSync(BUNX_ERROR_LOGS_DIR, { recursive: true });

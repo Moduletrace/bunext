@@ -14,7 +14,6 @@ import cleanupLogsDirs from "../../cleanup-logs-dir";
 const { BUNX_BUNDLER_ERROR_EXIT_FILE, BUNX_ERROR_LOGS_DIR } = grabDirNames();
 
 let build_start = 0;
-let build_starts = 0;
 const MAX_BUILD_STARTS = 2;
 
 type Params = {
@@ -35,7 +34,7 @@ export default function esbuildCTXArtifactTracker({
         name: "artifact-tracker",
         setup(build) {
             build.onStart(async () => {
-                build_starts++;
+                global.MAIN_CTX_BUILD_STARTS++;
                 build_start = performance.now();
 
                 const does_error_file_exist = existsSync(
@@ -43,7 +42,7 @@ export default function esbuildCTXArtifactTracker({
                 );
 
                 if (
-                    build_starts >= MAX_BUILD_STARTS &&
+                    global.MAIN_CTX_BUILD_STARTS >= MAX_BUILD_STARTS &&
                     !does_error_file_exist
                 ) {
                     await buildOnstartErrorHandler();
@@ -54,14 +53,19 @@ export default function esbuildCTXArtifactTracker({
                 if (result.errors.length > 0) {
                     global.RECOMPILING = false;
                     global.IS_SERVER_COMPONENT = false;
-                    build_starts = 0;
 
                     log.error(`Build errors:`);
                     for (const err of result.errors) {
-                        log.error(`  ${err.text}${err.location ? ` (${err.location.file}:${err.location.line}:${err.location.column})` : ""}`);
+                        log.error(
+                            `  ${err.text}${err.location ? ` (${err.location.file}:${err.location.line}:${err.location.column})` : ""}`,
+                        );
                     }
 
-                    for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
+                    for (
+                        let i = global.HMR_CONTROLLERS.length - 1;
+                        i >= 0;
+                        i--
+                    ) {
                         const controller = global.HMR_CONTROLLERS[i];
                         try {
                             controller?.controller?.enqueue(
@@ -101,7 +105,8 @@ export default function esbuildCTXArtifactTracker({
                 global.RECOMPILING = false;
                 global.IS_SERVER_COMPONENT = false;
 
-                build_starts = 0;
+                global.MAIN_CTX_BUILD_STARTS = 0;
+                global.BUNDLER_CTX_DISPOSED = false;
 
                 const does_error_file_exist = existsSync(
                     BUNX_BUNDLER_ERROR_EXIT_FILE,

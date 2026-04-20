@@ -6,17 +6,17 @@ import type {
 } from "../types";
 import type { FileSystemRouter, Server } from "bun";
 import grabDirNames, { type DirNames } from "../utils/grab-dir-names";
-import { type FSWatcher } from "fs";
 import init from "./init";
 import isDevelopment from "../utils/is-development";
 import { log } from "../utils/log";
 import cron from "./server/cron";
 import type { BuildContext } from "esbuild";
-import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
 import reactModulesBundler from "./bundler/react-modules-bundler";
 import grabConstants from "../utils/grab-constants";
+import type { FSWatcher } from "chokidar";
+import chokadirWatcherEsbuildCTX from "./server/chokidar-watcher-esbuild-ctx";
 
 /**
  * # Declare Global Variables
@@ -52,6 +52,7 @@ declare global {
     var REBUILD_RETRIES: number;
     var IS_404_PAGE: boolean;
     var CONSTANTS: ReturnType<typeof grabConstants>;
+    var MAIN_CTX_BUILD_STARTS: number;
 }
 
 const dirNames = grabDirNames();
@@ -69,6 +70,7 @@ export default async function bunextInit() {
     global.DIR_NAMES = dirNames;
     global.REACT_IMPORTS_MAP = { imports: {} };
     global.REACT_DOM_MODULE_CACHE = new Map<string, any>();
+    global.MAIN_CTX_BUILD_STARTS = 0;
 
     await init();
     log.banner();
@@ -93,7 +95,7 @@ export default async function bunextInit() {
                 serverPostBuildFn();
             },
         });
-        watcherEsbuildCTX();
+        chokadirWatcherEsbuildCTX();
     } else {
         log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler();

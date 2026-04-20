@@ -1,9 +1,9 @@
 import type { BundlerCTXMap, BunextConfig, GlobalHMRControllerObject, PageFiles } from "../types";
 import type { FileSystemRouter, Server } from "bun";
 import { type DirNames } from "../utils/grab-dir-names";
-import { type FSWatcher } from "fs";
 import type { BuildContext } from "esbuild";
 import grabConstants from "../utils/grab-constants";
+import type { FSWatcher } from "chokidar";
 /**
  * # Declare Global Variables
  */
@@ -45,5 +45,6 @@ declare global {
     var REBUILD_RETRIES: number;
     var IS_404_PAGE: boolean;
     var CONSTANTS: ReturnType<typeof grabConstants>;
+    var MAIN_CTX_BUILD_STARTS: number;
 }
 export default function bunextInit(): Promise<void>;

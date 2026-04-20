@@ -20,9 +20,10 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
                     global.SSR_BUNDLER_CTX = undefined;
                 }
             });
-            build.onEnd((result) => {
+            build.onEnd(async (result) => {
                 if (result.errors.length > 0) {
-                    global.SSR_BUNDLER_CTX_DISPOSED = false;
+                    global.SSR_BUNDLER_CTX_DISPOSED = true;
+                    await global.SSR_BUNDLER_CTX?.dispose();
                     build_starts = 0;
                     console.log("SSR Build errors:", result.errors);
                     return;

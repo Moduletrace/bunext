@@ -1,5 +1,4 @@
 import path from "path";
-import { log } from "../../../utils/log";
 export default function virtualFilesPlugin({ entryToPage }) {
     const virtualPlugin = {
         name: "virtual-hydration",

@@ -1,14 +1,13 @@
 import grabDirNames, {} from "../utils/grab-dir-names";
-import {} from "fs";
 import init from "./init";
 import isDevelopment from "../utils/is-development";
 import { log } from "../utils/log";
 import cron from "./server/cron";
-import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-bundler";
 import serverPostBuildFn from "./server/server-post-build-fn";
 import reactModulesBundler from "./bundler/react-modules-bundler";
 import grabConstants from "../utils/grab-constants";
+import chokadirWatcherEsbuildCTX from "./server/chokidar-watcher-esbuild-ctx";
 const dirNames = grabDirNames();
 const { PAGES_DIR } = dirNames;
 export default async function bunextInit() {
@@ -23,6 +22,7 @@ export default async function bunextInit() {
     global.DIR_NAMES = dirNames;
     global.REACT_IMPORTS_MAP = { imports: {} };
     global.REACT_DOM_MODULE_CACHE = new Map();
+    global.MAIN_CTX_BUILD_STARTS = 0;
     await init();
     log.banner();
     global.CONSTANTS = grabConstants();
@@ -40,7 +40,7 @@ export default async function bunextInit() {
                 serverPostBuildFn();
             },
         });
-        watcherEsbuildCTX();
+        chokadirWatcherEsbuildCTX();
     }
     else {
         log.build(`Building Modules ...`);

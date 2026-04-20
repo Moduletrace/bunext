@@ -1,8 +1,7 @@
 import { log } from "../../utils/log";
 import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
-import pagesSSRBundler from "../bundler/pages-ssr-bundler";
+import chokadirWatcherEsbuildCTX from "./chokidar-watcher-esbuild-ctx";
 import serverPostBuildFn from "./server-post-build-fn";
-import watcherEsbuildCTX from "./watcher-esbuild-ctx";
 export default async function fullRebuild(params) {
     try {
         const { msg } = params || {};
@@ -11,11 +10,14 @@ export default async function fullRebuild(params) {
             log.watch(msg);
         }
         global.ROUTER.reload();
-        await global.BUNDLER_CTX?.dispose();
-        global.BUNDLER_CTX = undefined;
-        await global.SSR_BUNDLER_CTX?.dispose();
-        global.SSR_BUNDLER_CTX = undefined;
-        await pagesSSRBundler();
+        try {
+            await global.BUNDLER_CTX?.dispose();
+            global.BUNDLER_CTX = undefined;
+            await global.SSR_BUNDLER_CTX?.dispose();
+            global.SSR_BUNDLER_CTX = undefined;
+        }
+        catch (error) { }
+        // await pagesSSRBundler();
         allPagesESBuildContextBundler({
             post_build_fn: () => {
                 serverPostBuildFn();
@@ -29,6 +31,6 @@ export default async function fullRebuild(params) {
     }
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();
-        watcherEsbuildCTX();
+        chokadirWatcherEsbuildCTX();
     }
 }

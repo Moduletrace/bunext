@@ -22,7 +22,6 @@ export default async function watcherEsbuildCTX() {
         }
         if (global.BUNDLER_CTX_DISPOSED) {
             await fullRebuild({ msg: `Restarting Bundler ...` });
-            global.BUNDLER_CTX_DISPOSED = false;
         }
         if (global.SSR_BUNDLER_CTX_DISPOSED) {
             pagesSSRBundler();
@@ -63,12 +62,7 @@ export default async function watcherEsbuildCTX() {
                     global.IS_SERVER_COMPONENT = true;
                 }
                 if (global.BUNDLER_CTX) {
-                    try {
-                        await global.BUNDLER_CTX.rebuild();
-                    }
-                    catch (error) {
-                        console.log(`ESBUILD Rebuild Error =>`, error);
-                    }
+                    await global.BUNDLER_CTX.rebuild();
                 }
                 if (filename.match(/(404|500)\.tsx?/)) {
                     for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
@@ -104,11 +98,11 @@ export default async function watcherEsbuildCTX() {
             msg: `${type} ${action}: ${filename}. Rebuilding ...`,
         });
     });
-    global.PAGES_SRC_WATCHER = pages_src_watcher;
+    // global.PAGES_SRC_WATCHER = pages_src_watcher;
 }
 function reloadWatcher() {
-    if (global.PAGES_SRC_WATCHER) {
-        global.PAGES_SRC_WATCHER.close();
-        watcherEsbuildCTX();
-    }
+    // if (global.PAGES_SRC_WATCHER) {
+    //     global.PAGES_SRC_WATCHER.close();
+    //     watcherEsbuildCTX();
+    // }
 }

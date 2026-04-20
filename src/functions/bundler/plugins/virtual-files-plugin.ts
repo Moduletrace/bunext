@@ -1,7 +1,6 @@
 import type { Plugin } from "esbuild";
 import path from "path";
 import type { PageFiles } from "../../../types";
-import { log } from "../../../utils/log";
 
 type Params = {
     entryToPage: Map<
