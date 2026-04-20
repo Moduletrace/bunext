@@ -70,6 +70,14 @@ function grabPageDirRecursively({
             continue;
         }
 
+        if (full_page_path.match(/__test__/)) {
+            continue;
+        }
+
+        if (page_name.match(/\.test\.(t|j)sx?/)) {
+            continue;
+        }
+
         if (page_name.match(/\.server\.tsx?/) && !include_server) {
             continue;
         }
