@@ -70,7 +70,7 @@ function grabPageDirRecursively({
             continue;
         }
 
-        if (full_page_path.match(/__test__/)) {
+        if (full_page_path.match(/__tests__/)) {
             continue;
         }
 
