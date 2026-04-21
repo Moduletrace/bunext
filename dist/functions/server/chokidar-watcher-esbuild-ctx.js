@@ -105,7 +105,7 @@ export default async function chokadirWatcherEsbuildCTX() {
         .on("unlink", (path) => handleEvent("unlink", path))
         .on("addDir", (path) => handleEvent("addDir", path))
         .on("unlinkDir", (path) => handleEvent("unlinkDir", path));
-    global.PAGES_SRC_WATCHER = watcher;
+    // global.PAGES_SRC_WATCHER = watcher;
 }
 function reloadWatcher() {
     if (global.PAGES_SRC_WATCHER) {

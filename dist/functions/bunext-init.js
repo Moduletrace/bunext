@@ -7,7 +7,7 @@ import allPagesESBuildContextBundler from "./bundler/all-pages-esbuild-context-b
 import serverPostBuildFn from "./server/server-post-build-fn";
 import reactModulesBundler from "./bundler/react-modules-bundler";
 import grabConstants from "../utils/grab-constants";
-import chokadirWatcherEsbuildCTX from "./server/chokidar-watcher-esbuild-ctx";
+import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 const dirNames = grabDirNames();
 const { PAGES_DIR } = dirNames;
 export default async function bunextInit() {
@@ -40,7 +40,7 @@ export default async function bunextInit() {
                 serverPostBuildFn();
             },
         });
-        chokadirWatcherEsbuildCTX();
+        watcherEsbuildCTX();
     }
     else {
         log.build(`Building Modules ...`);

@@ -3,7 +3,7 @@ import type { FileSystemRouter, Server } from "bun";
 import { type DirNames } from "../utils/grab-dir-names";
 import type { BuildContext } from "esbuild";
 import grabConstants from "../utils/grab-constants";
-import type { FSWatcher } from "chokidar";
+import type { FSWatcher } from "fs";
 /**
  * # Declare Global Variables
  */

@@ -98,11 +98,11 @@ export default async function watcherEsbuildCTX() {
             msg: `${type} ${action}: ${filename}. Rebuilding ...`,
         });
     });
-    // global.PAGES_SRC_WATCHER = pages_src_watcher;
+    global.PAGES_SRC_WATCHER = pages_src_watcher;
 }
 function reloadWatcher() {
-    // if (global.PAGES_SRC_WATCHER) {
-    //     global.PAGES_SRC_WATCHER.close();
-    //     watcherEsbuildCTX();
-    // }
+    if (global.PAGES_SRC_WATCHER) {
+        global.PAGES_SRC_WATCHER.close();
+        watcherEsbuildCTX();
+    }
 }

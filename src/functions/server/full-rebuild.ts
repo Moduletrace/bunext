@@ -1,7 +1,7 @@
 import { log } from "../../utils/log";
 import allPagesESBuildContextBundler from "../bundler/all-pages-esbuild-context-bundler";
-import chokadirWatcherEsbuildCTX from "./chokidar-watcher-esbuild-ctx";
 import serverPostBuildFn from "./server-post-build-fn";
+import watcherEsbuildCTX from "./watcher-esbuild-ctx";
 
 export default async function fullRebuild(params?: { msg?: string }) {
     try {
@@ -38,6 +38,6 @@ export default async function fullRebuild(params?: { msg?: string }) {
 
     if (global.PAGES_SRC_WATCHER) {
         global.PAGES_SRC_WATCHER.close();
-        chokadirWatcherEsbuildCTX();
+        watcherEsbuildCTX();
     }
 }
