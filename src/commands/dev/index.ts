@@ -3,6 +3,7 @@ import path from "path";
 import type { BunSpawnOptions } from "../../types";
 import grabDirNames from "../../utils/grab-dir-names";
 import writeErrorFile from "../../functions/write-error-file";
+import { existsSync } from "fs";
 
 let retries = 0;
 let timeout: any;
@@ -25,9 +26,14 @@ async function dev() {
     }
 
     const dev_spawn_file = path.resolve(__dirname, "dev-spawn.ts");
+    const dev_spawn_js_file = path.resolve(__dirname, "dev-spawn.js");
+
+    const final_spawn_file = existsSync(dev_spawn_js_file)
+        ? dev_spawn_js_file
+        : dev_spawn_file;
 
     const spawn_options: BunSpawnOptions = {
-        cmd: ["bun", dev_spawn_file],
+        cmd: ["bun", final_spawn_file],
         stdio: ["inherit", "inherit", "inherit"],
         async onExit(subprocess, exitCode, signalCode, error) {
             writeErrorFile({ exitCode, error });

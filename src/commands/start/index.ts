@@ -2,6 +2,7 @@ import { Command } from "commander";
 import path from "path";
 import type { BunSpawnOptions } from "../../types";
 import writeErrorFile from "../../functions/write-error-file";
+import { existsSync } from "fs";
 
 let retries = 0;
 let timeout: any;
@@ -19,14 +20,21 @@ async function start() {
     clearTimeout(timeout);
 
     if (retries >= MAX_RETRIES) {
-        console.error(`Production server crashed ${MAX_RETRIES} times. Exiting.`);
+        console.error(
+            `Production server crashed ${MAX_RETRIES} times. Exiting.`,
+        );
         process.exit(1);
     }
 
-    const dev_spawn_file = path.resolve(__dirname, "prod-spawn.ts");
+    const prod_spawn_file = path.resolve(__dirname, "prod-spawn.ts");
+    const prod_spawn_js_file = path.resolve(__dirname, "prod-spawn.js");
+
+    const final_spawn_file = existsSync(prod_spawn_js_file)
+        ? prod_spawn_js_file
+        : prod_spawn_file;
 
     const spawn_options: BunSpawnOptions = {
-        cmd: ["bun", dev_spawn_file],
+        cmd: ["bun", final_spawn_file],
         stdio: ["inherit", "inherit", "inherit"],
         onExit(subprocess, exitCode, signalCode, error) {
             writeErrorFile({ exitCode, error });
