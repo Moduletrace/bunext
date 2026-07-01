@@ -50,7 +50,7 @@ export default async function allPagesESBuildContextBundler(params) {
                 esbuildCTXArtifactTracker({
                     entryToPage,
                     post_build_fn: params?.post_build_fn,
-                    build_only: params?.build_only,
+                    build_only: params?.build_only || params?.start,
                 }),
             ],
             jsx: "automatic",

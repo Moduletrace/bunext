@@ -105,7 +105,7 @@ export default async function bunextInit(params?: Params) {
         watcherEsbuildCTX();
     } else {
         log.build(`Building Modules ...`);
-        await allPagesESBuildContextBundler();
+        await allPagesESBuildContextBundler({ start: true });
         cron();
     }
 }

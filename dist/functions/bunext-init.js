@@ -48,7 +48,7 @@ export default async function bunextInit(params) {
     }
     else {
         log.build(`Building Modules ...`);
-        await allPagesESBuildContextBundler();
+        await allPagesESBuildContextBundler({ start: true });
         cron();
     }
 }
