@@ -12,7 +12,7 @@ import cleanupLogsDirs from "../../cleanup-logs-dir";
 const { BUNX_BUNDLER_ERROR_EXIT_FILE, BUNX_ERROR_LOGS_DIR } = grabDirNames();
 let build_start = 0;
 const MAX_BUILD_STARTS = 2;
-export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, }) {
+export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, build_only, }) {
     const artifactTracker = {
         name: "artifact-tracker",
         setup(build) {
@@ -25,7 +25,7 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                     await buildOnstartErrorHandler();
                 }
             });
-            build.onEnd((result) => {
+            build.onEnd(async (result) => {
                 if (result.errors.length > 0) {
                     global.RECOMPILING = false;
                     global.IS_SERVER_COMPONENT = false;
@@ -65,12 +65,20 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                 global.MAIN_CTX_BUILD_STARTS = 0;
                 global.BUNDLER_CTX_DISPOSED = false;
                 const does_error_file_exist = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
-                if (does_error_file_exist) {
+                if (build_only) {
+                    try {
+                        await pagesSSRBundler();
+                    }
+                    catch (error) {
+                        log.error(`SSR Bundler Error: ${error}`);
+                    }
+                }
+                else if (does_error_file_exist) {
                     mkdirSync(BUNX_ERROR_LOGS_DIR, { recursive: true });
                     cpSync(BUNX_BUNDLER_ERROR_EXIT_FILE, path.join(BUNX_ERROR_LOGS_DIR, `${Date.now()}.log`));
                     rmSync(BUNX_BUNDLER_ERROR_EXIT_FILE, { force: true });
                     cleanupLogsDirs();
-                    fullRebuild();
+                    await fullRebuild();
                 }
                 else {
                     try {

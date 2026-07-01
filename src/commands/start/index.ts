@@ -45,17 +45,29 @@ async function start() {
         },
     };
 
-    let dev_process = Bun.spawn(spawn_options);
-
-    retries++;
-
-    timeout = setTimeout(() => {
-        retries = 0;
-    }, 10000);
+    let dev_process;
+    try {
+        dev_process = Bun.spawn(spawn_options);
+    } catch (error) {
+        console.error(`Failed to start production process:`, error);
+        retries++;
+        timeout = setTimeout(() => {
+            retries = 0;
+        }, 10000);
+        return await start();
+    }
 
     const exited = await dev_process.exited;
 
     if (exited) {
+        retries++;
+        timeout = setTimeout(() => {
+            retries = 0;
+        }, 10000);
         return await start();
     }
+
+    timeout = setTimeout(() => {
+        retries = 0;
+    }, 10000);
 }

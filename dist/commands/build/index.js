@@ -1,9 +1,8 @@
 import { Command } from "commander";
 import { log } from "../../utils/log";
-import init from "../../functions/init";
 import grabDirNames from "../../utils/grab-dir-names";
 import { rmSync } from "fs";
-import allPagesESBuildContextBundler from "../../functions/bundler/all-pages-esbuild-context-bundler";
+import bunextInit from "../../functions/bunext-init";
 const { HYDRATION_DST_DIR, BUNX_CWD_PAGES_REWRITE_DIR } = grabDirNames();
 export default function () {
     return new Command("build")
@@ -15,13 +14,8 @@ export default function () {
         }
         catch (error) { }
         global.SKIPPED_BROWSER_MODULES = new Set();
-        // await rewritePagesModule();
-        await init();
-        log.banner();
-        log.build("Building Project ...");
-        // await allPagesBunBundler();
-        // await allPagesBundler();
-        await allPagesESBuildContextBundler();
+        await bunextInit({ build_only: true });
+        log.success("Modules Built Successfully!");
         process.exit();
     });
 }

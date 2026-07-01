@@ -20,6 +20,7 @@ type Params = {
     post_build_fn?: (params: {
         artifacts: BundlerCTXMap[];
     }) => Promise<void> | void;
+    build_only?: boolean;
 };
 
 export default async function allPagesESBuildContextBundler(params?: Params) {
@@ -82,6 +83,7 @@ export default async function allPagesESBuildContextBundler(params?: Params) {
                 esbuildCTXArtifactTracker({
                     entryToPage,
                     post_build_fn: params?.post_build_fn,
+                    build_only: params?.build_only,
                 }),
             ],
             jsx: "automatic",

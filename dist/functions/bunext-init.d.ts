@@ -47,4 +47,8 @@ declare global {
     var CONSTANTS: ReturnType<typeof grabConstants>;
     var MAIN_CTX_BUILD_STARTS: number;
 }
-export default function bunextInit(): Promise<void>;
+type Params = {
+    build_only?: boolean;
+};
+export default function bunextInit(params?: Params): Promise<void>;
+export {};

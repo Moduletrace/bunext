@@ -24,11 +24,13 @@ type Params = {
         }
     >;
     post_build_fn?: (params: { artifacts: any[] }) => Promise<void> | void;
+    build_only?: boolean;
 };
 
 export default function esbuildCTXArtifactTracker({
     entryToPage,
     post_build_fn,
+    build_only,
 }: Params) {
     const artifactTracker: Plugin = {
         name: "artifact-tracker",
@@ -49,7 +51,7 @@ export default function esbuildCTXArtifactTracker({
                 }
             });
 
-            build.onEnd((result) => {
+            build.onEnd(async (result) => {
                 if (result.errors.length > 0) {
                     global.RECOMPILING = false;
                     global.IS_SERVER_COMPONENT = false;
@@ -112,7 +114,13 @@ export default function esbuildCTXArtifactTracker({
                     BUNX_BUNDLER_ERROR_EXIT_FILE,
                 );
 
-                if (does_error_file_exist) {
+                if (build_only) {
+                    try {
+                        await pagesSSRBundler();
+                    } catch (error) {
+                        log.error(`SSR Bundler Error: ${error}`);
+                    }
+                } else if (does_error_file_exist) {
                     mkdirSync(BUNX_ERROR_LOGS_DIR, { recursive: true });
                     cpSync(
                         BUNX_BUNDLER_ERROR_EXIT_FILE,
@@ -120,7 +128,7 @@ export default function esbuildCTXArtifactTracker({
                     );
                     rmSync(BUNX_BUNDLER_ERROR_EXIT_FILE, { force: true });
                     cleanupLogsDirs();
-                    fullRebuild();
+                    await fullRebuild();
                 } else {
                     try {
                         pagesSSRBundler();

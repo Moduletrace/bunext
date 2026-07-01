@@ -7,6 +7,7 @@ type Params = {
     post_build_fn?: (params: {
         artifacts: any[];
     }) => Promise<void> | void;
+    build_only?: boolean;
 };
-export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, }: Params): Plugin;
+export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, build_only, }: Params): Plugin;
 export {};

@@ -18,7 +18,7 @@ export default async function fullRebuild(params) {
         }
         catch (error) { }
         // await pagesSSRBundler();
-        allPagesESBuildContextBundler({
+        await allPagesESBuildContextBundler({
             post_build_fn: () => {
                 serverPostBuildFn();
             },

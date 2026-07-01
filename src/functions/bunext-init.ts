@@ -58,7 +58,11 @@ declare global {
 const dirNames = grabDirNames();
 const { PAGES_DIR } = dirNames;
 
-export default async function bunextInit() {
+type Params = {
+    build_only?: boolean;
+};
+
+export default async function bunextInit(params?: Params) {
     global.HMR_CONTROLLERS = [];
     global.BUNDLER_CTX_MAP = {};
     global.SSR_BUNDLER_CTX_MAP = {};
@@ -88,7 +92,10 @@ export default async function bunextInit() {
 
     const is_dev = isDevelopment();
 
-    if (is_dev) {
+    if (params?.build_only) {
+        log.build(`Building Modules ...`);
+        await allPagesESBuildContextBundler();
+    } else if (is_dev) {
         log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler({
             post_build_fn: () => {

@@ -22,6 +22,7 @@ export default async function watcherEsbuildCTX() {
         }
         if (global.BUNDLER_CTX_DISPOSED) {
             await fullRebuild({ msg: `Restarting Bundler ...` });
+            return;
         }
         if (global.SSR_BUNDLER_CTX_DISPOSED) {
             pagesSSRBundler();

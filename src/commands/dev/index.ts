@@ -44,16 +44,29 @@ async function dev() {
         },
     };
 
-    let dev_process = Bun.spawn(spawn_options);
+    let dev_process;
+    try {
+        dev_process = Bun.spawn(spawn_options);
+    } catch (error) {
+        console.error(`Failed to start dev process:`, error);
+        retries++;
+        timeout = setTimeout(() => {
+            retries = 0;
+        }, 10000);
+        return await dev();
+    }
 
-    retries++;
+    const exited = await dev_process.exited;
+
+    if (exited) {
+        retries++;
+        timeout = setTimeout(() => {
+            retries = 0;
+        }, 10000);
+        return await dev();
+    }
 
     timeout = setTimeout(() => {
         retries = 0;
     }, 10000);
-
-    const exited = await dev_process.exited;
-    if (exited) {
-        return await dev();
-    }
 }
