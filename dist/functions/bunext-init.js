@@ -40,8 +40,8 @@ export default async function bunextInit(params) {
     else if (is_dev) {
         log.build(`Building Modules ...`);
         await allPagesESBuildContextBundler({
-            post_build_fn: () => {
-                serverPostBuildFn();
+            post_build_fn: async () => {
+                await serverPostBuildFn();
             },
         });
         watcherEsbuildCTX();

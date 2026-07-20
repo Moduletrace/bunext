@@ -57,19 +57,18 @@ export default async function serverPostBuildFn(params?: Params) {
             ? new Request(target_artifact.req_url)
             : new Request(controller.page_url);
 
-        const page_component = global.IS_SERVER_COMPONENT
-            ? await grabPageComponent({
-                  req: mock_req,
-                  return_server_res_only: true,
-                  is_hydration: true,
-              })
-            : {};
+        // Always re-run server fns so fixed errors clear on the first HMR
+        const page_component = await grabPageComponent({
+            req: mock_req,
+            return_server_res_only: true,
+            is_hydration: true,
+        });
 
         if (page_component instanceof Response) {
             continue;
         }
 
-        const { serverRes } = page_component;
+        const { serverRes } = page_component || {};
 
         const final_artifact: Omit<GlobalHMRControllerObject, "controller"> = {
             ..._.omit(controller, ["controller"]),
@@ -80,9 +79,8 @@ export default async function serverPostBuildFn(params?: Params) {
             delete final_artifact.target_map;
         }
 
-        if (serverRes) {
-            final_artifact.page_props = serverRes;
-        }
+        // Always replace so prior error props cannot linger
+        final_artifact.page_props = serverRes || {};
 
         try {
             let final_data: { [k: string]: any } = {};

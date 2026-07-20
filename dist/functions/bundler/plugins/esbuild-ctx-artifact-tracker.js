@@ -56,20 +56,13 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                                 _.merge(global.BUNDLER_CTX_MAP[artifact.local_path], artifact);
                         }
                     }
-                    try {
-                        await post_build_fn?.({ artifacts });
-                    }
-                    catch (error) {
-                        log.error(`Post-build Error: ${error}`);
-                    }
                 }
                 const elapsed = (performance.now() - build_start).toFixed(0);
                 log.success(`[Built] in ${elapsed}ms`);
-                global.RECOMPILING = false;
-                global.IS_SERVER_COMPONENT = false;
                 global.MAIN_CTX_BUILD_STARTS = 0;
                 global.BUNDLER_CTX_DISPOSED = false;
                 const does_error_file_exist = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
+                // SSR must finish before HMR so server props are fresh
                 if (build_only) {
                     try {
                         await pagesSSRBundler();
@@ -92,12 +85,17 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                     catch (error) {
                         log.error(`SSR Bundler Error: ${error}`);
                     }
+                    if (artifacts?.[0] && artifacts.length > 0) {
+                        try {
+                            await post_build_fn?.({ artifacts });
+                        }
+                        catch (error) {
+                            log.error(`Post-build Error: ${error}`);
+                        }
+                    }
                 }
-                // if (global.SSR_BUNDLER_CTX) {
-                //     global.SSR_BUNDLER_CTX.rebuild();
-                // } else {
-                //     pagesSSRContextBundler();
-                // }
+                global.RECOMPILING = false;
+                global.IS_SERVER_COMPONENT = false;
             });
         },
     };

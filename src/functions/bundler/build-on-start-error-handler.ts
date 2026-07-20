@@ -8,8 +8,8 @@ export default async function buildOnstartErrorHandler(params?: Params) {
         return;
     }
 
-    console.log(`Killing Bundler ...`);
-    console.log(`global.BUNDLER_CTX_DISPOSED`, global.BUNDLER_CTX_DISPOSED);
+    // console.log(`Killing Bundler ...`);
+    // console.log(`global.BUNDLER_CTX_DISPOSED`, global.BUNDLER_CTX_DISPOSED);
 
     global.BUNDLER_CTX_DISPOSED = true;
 

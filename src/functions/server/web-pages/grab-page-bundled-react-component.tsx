@@ -20,9 +20,12 @@ export default async function grabPageBundledReactComponent({
 }: Params): Promise<GrabPageReactBundledComponentRes | undefined> {
     try {
         if (global.SSR_BUNDLER_CTX_MAP?.[file_path]) {
-            const mod = await import(
-                path.join(ROOT_DIR, global.SSR_BUNDLER_CTX_MAP[file_path].path)
+            const abs = path.join(
+                ROOT_DIR,
+                global.SSR_BUNDLER_CTX_MAP[file_path].path,
             );
+            Loader.registry.delete(abs);
+            const mod = await import(`${abs}?t=${Date.now()}`);
 
             const Main = mod.default as FC;
 

@@ -24,8 +24,8 @@ export default async function fullRebuild(params?: { msg?: string }) {
         } catch (error) {}
 
         await allPagesESBuildContextBundler({
-            post_build_fn: () => {
-                serverPostBuildFn();
+            post_build_fn: async () => {
+                await serverPostBuildFn();
             },
         });
     } catch (error: any) {

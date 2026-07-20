@@ -16,6 +16,9 @@ export default async function grabPageCombinedServerRes({ file_path, debug, url,
     const final_root_server_path = root_server_ctx_map?.local_path
         ? path.join(ROOT_DIR, root_server_ctx_map.path)
         : root_server_file_path;
+    if (final_root_server_path) {
+        Loader.registry.delete(final_root_server_path);
+    }
     const root_server_module = final_root_server_path
         ? await import(`${final_root_server_path}?t=${now}`)
         : undefined;
@@ -34,6 +37,9 @@ export default async function grabPageCombinedServerRes({ file_path, debug, url,
     const final_page_server_path = page_server_ctx?.local_path
         ? path.join(ROOT_DIR, page_server_ctx.path)
         : server_file_path;
+    if (final_page_server_path) {
+        Loader.registry.delete(final_page_server_path);
+    }
     const server_module = final_page_server_path
         ? await import(`${final_page_server_path}?t=${now}`)
         : undefined;
