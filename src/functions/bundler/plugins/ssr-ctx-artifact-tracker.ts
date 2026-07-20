@@ -41,9 +41,16 @@ export default function ssrCTXArtifactTracker({
             build.onEnd(async (result) => {
                 if (result.errors.length > 0) {
                     global.SSR_BUNDLER_CTX_DISPOSED = true;
-                    await global.SSR_BUNDLER_CTX?.dispose();
+                    try {
+                        await global.SSR_BUNDLER_CTX?.dispose();
+                    } catch {}
+                    global.SSR_BUNDLER_CTX = undefined;
                     build_starts = 0;
-                    console.log("SSR Build errors:", result.errors);
+                    for (const err of result.errors) {
+                        console.error(
+                            `SSR Build error: ${err.text}${err.location ? ` (${err.location.file}:${err.location.line}:${err.location.column})` : ""}`,
+                        );
+                    }
                     return;
                 }
 

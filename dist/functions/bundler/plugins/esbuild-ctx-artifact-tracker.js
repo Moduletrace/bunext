@@ -56,7 +56,12 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                                 _.merge(global.BUNDLER_CTX_MAP[artifact.local_path], artifact);
                         }
                     }
-                    post_build_fn?.({ artifacts });
+                    try {
+                        await post_build_fn?.({ artifacts });
+                    }
+                    catch (error) {
+                        log.error(`Post-build Error: ${error}`);
+                    }
                 }
                 const elapsed = (performance.now() - build_start).toFixed(0);
                 log.success(`[Built] in ${elapsed}ms`);
@@ -82,7 +87,7 @@ export default function esbuildCTXArtifactTracker({ entryToPage, post_build_fn, 
                 }
                 else {
                     try {
-                        pagesSSRBundler();
+                        await pagesSSRBundler();
                     }
                     catch (error) {
                         log.error(`SSR Bundler Error: ${error}`);

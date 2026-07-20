@@ -22,12 +22,22 @@ export default async function serverPostBuildFn(params) {
             continue;
         }
         if (params?.reload_all_controllers) {
-            controller.controller.enqueue(reload_enqueue);
+            try {
+                controller.controller.enqueue(reload_enqueue);
+            }
+            catch {
+                global.HMR_CONTROLLERS.splice(i, 1);
+            }
             continue;
         }
         const target_artifact = global.BUNDLER_CTX_MAP[controller.target_map.local_path];
-        if (!target_artifact.local_path) {
-            controller.controller.enqueue(reload_enqueue);
+        if (!target_artifact?.local_path) {
+            try {
+                controller.controller.enqueue(reload_enqueue);
+            }
+            catch {
+                global.HMR_CONTROLLERS.splice(i, 1);
+            }
             continue;
         }
         const mock_req = target_artifact.req_url

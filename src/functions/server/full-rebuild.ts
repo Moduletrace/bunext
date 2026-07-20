@@ -23,17 +23,16 @@ export default async function fullRebuild(params?: { msg?: string }) {
             global.SSR_BUNDLER_CTX = undefined;
         } catch (error) {}
 
-        // await pagesSSRBundler();
-
         await allPagesESBuildContextBundler({
             post_build_fn: () => {
                 serverPostBuildFn();
             },
         });
     } catch (error: any) {
+        log.error(error);
+    } finally {
         global.RECOMPILING = false;
         global.IS_SERVER_COMPONENT = false;
-        log.error(error);
     }
 
     if (global.PAGES_SRC_WATCHER) {

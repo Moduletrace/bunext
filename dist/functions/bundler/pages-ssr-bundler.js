@@ -48,41 +48,46 @@ export default async function pagesSSRBundler(params) {
         writeFileSync(path.join(BUNX_TMP_DIR, "ssr-entrypoints.json"), JSON.stringify(entryPoints, null, 4));
     }
     catch (error) { }
-    await esbuild.build({
-        entryPoints,
-        outdir: BUNX_CWD_MODULE_CACHE_DIR,
-        bundle: true,
-        minify: !dev,
-        format: "esm",
-        target: "esnext",
-        platform: "node",
-        define: {
-            "process.env.NODE_ENV": JSON.stringify(dev ? "development" : "production"),
-        },
-        entryNames: "[dir]/[hash]",
-        metafile: true,
-        plugins: [
-            tailwindEsbuildPlugin,
-            ssrVirtualFilesPlugin({
-                entryToPage,
-            }),
-            ssrCTXArtifactTracker({
-                entryToPage,
-                post_build_fn: params?.post_build_fn,
-            }),
-        ],
-        jsx: "automatic",
-        external: [
-            "react",
-            "react-dom",
-            "react/jsx-runtime",
-            "react/jsx-dev-runtime",
-            "bun:*",
-            "sqlite-vec",
-            "better-sqlite3",
-            ...(config.ssr_compiler_excludes || []),
-        ],
-        splitting: true,
-        // logLevel: "silent",
-    });
+    try {
+        await esbuild.build({
+            entryPoints,
+            outdir: BUNX_CWD_MODULE_CACHE_DIR,
+            bundle: true,
+            minify: !dev,
+            format: "esm",
+            target: "esnext",
+            platform: "node",
+            define: {
+                "process.env.NODE_ENV": JSON.stringify(dev ? "development" : "production"),
+            },
+            entryNames: "[dir]/[hash]",
+            metafile: true,
+            plugins: [
+                tailwindEsbuildPlugin,
+                ssrVirtualFilesPlugin({
+                    entryToPage,
+                }),
+                ssrCTXArtifactTracker({
+                    entryToPage,
+                    post_build_fn: params?.post_build_fn,
+                }),
+            ],
+            jsx: "automatic",
+            external: [
+                "react",
+                "react-dom",
+                "react/jsx-runtime",
+                "react/jsx-dev-runtime",
+                "bun:*",
+                "sqlite-vec",
+                "better-sqlite3",
+                ...(config.ssr_compiler_excludes || []),
+            ],
+            splitting: true,
+        });
+    }
+    catch (error) {
+        global.SSR_BUNDLER_CTX_DISPOSED = true;
+        log.error(`SSR Bundler Error: ${error}`);
+    }
 }

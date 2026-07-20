@@ -5,6 +5,7 @@ import fullRebuild from "./full-rebuild";
 import { AppData } from "../../data/app-data";
 import checkExcludedPatterns from "../../utils/check-excluded-patterns";
 import pagesSSRBundler from "../bundler/pages-ssr-bundler";
+import { log } from "../../utils/log";
 
 const { ROOT_DIR, BUNX_BUNDLER_ERROR_EXIT_FILE } = grabDirNames();
 
@@ -16,116 +17,136 @@ export default async function watcherEsbuildCTX() {
             persistent: true,
         },
         async (event, filename) => {
-            if (!filename) return;
+            let owns_recompile = false;
 
-            if (existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE)) {
-                await fullRebuild();
-                return;
-            }
+            try {
+                if (!filename) return;
 
-            if (filename.match(/^\.\w+/)) {
-                return;
-            }
+                if (existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE)) {
+                    await fullRebuild();
+                    return;
+                }
 
-            if (global.BUNDLER_CTX_DISPOSED) {
-                await fullRebuild({ msg: `Restarting Bundler ...` });
-                return;
-            }
+                if (filename.match(/^\.\w+/)) {
+                    return;
+                }
 
-            if (global.SSR_BUNDLER_CTX_DISPOSED) {
-                pagesSSRBundler();
-            }
+                if (global.BUNDLER_CTX_DISPOSED) {
+                    await fullRebuild({ msg: `Restarting Bundler ...` });
+                    return;
+                }
 
-            if (filename.endsWith(AppData["BunextTmpFileExt"])) {
-                return;
-            }
+                if (global.SSR_BUNDLER_CTX_DISPOSED) {
+                    await pagesSSRBundler().catch((error) => {
+                        log.error(`SSR Bundler Error: ${error}`);
+                    });
+                }
 
-            const full_file_path = path.join(ROOT_DIR, filename);
-            const does_file_exist = existsSync(full_file_path);
-            const file_stat = does_file_exist
-                ? statSync(full_file_path)
-                : undefined;
+                if (filename.endsWith(AppData["BunextTmpFileExt"])) {
+                    return;
+                }
 
-            if (full_file_path.match(/\/styles$/)) {
-                global.RECOMPILING = true;
-                await Bun.sleep(1000);
-                await fullRebuild({
-                    msg: `Detected new \`styles\` directory. Rebuilding ...`,
-                });
-                return;
-            }
+                const full_file_path = path.join(ROOT_DIR, filename);
+                const does_file_exist = existsSync(full_file_path);
+                const file_stat = does_file_exist
+                    ? statSync(full_file_path)
+                    : undefined;
 
-            const excluded_match =
-                /node_modules\/|^public\/|^\.bunext\/|^\.git\/|^\.?dist\/|bun\.lockb$/;
-
-            if (filename.match(excluded_match)) return;
-
-            if (filename.match(/bunext.config\.ts/)) {
-                await fullRebuild({
-                    msg: `bunext.config.ts file changed. Rebuilding server ...`,
-                });
-                return;
-            }
-
-            const target_files_match = /\.(tsx?|jsx?|css)$/;
-            // const rebuild_skip_paths = /\/pages\/api\//;
-
-            if (event !== "rename") {
-                if (filename.match(target_files_match)) {
-                    if (global.RECOMPILING) return;
+                if (full_file_path.match(/\/styles$/)) {
+                    owns_recompile = true;
                     global.RECOMPILING = true;
+                    await Bun.sleep(1000);
+                    await fullRebuild({
+                        msg: `Detected new \`styles\` directory. Rebuilding ...`,
+                    });
+                    return;
+                }
 
-                    if (filename.match(/.*\.server\.tsx?/)) {
-                        global.IS_SERVER_COMPONENT = true;
-                    }
+                const excluded_match =
+                    /node_modules\/|^public\/|^\.bunext\/|^\.git\/|^\.?dist\/|bun\.lockb$/;
 
-                    if (global.BUNDLER_CTX) {
-                        await global.BUNDLER_CTX.rebuild();
-                    }
+                if (filename.match(excluded_match)) return;
 
-                    if (filename.match(/(404|500)\.tsx?/)) {
-                        for (
-                            let i = global.HMR_CONTROLLERS.length - 1;
-                            i >= 0;
-                            i--
-                        ) {
-                            const controller = global.HMR_CONTROLLERS[i];
-                            controller?.controller?.enqueue(
-                                `event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`,
-                            );
+                if (filename.match(/bunext.config\.ts/)) {
+                    await fullRebuild({
+                        msg: `bunext.config.ts file changed. Rebuilding server ...`,
+                    });
+                    return;
+                }
+
+                const target_files_match = /\.(tsx?|jsx?|css)$/;
+
+                if (event !== "rename") {
+                    if (filename.match(target_files_match)) {
+                        if (global.RECOMPILING) return;
+                        owns_recompile = true;
+                        global.RECOMPILING = true;
+
+                        if (filename.match(/.*\.server\.tsx?/)) {
+                            global.IS_SERVER_COMPONENT = true;
+                        }
+
+                        if (global.BUNDLER_CTX) {
+                            await global.BUNDLER_CTX.rebuild();
+                        }
+
+                        if (filename.match(/(404|500)\.tsx?/)) {
+                            for (
+                                let i = global.HMR_CONTROLLERS.length - 1;
+                                i >= 0;
+                                i--
+                            ) {
+                                const controller = global.HMR_CONTROLLERS[i];
+                                try {
+                                    controller?.controller?.enqueue(
+                                        `event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`,
+                                    );
+                                } catch {
+                                    global.HMR_CONTROLLERS.splice(i, 1);
+                                }
+                            }
                         }
                     }
+                    return;
                 }
-                return;
+
+                const is_file_of_interest =
+                    Boolean(filename.match(target_files_match)) ||
+                    file_stat?.isDirectory();
+
+                if (!is_file_of_interest) {
+                    return;
+                }
+
+                if (!filename.match(/^src\/pages\/|\.css$/))
+                    return reloadWatcher();
+                if (checkExcludedPatterns({ path: filename }))
+                    return reloadWatcher();
+                if (filename.match(/ /)) return reloadWatcher();
+
+                if (global.RECOMPILING) return;
+
+                owns_recompile = true;
+                const action = does_file_exist ? "created" : "deleted";
+                const type = filename.match(/\.css$/)
+                    ? "Sylesheet"
+                    : file_stat?.isDirectory()
+                      ? "Directory"
+                      : filename.match(/\/pages\/api\//)
+                        ? "API Route"
+                        : "Page";
+
+                await fullRebuild({
+                    msg: `${type} ${action}: ${filename}. Rebuilding ...`,
+                });
+            } catch (error) {
+                log.error(`Watcher rebuild failed: ${error}`);
+            } finally {
+                if (owns_recompile) {
+                    global.RECOMPILING = false;
+                    global.IS_SERVER_COMPONENT = false;
+                }
             }
-
-            const is_file_of_interest =
-                Boolean(filename.match(target_files_match)) ||
-                file_stat?.isDirectory();
-
-            if (!is_file_of_interest) {
-                return;
-            }
-
-            if (!filename.match(/^src\/pages\/|\.css$/)) return reloadWatcher();
-            if (checkExcludedPatterns({ path: filename }))
-                return reloadWatcher();
-            if (filename.match(/ /)) return reloadWatcher();
-
-            if (global.RECOMPILING) return;
-
-            const action = does_file_exist ? "created" : "deleted";
-            const type = filename.match(/\.css$/)
-                ? "Sylesheet"
-                : file_stat?.isDirectory()
-                  ? "Directory"
-                  : filename.match(/\/pages\/api\//)
-                    ? "API Route"
-                    : "Page";
-
-            await fullRebuild({
-                msg: `${type} ${action}: ${filename}. Rebuilding ...`,
-            });
         },
     );
 
