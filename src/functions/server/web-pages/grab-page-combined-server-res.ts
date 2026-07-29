@@ -41,7 +41,7 @@ export default async function grabPageCombinedServerRes({
         : root_server_file_path;
 
     if (final_root_server_path) {
-        Loader.registry.delete(final_root_server_path);
+        // Loader.registry.delete(final_root_server_path);
     }
     const root_server_module: BunextPageServerModule = final_root_server_path
         ? await import(`${final_root_server_path}?t=${now}`)
@@ -69,7 +69,7 @@ export default async function grabPageCombinedServerRes({
         : server_file_path;
 
     if (final_page_server_path) {
-        Loader.registry.delete(final_page_server_path);
+        // Loader.registry.delete(final_page_server_path);
     }
     const server_module: BunextPageServerModule = final_page_server_path
         ? await import(`${final_page_server_path}?t=${now}`)

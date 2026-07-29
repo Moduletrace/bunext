@@ -9,7 +9,7 @@ export default async function grabPageBundledReactComponent({ file_path, return_
     try {
         if (global.SSR_BUNDLER_CTX_MAP?.[file_path]) {
             const abs = path.join(ROOT_DIR, global.SSR_BUNDLER_CTX_MAP[file_path].path);
-            Loader.registry.delete(abs);
+            // Loader.registry.delete(abs);
             const mod = await import(`${abs}?t=${Date.now()}`);
             const Main = mod.default;
             return { component: Main };

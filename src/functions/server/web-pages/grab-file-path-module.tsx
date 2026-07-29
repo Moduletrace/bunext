@@ -38,7 +38,7 @@ export default async function grabFilePathModule<T extends any = any>({
         outfile: target_cache_file_path,
     });
 
-    Loader.registry.delete(target_cache_file_path);
+    // Loader.registry.delete(target_cache_file_path);
     const module = await import(`${target_cache_file_path}?t=${Date.now()}`);
 
     return module as T;
