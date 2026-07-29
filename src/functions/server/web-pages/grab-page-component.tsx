@@ -105,6 +105,7 @@ export default async function grabPageComponent(
                 await fullRebuild({
                     msg: `Retrying Bundle map for file \`${file_path}\``,
                 });
+                await Bun.sleep(1000);
                 bundledMap = global.BUNDLER_CTX_MAP[file_path];
                 if (bundledMap?.path) break;
             }
