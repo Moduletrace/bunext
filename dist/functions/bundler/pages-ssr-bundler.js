@@ -79,6 +79,7 @@ export default async function pagesSSRBundler(params) {
                 "react/jsx-runtime",
                 "react/jsx-dev-runtime",
                 "bun:*",
+                "bun",
                 "sqlite-vec",
                 "better-sqlite3",
                 ...(config.ssr_compiler_excludes || []),
