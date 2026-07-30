@@ -3,5 +3,5 @@ export default function isDevelopment() {
         return false;
     }
 
-    return Boolean(global.CONFIG?.development);
+    return true;
 }

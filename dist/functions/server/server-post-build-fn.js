@@ -12,13 +12,6 @@ export default async function serverPostBuildFn(params) {
             continue;
         }
         if (!controller.target_map?.local_path) {
-            // if (global.IS_404_PAGE) {
-            //     controller.controller.enqueue(reload_enqueue);
-            // }
-            // if (!global.HMR_CONTROLLERS[i].page_reloaded) {
-            //     controller.controller.enqueue(reload_enqueue);
-            //     global.HMR_CONTROLLERS[i].page_reloaded = true;
-            // }
             continue;
         }
         if (params?.reload_all_controllers) {
