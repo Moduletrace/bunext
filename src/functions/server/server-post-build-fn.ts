@@ -47,10 +47,13 @@ export default async function serverPostBuildFn(params?: Params) {
         }
 
         const mock_req = target_artifact.req_url
-            ? new Request(target_artifact.req_url)
+            ? new Request(target_artifact.req_url, {})
             : new Request(controller.page_url);
 
-        // Always re-run server fns so fixed errors clear on the first HMR
+        if (controller.page_cookie) {
+            mock_req.headers.set("cookie", controller.page_cookie);
+        }
+
         const page_component = await grabPageComponent({
             req: mock_req,
             return_server_res_only: true,

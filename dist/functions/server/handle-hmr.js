@@ -6,6 +6,7 @@ function removeController(controller) {
 }
 export default async function ({ req }) {
     const referer = req.headers.get("referer");
+    const page_cookie = req.headers.get("cookie");
     if (!referer) {
         return new Response("Missing Referer Header", { status: 400 });
     }
@@ -29,6 +30,7 @@ export default async function ({ req }) {
                 controller: c,
                 page_url: referer_url.href,
                 target_map,
+                page_cookie,
             });
             heartbeat = setInterval(() => {
                 try {

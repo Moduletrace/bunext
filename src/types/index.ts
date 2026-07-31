@@ -353,6 +353,7 @@ export type GlobalHMRControllerObject = {
     target_map?: BundlerCTXMap;
     page_props?: any;
     page_reloaded?: boolean;
+    page_cookie?: string | null;
 };
 
 export type BunextCacheFileMeta = {

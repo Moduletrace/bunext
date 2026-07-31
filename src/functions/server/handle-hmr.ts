@@ -13,6 +13,8 @@ function removeController(controller: ReadableStreamDefaultController<string>) {
 
 export default async function ({ req }: Params): Promise<Response> {
     const referer = req.headers.get("referer");
+    const page_cookie = req.headers.get("cookie");
+
     if (!referer) {
         return new Response("Missing Referer Header", { status: 400 });
     }
@@ -39,6 +41,7 @@ export default async function ({ req }: Params): Promise<Response> {
                 controller: c,
                 page_url: referer_url.href,
                 target_map,
+                page_cookie,
             });
             heartbeat = setInterval(() => {
                 try {
