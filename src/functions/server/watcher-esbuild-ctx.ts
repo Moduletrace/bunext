@@ -1,4 +1,4 @@
-import { watch, existsSync, statSync } from "fs";
+import { watch, existsSync, statSync, glob } from "fs";
 import path from "path";
 import grabDirNames from "../../utils/grab-dir-names";
 import fullRebuild from "./full-rebuild";
@@ -21,6 +21,35 @@ export default async function watcherEsbuildCTX() {
 
             try {
                 if (!filename) return;
+                const full_file_path = path.join(ROOT_DIR, filename);
+
+                if (global.CONFIG.exclude_watch_patterns) {
+                    for (
+                        let i = 0;
+                        i < global.CONFIG.exclude_watch_patterns.length;
+                        i++
+                    ) {
+                        const watch_pattern =
+                            global.CONFIG.exclude_watch_patterns[i];
+
+                        if (watch_pattern instanceof RegExp) {
+                            const is_path_excluded =
+                                watch_pattern.test(filename);
+                            if (is_path_excluded) {
+                                return;
+                            }
+                        } else {
+                            const excluded_path = path.resolve(
+                                ROOT_DIR,
+                                watch_pattern,
+                            );
+
+                            if (excluded_path == full_file_path) {
+                                return;
+                            }
+                        }
+                    }
+                }
 
                 if (existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE)) {
                     await fullRebuild();
@@ -46,7 +75,6 @@ export default async function watcherEsbuildCTX() {
                     return;
                 }
 
-                const full_file_path = path.join(ROOT_DIR, filename);
                 const does_file_exist = existsSync(full_file_path);
                 const file_stat = does_file_exist
                     ? statSync(full_file_path)

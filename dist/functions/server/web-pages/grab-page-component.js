@@ -138,6 +138,7 @@ export default async function grabPageComponent(params) {
         else {
             log.error(`Error Grabbing Page Component: ${error.message}`);
             log.error(`Page: ${passed_file_path || url?.pathname}`);
+            process.exit(1);
         }
         return await grabPageErrorComponent({
             error,

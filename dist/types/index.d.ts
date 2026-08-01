@@ -66,6 +66,12 @@ export type BunextConfig = {
      * bundler for the browser. Eg. `react/jsx-dev-runtime`
      */
     page_compiler_excludes?: string[];
+    /**
+     * Patterns to exclude from the watcher. Eg. `./src/server.ts`
+     * or `\*.test.ts\`. It should either be a file path (relative or
+     * absolute), or a RegEx pattern.
+     */
+    exclude_watch_patterns?: (string | RegExp)[];
 };
 export type BunextConfigMiddlewareParams = {
     req: Request;
