@@ -72,6 +72,10 @@ export type BunextConfig = {
      * absolute), or a RegEx pattern.
      */
     exclude_watch_patterns?: (string | RegExp)[];
+    /**
+     * Public environment variables to be passed to the client
+     */
+    public_envs?: Record<string, string>;
 };
 export type BunextConfigMiddlewareParams = {
     req: Request;

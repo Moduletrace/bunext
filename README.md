@@ -742,6 +742,9 @@ const config: BunextConfig = {
     globalVars: {
         MY_API_URL: "https://api.example.com",
     },
+    public_envs: {
+        BUNEXT_PUBLIC_APP_NAME: "My App",
+    },
     development: false, // forced by the CLI; set manually if needed
 };
 
@@ -755,6 +758,7 @@ export default config;
 | `distDir`            | `string`                                                                          | `.bunext`        | Internal artifact directory                                                                       |
 | `assetsPrefix`       | `string`                                                                          | `_bunext/static` | URL prefix for static assets                                                                      |
 | `globalVars`         | `{ [k: string]: any }`                                                            | —                | Variables injected globally at build time                                                         |
+| `public_envs`        | `Record<string, string>`                                                          | —                | Public env vars exposed to the client via `window.process.env` (see [Environment Variables](#environment-variables)) |
 | `development`        | `boolean`                                                                         | —                | Overridden to `true` by `bunext dev` automatically                                                |
 | `defaultCacheExpiry` | `number`                                                                          | `3600`           | Global page cache expiry in seconds                                                               |
 | `middleware`         | `(params: BunextConfigMiddlewareParams) => Response \| undefined \| Promise<...>` | —                | Global middleware — see [Middleware](#middleware)                                                 |
@@ -909,9 +913,35 @@ bun run server.ts
 
 ## Environment Variables
 
-| Variable | Description                                             |
-| -------- | ------------------------------------------------------- |
-| `PORT`   | Override the server port (takes precedence over config) |
+| Variable           | Description                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------ |
+| `PORT`             | Override the server port (takes precedence over config)                                          |
+| `BUNEXT_PUBLIC_*`  | Any env var prefixed with `BUNEXT_PUBLIC_` is exposed to the client via `window.process.env`     |
+
+### Public Environment Variables
+
+Variables prefixed with `BUNEXT_PUBLIC_` are automatically injected into every page as `window.process.env`. You can also define public envs in config via `public_envs` (config values override env vars of the same name):
+
+```bash
+# .env
+BUNEXT_PUBLIC_API_URL=https://api.example.com
+```
+
+```ts
+// bunext.config.ts
+const config: BunextConfig = {
+    public_envs: {
+        BUNEXT_PUBLIC_APP_NAME: "My App",
+    },
+};
+```
+
+```tsx
+// Client component — available after hydration
+const apiUrl = window.process.env.BUNEXT_PUBLIC_API_URL;
+```
+
+`window.process.env` always includes `NODE_ENV` (`"development"` or `"production"`).
 
 ---
 

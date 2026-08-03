@@ -70,12 +70,18 @@ export default async function genWebHTML({
 
     const final_meta = _.merge(root_meta, page_meta);
 
-    // const public_envs = Object.keys(process.env).filter((e) =>
-    //     e.startsWith(`NEXT_PUBLIC_`),
-    // );
+    const public_envs = Object.fromEntries(
+        Object.entries(process.env).filter(([k]) =>
+            k.startsWith("BUNEXT_PUBLIC_"),
+        ),
+    );
 
     const client_process = {
-        env: {},
+        env: {
+            NODE_ENV: dev ? "development" : "production",
+            ...public_envs,
+            ...global.CONFIG.public_envs,
+        },
     };
 
     let final_component = (

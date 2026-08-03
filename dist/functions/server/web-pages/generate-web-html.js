@@ -43,11 +43,13 @@ export default async function genWebHTML({ component: Main, pageProps, bundledMa
     const RootHead = root_module?.Head;
     const dev = isDevelopment();
     const final_meta = _.merge(root_meta, page_meta);
-    // const public_envs = Object.keys(process.env).filter((e) =>
-    //     e.startsWith(`NEXT_PUBLIC_`),
-    // );
+    const public_envs = Object.fromEntries(Object.entries(process.env).filter(([k]) => k.startsWith("BUNEXT_PUBLIC_")));
     const client_process = {
-        env: {},
+        env: {
+            NODE_ENV: dev ? "development" : "production",
+            ...public_envs,
+            ...global.CONFIG.public_envs,
+        },
     };
     let final_component = (_jsxs("html", { ...html_props, children: [_jsxs("head", { children: [_jsx("meta", { charSet: "utf-8", "data-bunext-head": true }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0", "data-bunext-head": true }), final_meta ? grabWebMetaHTML({ meta: final_meta }) : null, bundledMap?.css_path ? (_jsx("link", { rel: "stylesheet", href: `/${bundledMap.css_path}`, "data-bunext-head": true })) : null, _jsx("script", { dangerouslySetInnerHTML: {
                             __html: `window.${ClientWindowPagePropsName} = ${serializedProps};\nwindow.process = ${JSON.stringify(client_process)}`,
