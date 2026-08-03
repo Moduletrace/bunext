@@ -33,11 +33,12 @@ export default async function bunextRequestHandler({
 
         let response: Response | undefined = undefined;
 
-        if (global.CONSTANTS.config?.middleware) {
-            const middleware_res = await global.CONSTANTS.config.middleware({
-                req: initial_req,
-                url,
-            });
+        if (global.BUNEXT_CONSTANTS.config?.middleware) {
+            const middleware_res =
+                await global.BUNEXT_CONSTANTS.config.middleware({
+                    req: initial_req,
+                    url,
+                });
 
             if (middleware_res instanceof Response) {
                 return middleware_res;

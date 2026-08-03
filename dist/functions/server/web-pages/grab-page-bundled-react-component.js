@@ -7,8 +7,8 @@ import grabDirNames from "../../../utils/grab-dir-names";
 const { ROOT_DIR } = grabDirNames();
 export default async function grabPageBundledReactComponent({ file_path, return_tsx_only, }) {
     try {
-        if (global.SSR_BUNDLER_CTX_MAP?.[file_path]) {
-            const abs = path.join(ROOT_DIR, global.SSR_BUNDLER_CTX_MAP[file_path].path);
+        if (global.BUNEXT_SSR_BUNDLER_CTX_MAP?.[file_path]) {
+            const abs = path.join(ROOT_DIR, global.BUNEXT_SSR_BUNDLER_CTX_MAP[file_path].path);
             // Loader.registry.delete(abs);
             const mod = await import(`${abs}?t=${Date.now()}`);
             const Main = mod.default;

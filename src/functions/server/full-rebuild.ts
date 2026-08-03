@@ -7,20 +7,20 @@ export default async function fullRebuild(params?: { msg?: string }) {
     try {
         const { msg } = params || {};
 
-        global.RECOMPILING = true;
+        global.BUNEXT_RECOMPILING = true;
 
         if (msg) {
             log.watch(msg);
         }
 
-        global.ROUTER.reload();
+        global.BUNEXT_ROUTER.reload();
 
         try {
-            await global.BUNDLER_CTX?.dispose();
-            global.BUNDLER_CTX = undefined;
+            await global.BUNEXT_BUNDLER_CTX?.dispose();
+            global.BUNEXT_BUNDLER_CTX = undefined;
 
-            await global.SSR_BUNDLER_CTX?.dispose();
-            global.SSR_BUNDLER_CTX = undefined;
+            await global.BUNEXT_SSR_BUNDLER_CTX?.dispose();
+            global.BUNEXT_SSR_BUNDLER_CTX = undefined;
         } catch (error) {}
 
         await allPagesESBuildContextBundler({
@@ -31,12 +31,12 @@ export default async function fullRebuild(params?: { msg?: string }) {
     } catch (error: any) {
         log.error(error);
     } finally {
-        global.RECOMPILING = false;
-        global.IS_SERVER_COMPONENT = false;
+        global.BUNEXT_RECOMPILING = false;
+        global.BUNEXT_IS_SERVER_COMPONENT = false;
     }
 
-    if (global.PAGES_SRC_WATCHER) {
-        global.PAGES_SRC_WATCHER.close();
+    if (global.BUNEXT_PAGES_SRC_WATCHER) {
+        global.BUNEXT_PAGES_SRC_WATCHER.close();
         watcherEsbuildCTX();
     }
 }

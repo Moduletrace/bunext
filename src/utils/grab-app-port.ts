@@ -9,8 +9,8 @@ export default function grabAppPort() {
             return numberfy(process.env.PORT);
         }
 
-        if (global.CONFIG.port) {
-            return global.CONFIG.port;
+        if (global.BUNEXT_CONFIG.port) {
+            return global.BUNEXT_CONFIG.port;
         }
 
         return numberfy(defaultPort);

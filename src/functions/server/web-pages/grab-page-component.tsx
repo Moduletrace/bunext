@@ -45,7 +45,7 @@ export default async function grabPageComponent(
     } = params;
 
     const url = req?.url ? new URL(req.url) : undefined;
-    const router = global.ROUTER;
+    const router = global.BUNEXT_ROUTER;
     const is_dev = isDevelopment();
 
     const forwarded_proto = req?.headers.get("x-forwarded-proto");
@@ -89,7 +89,7 @@ export default async function grabPageComponent(
             throw new Error(errMsg);
         }
 
-        let bundledMap = global.BUNDLER_CTX_MAP[file_path];
+        let bundledMap = global.BUNEXT_BUNDLER_CTX_MAP[file_path];
 
         if (!bundledMap?.path) {
             if (does_error_file_exist) {
@@ -106,7 +106,7 @@ export default async function grabPageComponent(
                     msg: `Retrying Bundle map for file \`${file_path}\``,
                 });
                 await Bun.sleep(1000);
-                bundledMap = global.BUNDLER_CTX_MAP[file_path];
+                bundledMap = global.BUNEXT_BUNDLER_CTX_MAP[file_path];
                 if (bundledMap?.path) break;
             }
 
@@ -118,7 +118,7 @@ export default async function grabPageComponent(
         }
 
         if (req && !is_hydration) {
-            global.BUNDLER_CTX_MAP[file_path].req_url = req.url;
+            global.BUNEXT_BUNDLER_CTX_MAP[file_path].req_url = req.url;
         }
 
         if (debug) {
@@ -168,8 +168,9 @@ export default async function grabPageComponent(
             error?.status === 404;
 
         if (!params.retry && is_dev) {
-            while (global.REBUILD_RETRIES < 2) {
-                global.REBUILD_RETRIES = global.REBUILD_RETRIES + 1;
+            while (global.BUNEXT_REBUILD_RETRIES < 2) {
+                global.BUNEXT_REBUILD_RETRIES =
+                    global.BUNEXT_REBUILD_RETRIES + 1;
 
                 await fullRebuild();
                 await Bun.sleep(200);
@@ -182,17 +183,17 @@ export default async function grabPageComponent(
                     component_retried instanceof Response ||
                     component_retried.success
                 ) {
-                    global.REBUILD_RETRIES = 0;
+                    global.BUNEXT_REBUILD_RETRIES = 0;
                     await serverPostBuildFn();
                     return component_retried;
                 }
             }
 
-            global.REBUILD_RETRIES = 0;
+            global.BUNEXT_REBUILD_RETRIES = 0;
         }
 
         if (is404) {
-            global.IS_404_PAGE = true;
+            global.BUNEXT_IS_404_PAGE = true;
         } else {
             log.error(`Error Grabbing Page Component: ${error.message}`);
             log.error(`Page: ${passed_file_path || url?.pathname}`);

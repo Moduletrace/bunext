@@ -5,7 +5,7 @@ const BunSkipNonBrowserPlugin = {
         const skipFilter = /^(bun:|node:|fs$|path$|os$|crypto$|net$|events$|util$|tls$|url$|process$)/;
         // const skipped_modules = new Set<string>();
         build.onResolve({ filter: skipFilter }, (args) => {
-            global.SKIPPED_BROWSER_MODULES.add(args.path);
+            global.BUNEXT_SKIPPED_BROWSER_MODULES.add(args.path);
             return {
                 path: args.path,
                 namespace: "skipped",
@@ -13,8 +13,8 @@ const BunSkipNonBrowserPlugin = {
             };
         });
         // build.onEnd(() => {
-        //     log.warn(`global.SKIPPED_BROWSER_MODULES`, [
-        //         ...global.SKIPPED_BROWSER_MODULES,
+        //     log.warn(`global.BUNEXT_SKIPPED_BROWSER_MODULES`, [
+        //         ...global.BUNEXT_SKIPPED_BROWSER_MODULES,
         //     ]);
         // });
         // build.onResolve({ filter: /^[^./]/ }, (args) => {

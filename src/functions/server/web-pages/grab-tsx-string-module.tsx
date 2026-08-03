@@ -148,13 +148,14 @@ async function loadEntry<T>(page_file_path: string): Promise<T> {
     const mod_file_path = toModPath(page_file_path);
     const mod_css_path = mod_file_path.replace(/\.js$/, ".css");
 
-    if (global.REACT_DOM_MODULE_CACHE.has(page_file_path)) {
-        return global.REACT_DOM_MODULE_CACHE.get(page_file_path)?.main as T;
+    if (global.BUNEXT_REACT_DOM_MODULE_CACHE.has(page_file_path)) {
+        return global.BUNEXT_REACT_DOM_MODULE_CACHE.get(page_file_path)
+            ?.main as T;
     }
 
     const mod = await import(`${mod_file_path}?t=${now}`);
 
-    global.REACT_DOM_MODULE_CACHE.set(page_file_path, {
+    global.BUNEXT_REACT_DOM_MODULE_CACHE.set(page_file_path, {
         main: mod,
         css: mod_css_path,
     });

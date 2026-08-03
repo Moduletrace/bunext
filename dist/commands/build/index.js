@@ -13,7 +13,7 @@ export default function () {
             rmSync(BUNX_CWD_PAGES_REWRITE_DIR, { recursive: true });
         }
         catch (error) { }
-        global.SKIPPED_BROWSER_MODULES = new Set();
+        global.BUNEXT_SKIPPED_BROWSER_MODULES = new Set();
         await bunextInit({ build_only: true });
         log.success("Modules Built Successfully!");
         process.exit();

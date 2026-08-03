@@ -16,7 +16,7 @@ export default async function pagesSSRBundler(params) {
         include_server: true,
     });
     const dev = isDevelopment();
-    const config = global.CONFIG;
+    const config = global.BUNEXT_CONFIG;
     try {
         writeFileSync(path.join(BUNX_TMP_DIR, "ssr-pages.json"), JSON.stringify(pages, null, 4));
     }
@@ -88,7 +88,7 @@ export default async function pagesSSRBundler(params) {
         });
     }
     catch (error) {
-        global.SSR_BUNDLER_CTX_DISPOSED = true;
+        global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED = true;
         log.error(`SSR Bundler Error: ${error}`);
     }
 }

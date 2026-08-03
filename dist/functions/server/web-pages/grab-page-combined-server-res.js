@@ -12,7 +12,7 @@ export default async function grabPageCombinedServerRes({ file_path, debug, url,
     const { server_file_path: root_server_file_path } = root_file_path
         ? grabPageServerPath({ file_path: root_file_path })
         : {};
-    const root_server_ctx_map = global.SSR_BUNDLER_CTX_MAP[root_server_file_path || ""];
+    const root_server_ctx_map = global.BUNEXT_SSR_BUNDLER_CTX_MAP[root_server_file_path || ""];
     const final_root_server_path = root_server_ctx_map?.local_path
         ? path.join(ROOT_DIR, root_server_ctx_map.path)
         : root_server_file_path;
@@ -33,7 +33,7 @@ export default async function grabPageCombinedServerRes({ file_path, debug, url,
         log.info(`rootServerRes:`, rootServerRes);
     }
     const { server_file_path } = grabPageServerPath({ file_path });
-    const page_server_ctx = global.SSR_BUNDLER_CTX_MAP[server_file_path || ""];
+    const page_server_ctx = global.BUNEXT_SSR_BUNDLER_CTX_MAP[server_file_path || ""];
     const final_page_server_path = page_server_ctx?.local_path
         ? path.join(ROOT_DIR, page_server_ctx.path)
         : server_file_path;

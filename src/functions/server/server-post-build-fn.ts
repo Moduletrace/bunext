@@ -7,15 +7,15 @@ type Params = {
 };
 
 export default async function serverPostBuildFn(params?: Params) {
-    if (!global.HMR_CONTROLLERS?.[0] || !global.BUNDLER_CTX_MAP) {
+    if (!global.BUNEXT_HMR_CONTROLLERS?.[0] || !global.BUNEXT_BUNDLER_CTX_MAP) {
         return;
     }
 
     const reload_payload = { reload: true };
     const reload_enqueue = `event: update\ndata: ${JSON.stringify(reload_payload)}\n\n`;
 
-    for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
-        const controller = global.HMR_CONTROLLERS[i];
+    for (let i = global.BUNEXT_HMR_CONTROLLERS.length - 1; i >= 0; i--) {
+        const controller = global.BUNEXT_HMR_CONTROLLERS[i];
 
         if (!controller) {
             continue;
@@ -29,19 +29,19 @@ export default async function serverPostBuildFn(params?: Params) {
             try {
                 controller.controller.enqueue(reload_enqueue);
             } catch {
-                global.HMR_CONTROLLERS.splice(i, 1);
+                global.BUNEXT_HMR_CONTROLLERS.splice(i, 1);
             }
             continue;
         }
 
         const target_artifact =
-            global.BUNDLER_CTX_MAP[controller.target_map.local_path];
+            global.BUNEXT_BUNDLER_CTX_MAP[controller.target_map.local_path];
 
         if (!target_artifact?.local_path) {
             try {
                 controller.controller.enqueue(reload_enqueue);
             } catch {
-                global.HMR_CONTROLLERS.splice(i, 1);
+                global.BUNEXT_HMR_CONTROLLERS.splice(i, 1);
             }
             continue;
         }
@@ -81,7 +81,7 @@ export default async function serverPostBuildFn(params?: Params) {
         try {
             let final_data: { [k: string]: any } = {};
 
-            if (global.ROOT_FILE_UPDATED) {
+            if (global.BUNEXT_ROOT_FILE_UPDATED) {
                 final_data = reload_payload;
             } else {
                 final_data = final_artifact;
@@ -91,9 +91,9 @@ export default async function serverPostBuildFn(params?: Params) {
                 `event: update\ndata: ${JSON.stringify(final_data)}\n\n`,
             );
 
-            global.ROOT_FILE_UPDATED = false;
+            global.BUNEXT_ROOT_FILE_UPDATED = false;
         } catch {
-            global.HMR_CONTROLLERS.splice(i, 1);
+            global.BUNEXT_HMR_CONTROLLERS.splice(i, 1);
         }
     }
 }

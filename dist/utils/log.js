@@ -21,5 +21,5 @@ export const log = {
     build: (msg) => console.log(`${prefix.build}  ${chalk.magenta(msg)}`),
     watch: (msg) => console.log(`${prefix.watch}  ${chalk.blue(msg)}`),
     server: (url) => console.log(`${prefix.success}  ${chalk.white("Server running on")} ${chalk.cyan.underline(url)}`),
-    banner: () => console.log(`\n  ${chalk.cyan.bold(AppNames.name)} ${chalk.gray(`v${global.CURRENT_VERSION || AppNames["version"]}`)}\n`),
+    banner: () => console.log(`\n  ${chalk.cyan.bold(AppNames.name)} ${chalk.gray(`v${global.BUNEXT_CURRENT_VERSION || AppNames["version"]}`)}\n`),
 };

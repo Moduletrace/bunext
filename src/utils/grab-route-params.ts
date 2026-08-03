@@ -28,7 +28,7 @@ export default async function grabRouteParams({
         url,
         query: _.merge(query, passed_query),
         body,
-        server: global.SERVER,
+        server: global.BUNEXT_SERVER,
     };
 
     return routeParams;

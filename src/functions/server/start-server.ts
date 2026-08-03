@@ -7,7 +7,7 @@ export default async function startServer() {
 
     const server = Bun.serve(serverParams);
 
-    global.SERVER = server;
+    global.BUNEXT_SERVER = server;
 
     log.server(`http://${server.hostname}:${server.port}`);
 

@@ -1,6 +1,6 @@
 export default function ({ path }) {
-    for (let i = 0; i < global.CONSTANTS.RouteIgnorePatterns.length; i++) {
-        const regex = global.CONSTANTS.RouteIgnorePatterns[i];
+    for (let i = 0; i < global.BUNEXT_CONSTANTS.RouteIgnorePatterns.length; i++) {
+        const regex = global.BUNEXT_CONSTANTS.RouteIgnorePatterns[i];
         if (path.match(regex))
             return true;
     }

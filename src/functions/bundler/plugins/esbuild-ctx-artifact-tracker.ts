@@ -36,7 +36,7 @@ export default function esbuildCTXArtifactTracker({
         name: "artifact-tracker",
         setup(build) {
             build.onStart(async () => {
-                global.MAIN_CTX_BUILD_STARTS++;
+                global.BUNEXT_MAIN_CTX_BUILD_STARTS++;
                 build_start = performance.now();
 
                 const does_error_file_exist = existsSync(
@@ -44,7 +44,7 @@ export default function esbuildCTXArtifactTracker({
                 );
 
                 if (
-                    global.MAIN_CTX_BUILD_STARTS >= MAX_BUILD_STARTS &&
+                    global.BUNEXT_MAIN_CTX_BUILD_STARTS >= MAX_BUILD_STARTS &&
                     !does_error_file_exist
                 ) {
                     await buildOnstartErrorHandler();
@@ -53,8 +53,8 @@ export default function esbuildCTXArtifactTracker({
 
             build.onEnd(async (result) => {
                 if (result.errors.length > 0) {
-                    global.RECOMPILING = false;
-                    global.IS_SERVER_COMPONENT = false;
+                    global.BUNEXT_RECOMPILING = false;
+                    global.BUNEXT_IS_SERVER_COMPONENT = false;
 
                     log.error(`Build errors:`);
                     for (const err of result.errors) {
@@ -64,17 +64,17 @@ export default function esbuildCTXArtifactTracker({
                     }
 
                     for (
-                        let i = global.HMR_CONTROLLERS.length - 1;
+                        let i = global.BUNEXT_HMR_CONTROLLERS.length - 1;
                         i >= 0;
                         i--
                     ) {
-                        const controller = global.HMR_CONTROLLERS[i];
+                        const controller = global.BUNEXT_HMR_CONTROLLERS[i];
                         try {
                             controller?.controller?.enqueue(
                                 `event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`,
                             );
                         } catch {
-                            global.HMR_CONTROLLERS.splice(i, 1);
+                            global.BUNEXT_HMR_CONTROLLERS.splice(i, 1);
                         }
                     }
 
@@ -89,10 +89,15 @@ export default function esbuildCTXArtifactTracker({
                 if (artifacts?.[0] && artifacts.length > 0) {
                     for (let i = 0; i < artifacts.length; i++) {
                         const artifact = artifacts[i];
-                        if (artifact?.local_path && global.BUNDLER_CTX_MAP) {
-                            global.BUNDLER_CTX_MAP[artifact.local_path] =
+                        if (
+                            artifact?.local_path &&
+                            global.BUNEXT_BUNDLER_CTX_MAP
+                        ) {
+                            global.BUNEXT_BUNDLER_CTX_MAP[artifact.local_path] =
                                 _.merge(
-                                    global.BUNDLER_CTX_MAP[artifact.local_path],
+                                    global.BUNEXT_BUNDLER_CTX_MAP[
+                                        artifact.local_path
+                                    ],
                                     artifact,
                                 );
                         }
@@ -102,8 +107,8 @@ export default function esbuildCTXArtifactTracker({
                 const elapsed = (performance.now() - build_start).toFixed(0);
                 log.success(`[Built] in ${elapsed}ms`);
 
-                global.MAIN_CTX_BUILD_STARTS = 0;
-                global.BUNDLER_CTX_DISPOSED = false;
+                global.BUNEXT_MAIN_CTX_BUILD_STARTS = 0;
+                global.BUNEXT_BUNDLER_CTX_DISPOSED = false;
 
                 const does_error_file_exist = existsSync(
                     BUNX_BUNDLER_ERROR_EXIT_FILE,
@@ -141,8 +146,8 @@ export default function esbuildCTXArtifactTracker({
                     }
                 }
 
-                global.RECOMPILING = false;
-                global.IS_SERVER_COMPONENT = false;
+                global.BUNEXT_RECOMPILING = false;
+                global.BUNEXT_IS_SERVER_COMPONENT = false;
             });
         },
     };

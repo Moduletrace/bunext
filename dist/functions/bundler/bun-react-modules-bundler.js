@@ -62,7 +62,7 @@ export default async function bunReactModulesBundler() {
     });
     rmSync(tmpDir, { force: true, recursive: true });
     const PUBLIC_ROOT = BUNEXT_VENDOR_DIR.replace(BUNX_CWD_DIR, "/.bunext");
-    global.REACT_IMPORTS_MAP = {
+    global.BUNEXT_REACT_IMPORTS_MAP = {
         imports: {
             react: `${PUBLIC_ROOT}/react.js`,
             "react-dom": `${PUBLIC_ROOT}/react-dom.js`,

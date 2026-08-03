@@ -13,7 +13,7 @@ export default async function allPagesESBuildContextBundler(params) {
     try {
         const did_process_exit_because_of_bundler_error = existsSync(BUNX_BUNDLER_ERROR_EXIT_FILE);
         const pages = grabAllPages({ exclude_api: true });
-        global.PAGE_FILES = pages;
+        global.BUNEXT_PAGE_FILES = pages;
         const dev = isDevelopment();
         const entryToPage = new Map();
         for (const page of pages) {
@@ -28,7 +28,7 @@ export default async function allPagesESBuildContextBundler(params) {
             entryToPage.set(entryFile, { ...page, tsx });
         }
         const entryPoints = [...entryToPage.keys()].map((e) => `hydration-virtual:${e}`);
-        global.BUNDLER_CTX = await esbuild.context({
+        global.BUNEXT_BUNDLER_CTX = await esbuild.context({
             entryPoints,
             outdir: HYDRATION_DST_DIR,
             bundle: true,
@@ -62,13 +62,13 @@ export default async function allPagesESBuildContextBundler(params) {
                 "react-dom/client",
                 "react/jsx-runtime",
                 "react/jsx-dev-runtime",
-                ...(global.CONFIG.page_compiler_excludes || []),
+                ...(global.BUNEXT_CONFIG.page_compiler_excludes || []),
             ],
             logLevel: did_process_exit_because_of_bundler_error
                 ? "silent"
                 : undefined,
         });
-        await global.BUNDLER_CTX.rebuild();
+        await global.BUNEXT_BUNDLER_CTX.rebuild();
     }
     catch (error) {
         console.log(`ESBUILD Error =>`, error);

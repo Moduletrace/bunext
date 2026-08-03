@@ -16,7 +16,7 @@ export default async function grabRouteParams({ req, query: passed_query, }) {
         url,
         query: _.merge(query, passed_query),
         body,
-        server: global.SERVER,
+        server: global.BUNEXT_SERVER,
     };
     return routeParams;
 }

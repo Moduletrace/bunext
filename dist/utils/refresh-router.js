@@ -5,5 +5,5 @@ export default function refreshRouter() {
         style: "nextjs",
         dir: PAGES_DIR,
     });
-    global.ROUTER = router;
+    global.BUNEXT_ROUTER = router;
 }

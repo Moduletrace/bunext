@@ -31,7 +31,7 @@ export type DirNames = {
 };
 
 export default function grabDirNames(): DirNames {
-    if (global.DIR_NAMES) return global.DIR_NAMES;
+    if (global.BUNEXT_DIR_NAMES) return global.BUNEXT_DIR_NAMES;
 
     const ROOT_DIR = process.cwd();
     const SRC_DIR = path.join(ROOT_DIR, "src");

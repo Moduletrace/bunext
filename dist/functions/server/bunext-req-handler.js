@@ -19,8 +19,8 @@ export default async function bunextRequestHandler({ req: initial_req, server, }
             return Response.json({ success: false, msg: `Invalid Path` });
         }
         let response = undefined;
-        if (global.CONSTANTS.config?.middleware) {
-            const middleware_res = await global.CONSTANTS.config.middleware({
+        if (global.BUNEXT_CONSTANTS.config?.middleware) {
+            const middleware_res = await global.BUNEXT_CONSTANTS.config.middleware({
                 req: initial_req,
                 url,
             });

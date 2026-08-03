@@ -31,6 +31,6 @@ export const log = {
         ),
     banner: () =>
         console.log(
-            `\n  ${chalk.cyan.bold(AppNames.name)} ${chalk.gray(`v${global.CURRENT_VERSION || AppNames["version"]}`)}\n`,
+            `\n  ${chalk.cyan.bold(AppNames.name)} ${chalk.gray(`v${global.BUNEXT_CURRENT_VERSION || AppNames["version"]}`)}\n`,
         ),
 };

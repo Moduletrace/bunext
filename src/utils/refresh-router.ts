@@ -8,5 +8,5 @@ export default function refreshRouter() {
         dir: PAGES_DIR,
     });
 
-    global.ROUTER = router;
+    global.BUNEXT_ROUTER = router;
 }

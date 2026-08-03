@@ -32,19 +32,19 @@ export default function ssrCTXArtifactTracker({
                 build_starts++;
                 build_start = performance.now();
                 if (build_starts == MAX_BUILD_STARTS) {
-                    global.SSR_BUNDLER_CTX_DISPOSED = true;
-                    await global.SSR_BUNDLER_CTX?.dispose();
-                    global.SSR_BUNDLER_CTX = undefined;
+                    global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED = true;
+                    await global.BUNEXT_SSR_BUNDLER_CTX?.dispose();
+                    global.BUNEXT_SSR_BUNDLER_CTX = undefined;
                 }
             });
 
             build.onEnd(async (result) => {
                 if (result.errors.length > 0) {
-                    global.SSR_BUNDLER_CTX_DISPOSED = true;
+                    global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED = true;
                     try {
-                        await global.SSR_BUNDLER_CTX?.dispose();
+                        await global.BUNEXT_SSR_BUNDLER_CTX?.dispose();
                     } catch {}
-                    global.SSR_BUNDLER_CTX = undefined;
+                    global.BUNEXT_SSR_BUNDLER_CTX = undefined;
                     build_starts = 0;
                     for (const err of result.errors) {
                         console.error(
@@ -65,10 +65,11 @@ export default function ssrCTXArtifactTracker({
                         const artifact = artifacts[i];
                         if (
                             artifact?.local_path &&
-                            global.SSR_BUNDLER_CTX_MAP
+                            global.BUNEXT_SSR_BUNDLER_CTX_MAP
                         ) {
-                            global.SSR_BUNDLER_CTX_MAP[artifact.local_path] =
-                                artifact;
+                            global.BUNEXT_SSR_BUNDLER_CTX_MAP[
+                                artifact.local_path
+                            ] = artifact;
                         }
                     }
 
@@ -83,11 +84,15 @@ export default function ssrCTXArtifactTracker({
                 try {
                     writeFileSync(
                         path.join(BUNX_TMP_DIR, "ctx-map.json"),
-                        JSON.stringify(global.SSR_BUNDLER_CTX_MAP, null, 4),
+                        JSON.stringify(
+                            global.BUNEXT_SSR_BUNDLER_CTX_MAP,
+                            null,
+                            4,
+                        ),
                     );
                 } catch (error) {}
 
-                global.SSR_BUNDLER_CTX_DISPOSED = false;
+                global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED = false;
             });
         },
     };

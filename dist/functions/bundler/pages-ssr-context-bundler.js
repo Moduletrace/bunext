@@ -11,9 +11,9 @@ const { BUNX_CWD_MODULE_CACHE_DIR } = grabDirNames();
 export default async function pagesSSRContextBundler(params) {
     const pages = grabAllPages();
     const dev = isDevelopment();
-    if (global.SSR_BUNDLER_CTX) {
-        await global.SSR_BUNDLER_CTX.dispose();
-        global.SSR_BUNDLER_CTX = undefined;
+    if (global.BUNEXT_SSR_BUNDLER_CTX) {
+        await global.BUNEXT_SSR_BUNDLER_CTX.dispose();
+        global.BUNEXT_SSR_BUNDLER_CTX = undefined;
     }
     const entryToPage = new Map();
     const { root_file_path } = grabRootFilePath();
@@ -32,7 +32,7 @@ export default async function pagesSSRContextBundler(params) {
         entryToPage.set(page.local_path, { ...page, tsx });
     }
     const entryPoints = [...entryToPage.keys()].map((e) => `ssr-virtual:${e}`);
-    global.SSR_BUNDLER_CTX = await esbuild.context({
+    global.BUNEXT_SSR_BUNDLER_CTX = await esbuild.context({
         entryPoints,
         outdir: BUNX_CWD_MODULE_CACHE_DIR,
         bundle: true,
@@ -65,5 +65,5 @@ export default async function pagesSSRContextBundler(params) {
         ],
         // logLevel: "silent",
     });
-    await global.SSR_BUNDLER_CTX.rebuild();
+    await global.BUNEXT_SSR_BUNDLER_CTX.rebuild();
 }

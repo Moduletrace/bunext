@@ -11,27 +11,27 @@ import watcherEsbuildCTX from "./server/watcher-esbuild-ctx";
 const dirNames = grabDirNames();
 const { PAGES_DIR } = dirNames;
 export default async function bunextInit(params) {
-    global.HMR_CONTROLLERS = [];
-    global.BUNDLER_CTX_MAP = {};
-    global.SSR_BUNDLER_CTX_MAP = {};
-    // global.API_ROUTES_BUNDLER_CTX_MAP = {};
-    global.BUNDLER_REBUILDS = 0;
-    global.REBUILD_RETRIES = 0;
-    global.PAGE_FILES = [];
-    global.SKIPPED_BROWSER_MODULES = new Set();
-    global.DIR_NAMES = dirNames;
-    global.REACT_IMPORTS_MAP = { imports: {} };
-    global.REACT_DOM_MODULE_CACHE = new Map();
-    global.MAIN_CTX_BUILD_STARTS = 0;
+    global.BUNEXT_HMR_CONTROLLERS = [];
+    global.BUNEXT_BUNDLER_CTX_MAP = {};
+    global.BUNEXT_SSR_BUNDLER_CTX_MAP = {};
+    // global.BUNEXT_API_ROUTES_BUNDLER_CTX_MAP = {};
+    global.BUNEXT_BUNDLER_REBUILDS = 0;
+    global.BUNEXT_REBUILD_RETRIES = 0;
+    global.BUNEXT_PAGE_FILES = [];
+    global.BUNEXT_SKIPPED_BROWSER_MODULES = new Set();
+    global.BUNEXT_DIR_NAMES = dirNames;
+    global.BUNEXT_REACT_IMPORTS_MAP = { imports: {} };
+    global.BUNEXT_REACT_DOM_MODULE_CACHE = new Map();
+    global.BUNEXT_MAIN_CTX_BUILD_STARTS = 0;
     await init();
     log.banner();
-    global.CONSTANTS = grabConstants();
+    global.BUNEXT_CONSTANTS = grabConstants();
     await reactModulesBundler();
     const router = new Bun.FileSystemRouter({
         style: "nextjs",
         dir: PAGES_DIR,
     });
-    global.ROUTER = router;
+    global.BUNEXT_ROUTER = router;
     const is_dev = isDevelopment();
     if (params?.build_only) {
         log.build(`Building Modules ...`);

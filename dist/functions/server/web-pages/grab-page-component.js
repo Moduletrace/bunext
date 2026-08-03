@@ -20,7 +20,7 @@ class NotFoundError extends Error {
 export default async function grabPageComponent(params) {
     const { req, file_path: passed_file_path, debug, return_server_res_only, skip_server_res, is_hydration, } = params;
     const url = req?.url ? new URL(req.url) : undefined;
-    const router = global.ROUTER;
+    const router = global.BUNEXT_ROUTER;
     const is_dev = isDevelopment();
     const forwarded_proto = req?.headers.get("x-forwarded-proto");
     if (url && forwarded_proto) {
@@ -50,7 +50,7 @@ export default async function grabPageComponent(params) {
             // log.error(errMsg);
             throw new Error(errMsg);
         }
-        let bundledMap = global.BUNDLER_CTX_MAP[file_path];
+        let bundledMap = global.BUNEXT_BUNDLER_CTX_MAP[file_path];
         if (!bundledMap?.path) {
             if (does_error_file_exist) {
                 throw new Error(`Application Error. Please Check your components. ${match?.filePath} likely exists but has no exported module.`);
@@ -62,7 +62,7 @@ export default async function grabPageComponent(params) {
                     msg: `Retrying Bundle map for file \`${file_path}\``,
                 });
                 await Bun.sleep(1000);
-                bundledMap = global.BUNDLER_CTX_MAP[file_path];
+                bundledMap = global.BUNEXT_BUNDLER_CTX_MAP[file_path];
                 if (bundledMap?.path)
                     break;
             }
@@ -73,7 +73,7 @@ export default async function grabPageComponent(params) {
             }
         }
         if (req && !is_hydration) {
-            global.BUNDLER_CTX_MAP[file_path].req_url = req.url;
+            global.BUNEXT_BUNDLER_CTX_MAP[file_path].req_url = req.url;
         }
         if (debug) {
             log.info(`bundledMap:`, bundledMap);
@@ -115,8 +115,9 @@ export default async function grabPageComponent(params) {
             error?.name === "NotFoundError" ||
             error?.status === 404;
         if (!params.retry && is_dev) {
-            while (global.REBUILD_RETRIES < 2) {
-                global.REBUILD_RETRIES = global.REBUILD_RETRIES + 1;
+            while (global.BUNEXT_REBUILD_RETRIES < 2) {
+                global.BUNEXT_REBUILD_RETRIES =
+                    global.BUNEXT_REBUILD_RETRIES + 1;
                 await fullRebuild();
                 await Bun.sleep(200);
                 const component_retried = await grabPageComponent({
@@ -125,15 +126,15 @@ export default async function grabPageComponent(params) {
                 });
                 if (component_retried instanceof Response ||
                     component_retried.success) {
-                    global.REBUILD_RETRIES = 0;
+                    global.BUNEXT_REBUILD_RETRIES = 0;
                     await serverPostBuildFn();
                     return component_retried;
                 }
             }
-            global.REBUILD_RETRIES = 0;
+            global.BUNEXT_REBUILD_RETRIES = 0;
         }
         if (is404) {
-            global.IS_404_PAGE = true;
+            global.BUNEXT_IS_404_PAGE = true;
         }
         else {
             log.error(`Error Grabbing Page Component: ${error.message}`);

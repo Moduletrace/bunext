@@ -3,7 +3,7 @@ import grabDirNames from "../../../utils/grab-dir-names";
 import grabPageModules from "./grab-page-modules";
 import _ from "lodash";
 export default async function grabPageErrorComponent({ error, routeParams, is404, url, }) {
-    const router = global.ROUTER;
+    const router = global.BUNEXT_ROUTER;
     const { BUNX_ROOT_500_PRESET_COMPONENT, BUNX_ROOT_404_PRESET_COMPONENT } = grabDirNames();
     const errorRoute = is404 ? "/404" : "/500";
     const presetComponent = is404
@@ -30,7 +30,7 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
             };
         }
         const file_path = match.filePath;
-        const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
+        const bundledMap = global.BUNEXT_BUNDLER_CTX_MAP?.[file_path];
         const page_component = await grabPageModules({
             file_path: file_path,
             query: match?.query,

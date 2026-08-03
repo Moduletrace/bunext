@@ -80,7 +80,7 @@ export default async function genWebHTML({
         env: {
             NODE_ENV: dev ? "development" : "production",
             ...public_envs,
-            ...global.CONFIG.public_envs,
+            ...global.BUNEXT_CONFIG.public_envs,
         },
     };
 
@@ -122,7 +122,7 @@ export default async function genWebHTML({
                             type="importmap"
                             dangerouslySetInnerHTML={{
                                 __html: JSON.stringify(
-                                    global.REACT_IMPORTS_MAP,
+                                    global.BUNEXT_REACT_IMPORTS_MAP,
                                 ),
                             }}
                             defer

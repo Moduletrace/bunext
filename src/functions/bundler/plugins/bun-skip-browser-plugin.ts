@@ -9,7 +9,7 @@ const BunSkipNonBrowserPlugin: Bun.BunPlugin = {
         // const skipped_modules = new Set<string>();
 
         build.onResolve({ filter: skipFilter }, (args) => {
-            global.SKIPPED_BROWSER_MODULES.add(args.path);
+            global.BUNEXT_SKIPPED_BROWSER_MODULES.add(args.path);
             return {
                 path: args.path,
                 namespace: "skipped",
@@ -18,8 +18,8 @@ const BunSkipNonBrowserPlugin: Bun.BunPlugin = {
         });
 
         // build.onEnd(() => {
-        //     log.warn(`global.SKIPPED_BROWSER_MODULES`, [
-        //         ...global.SKIPPED_BROWSER_MODULES,
+        //     log.warn(`global.BUNEXT_SKIPPED_BROWSER_MODULES`, [
+        //         ...global.BUNEXT_SKIPPED_BROWSER_MODULES,
         //     ]);
         // });
 

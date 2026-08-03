@@ -1,7 +1,7 @@
 import grabAppPort from "./grab-app-port";
 export default function grabOrigin() {
-    if (global.CONFIG.origin) {
-        return global.CONFIG.origin;
+    if (global.BUNEXT_CONFIG.origin) {
+        return global.BUNEXT_CONFIG.origin;
     }
     const port = grabAppPort();
     return `http://localhost:${port}`;

@@ -24,7 +24,7 @@ export default async function () {
     try {
         const package_json = await Bun.file(path.resolve(__dirname, "../../package.json")).json();
         const current_version = package_json.version;
-        global.CURRENT_VERSION = current_version;
+        global.BUNEXT_CURRENT_VERSION = current_version;
     }
     catch (error) { }
     const keys = Object.keys(dirNames);
@@ -45,7 +45,7 @@ export default async function () {
         }
     }
     const config = (await grabConfig()) || {};
-    global.CONFIG = {
+    global.BUNEXT_CONFIG = {
         ...config,
         development: is_dev,
     };

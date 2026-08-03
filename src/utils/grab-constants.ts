@@ -1,5 +1,5 @@
 export default function grabConstants() {
-    const config = global.CONFIG;
+    const config = global.BUNEXT_CONFIG;
     const MB_IN_BYTES = 1024 * 1024;
 
     const ClientWindowPagePropsName = "__PAGE_PROPS__";

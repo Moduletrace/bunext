@@ -21,7 +21,7 @@ export default async function grabPageErrorComponent({
     is404,
     url,
 }: Params): Promise<GrabPageComponentRes | Response> {
-    const router = global.ROUTER;
+    const router = global.BUNEXT_ROUTER;
 
     const { BUNX_ROOT_500_PRESET_COMPONENT, BUNX_ROOT_404_PRESET_COMPONENT } =
         grabDirNames();
@@ -59,7 +59,7 @@ export default async function grabPageErrorComponent({
 
         const file_path = match.filePath;
 
-        const bundledMap = global.BUNDLER_CTX_MAP?.[file_path];
+        const bundledMap = global.BUNEXT_BUNDLER_CTX_MAP?.[file_path];
 
         const page_component = await grabPageModules({
             file_path: file_path,

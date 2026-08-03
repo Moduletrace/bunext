@@ -23,7 +23,7 @@ export default async function pagesSSRBundler(params?: Params) {
         include_server: true,
     });
     const dev = isDevelopment();
-    const config = global.CONFIG;
+    const config = global.BUNEXT_CONFIG;
 
     try {
         writeFileSync(
@@ -116,7 +116,7 @@ export default async function pagesSSRBundler(params?: Params) {
             splitting: true,
         });
     } catch (error) {
-        global.SSR_BUNDLER_CTX_DISPOSED = true;
+        global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED = true;
         log.error(`SSR Bundler Error: ${error}`);
     }
 }

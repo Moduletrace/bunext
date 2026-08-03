@@ -3,8 +3,12 @@ type Params = {
 };
 
 export default function ({ path }: Params): boolean {
-    for (let i = 0; i < global.CONSTANTS.RouteIgnorePatterns.length; i++) {
-        const regex = global.CONSTANTS.RouteIgnorePatterns[i];
+    for (
+        let i = 0;
+        i < global.BUNEXT_CONSTANTS.RouteIgnorePatterns.length;
+        i++
+    ) {
+        const regex = global.BUNEXT_CONSTANTS.RouteIgnorePatterns[i];
         if (path.match(regex)) return true;
     }
 

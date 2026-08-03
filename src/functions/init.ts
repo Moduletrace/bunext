@@ -35,7 +35,7 @@ export default async function () {
 
         const current_version = package_json.version;
 
-        global.CURRENT_VERSION = current_version;
+        global.BUNEXT_CURRENT_VERSION = current_version;
     } catch (error) {}
 
     const keys = Object.keys(dirNames) as (keyof ReturnType<
@@ -65,7 +65,7 @@ export default async function () {
 
     const config: BunextConfig = (await grabConfig()) || {};
 
-    global.CONFIG = {
+    global.BUNEXT_CONFIG = {
         ...config,
         development: is_dev,
     };

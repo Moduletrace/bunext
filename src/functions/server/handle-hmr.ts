@@ -3,11 +3,11 @@ type Params = {
 };
 
 function removeController(controller: ReadableStreamDefaultController<string>) {
-    const idx = global.HMR_CONTROLLERS.findIndex(
+    const idx = global.BUNEXT_HMR_CONTROLLERS.findIndex(
         (c) => c.controller == controller,
     );
     if (typeof idx == "number" && idx >= 0) {
-        global.HMR_CONTROLLERS.splice(idx, 1);
+        global.BUNEXT_HMR_CONTROLLERS.splice(idx, 1);
     }
 }
 
@@ -26,10 +26,10 @@ export default async function ({ req }: Params): Promise<Response> {
         return new Response("Invalid Referer Header", { status: 400 });
     }
 
-    const match = global.ROUTER.match(referer_url.pathname);
+    const match = global.BUNEXT_ROUTER.match(referer_url.pathname);
 
     const target_map = match?.filePath
-        ? global.BUNDLER_CTX_MAP?.[match.filePath]
+        ? global.BUNEXT_BUNDLER_CTX_MAP?.[match.filePath]
         : undefined;
 
     let controller: ReadableStreamDefaultController<string>;
@@ -37,7 +37,7 @@ export default async function ({ req }: Params): Promise<Response> {
     const stream = new ReadableStream<string>({
         start(c) {
             controller = c;
-            global.HMR_CONTROLLERS.push({
+            global.BUNEXT_HMR_CONTROLLERS.push({
                 controller: c,
                 page_url: referer_url.href,
                 target_map,

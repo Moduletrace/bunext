@@ -52,10 +52,10 @@ export default async function ({ req }: Params): Promise<Response> {
     let module: any;
     const now = Date.now();
 
-    if (is_dev && global.SSR_BUNDLER_CTX_MAP?.[match.filePath]?.path) {
+    if (is_dev && global.BUNEXT_SSR_BUNDLER_CTX_MAP?.[match.filePath]?.path) {
         const target_import = path.join(
             ROOT_DIR,
-            global.SSR_BUNDLER_CTX_MAP[match.filePath].path,
+            global.BUNEXT_SSR_BUNDLER_CTX_MAP[match.filePath].path,
         );
 
         module = await import(`${target_import}?t=${now}`);
@@ -108,9 +108,7 @@ export default async function ({ req }: Params): Promise<Response> {
             );
         }
 
-        routeParams.body = JSON.parse(
-            new TextDecoder().decode(body) || "{}",
-        );
+        routeParams.body = JSON.parse(new TextDecoder().decode(body) || "{}");
     }
 
     const target_module = (module["default"] ||

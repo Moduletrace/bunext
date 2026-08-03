@@ -32,17 +32,17 @@ export default async function chokadirWatcherEsbuildCTX() {
                 await fullRebuild();
                 return;
             }
-            if (global.BUNDLER_CTX_DISPOSED) {
+            if (global.BUNEXT_BUNDLER_CTX_DISPOSED) {
                 await fullRebuild({ msg: `Restarting Bundler ...` });
             }
-            if (global.SSR_BUNDLER_CTX_DISPOSED) {
+            if (global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED) {
                 await pagesSSRBundler().catch((error) => {
                     log.error(`SSR Bundler Error: ${error}`);
                 });
             }
             if (filename.match(/\/styles$/) || filename === "styles") {
                 owns_recompile = true;
-                global.RECOMPILING = true;
+                global.BUNEXT_RECOMPILING = true;
                 await Bun.sleep(1000);
                 await fullRebuild({
                     msg: `Detected new \`styles\` directory. Rebuilding ...`,
@@ -58,24 +58,24 @@ export default async function chokadirWatcherEsbuildCTX() {
             const target_files_match = /\.(tsx?|jsx?|css)$/;
             if (event === "change") {
                 if (filename.match(target_files_match)) {
-                    if (global.RECOMPILING)
+                    if (global.BUNEXT_RECOMPILING)
                         return;
                     owns_recompile = true;
-                    global.RECOMPILING = true;
+                    global.BUNEXT_RECOMPILING = true;
                     if (filename.match(/.*\.server\.tsx?/)) {
-                        global.IS_SERVER_COMPONENT = true;
+                        global.BUNEXT_IS_SERVER_COMPONENT = true;
                     }
-                    if (global.BUNDLER_CTX) {
-                        await global.BUNDLER_CTX.rebuild();
+                    if (global.BUNEXT_BUNDLER_CTX) {
+                        await global.BUNEXT_BUNDLER_CTX.rebuild();
                     }
                     if (filename.match(/(404|500)\.tsx?/)) {
-                        for (let i = global.HMR_CONTROLLERS.length - 1; i >= 0; i--) {
-                            const controller = global.HMR_CONTROLLERS[i];
+                        for (let i = global.BUNEXT_HMR_CONTROLLERS.length - 1; i >= 0; i--) {
+                            const controller = global.BUNEXT_HMR_CONTROLLERS[i];
                             try {
                                 controller?.controller?.enqueue(`event: update\ndata: ${JSON.stringify({ reload: true })}\n\n`);
                             }
                             catch {
-                                global.HMR_CONTROLLERS.splice(i, 1);
+                                global.BUNEXT_HMR_CONTROLLERS.splice(i, 1);
                             }
                         }
                     }
@@ -92,7 +92,7 @@ export default async function chokadirWatcherEsbuildCTX() {
                     filename.includes(" ")) {
                     return reloadWatcher();
                 }
-                if (global.RECOMPILING)
+                if (global.BUNEXT_RECOMPILING)
                     return;
                 owns_recompile = true;
                 const action = event.startsWith("add") ? "created" : "deleted";
@@ -113,8 +113,8 @@ export default async function chokadirWatcherEsbuildCTX() {
         }
         finally {
             if (owns_recompile) {
-                global.RECOMPILING = false;
-                global.IS_SERVER_COMPONENT = false;
+                global.BUNEXT_RECOMPILING = false;
+                global.BUNEXT_IS_SERVER_COMPONENT = false;
             }
         }
     };
@@ -126,8 +126,8 @@ export default async function chokadirWatcherEsbuildCTX() {
         .on("unlinkDir", (path) => handleEvent("unlinkDir", path));
 }
 function reloadWatcher() {
-    if (global.PAGES_SRC_WATCHER) {
-        global.PAGES_SRC_WATCHER.close();
+    if (global.BUNEXT_PAGES_SRC_WATCHER) {
+        global.BUNEXT_PAGES_SRC_WATCHER.close();
         chokadirWatcherEsbuildCTX();
     }
 }

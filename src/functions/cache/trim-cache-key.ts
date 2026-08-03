@@ -18,7 +18,7 @@ export default async function trimCacheKey({
             key,
         });
 
-        const config = global.CONFIG;
+        const config = global.BUNEXT_CONFIG;
 
         const default_expiry_time_seconds =
             config.default_cache_expiry ||

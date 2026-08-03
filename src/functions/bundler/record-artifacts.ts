@@ -21,8 +21,11 @@ export default async function recordArtifacts({
         }
     }
 
-    if (global.BUNDLER_CTX_MAP) {
-        global.BUNDLER_CTX_MAP = _.merge(global.BUNDLER_CTX_MAP, artifacts_map);
+    if (global.BUNEXT_BUNDLER_CTX_MAP) {
+        global.BUNEXT_BUNDLER_CTX_MAP = _.merge(
+            global.BUNEXT_BUNDLER_CTX_MAP,
+            artifacts_map,
+        );
     }
 
     // await Bun.write(

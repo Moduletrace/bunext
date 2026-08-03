@@ -15,19 +15,19 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
                 build_starts++;
                 build_start = performance.now();
                 if (build_starts == MAX_BUILD_STARTS) {
-                    global.SSR_BUNDLER_CTX_DISPOSED = true;
-                    await global.SSR_BUNDLER_CTX?.dispose();
-                    global.SSR_BUNDLER_CTX = undefined;
+                    global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED = true;
+                    await global.BUNEXT_SSR_BUNDLER_CTX?.dispose();
+                    global.BUNEXT_SSR_BUNDLER_CTX = undefined;
                 }
             });
             build.onEnd(async (result) => {
                 if (result.errors.length > 0) {
-                    global.SSR_BUNDLER_CTX_DISPOSED = true;
+                    global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED = true;
                     try {
-                        await global.SSR_BUNDLER_CTX?.dispose();
+                        await global.BUNEXT_SSR_BUNDLER_CTX?.dispose();
                     }
                     catch { }
-                    global.SSR_BUNDLER_CTX = undefined;
+                    global.BUNEXT_SSR_BUNDLER_CTX = undefined;
                     build_starts = 0;
                     for (const err of result.errors) {
                         console.error(`SSR Build error: ${err.text}${err.location ? ` (${err.location.file}:${err.location.line}:${err.location.column})` : ""}`);
@@ -43,9 +43,8 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
                     for (let i = 0; i < artifacts.length; i++) {
                         const artifact = artifacts[i];
                         if (artifact?.local_path &&
-                            global.SSR_BUNDLER_CTX_MAP) {
-                            global.SSR_BUNDLER_CTX_MAP[artifact.local_path] =
-                                artifact;
+                            global.BUNEXT_SSR_BUNDLER_CTX_MAP) {
+                            global.BUNEXT_SSR_BUNDLER_CTX_MAP[artifact.local_path] = artifact;
                         }
                     }
                     // post_build_fn?.({ artifacts });
@@ -55,10 +54,10 @@ export default function ssrCTXArtifactTracker({ entryToPage, post_build_fn, }) {
                     // log.success(`SSR [Built] in ${elapsed}ms`);
                 }
                 try {
-                    writeFileSync(path.join(BUNX_TMP_DIR, "ctx-map.json"), JSON.stringify(global.SSR_BUNDLER_CTX_MAP, null, 4));
+                    writeFileSync(path.join(BUNX_TMP_DIR, "ctx-map.json"), JSON.stringify(global.BUNEXT_SSR_BUNDLER_CTX_MAP, null, 4));
                 }
                 catch (error) { }
-                global.SSR_BUNDLER_CTX_DISPOSED = false;
+                global.BUNEXT_SSR_BUNDLER_CTX_DISPOSED = false;
             });
         },
     };
