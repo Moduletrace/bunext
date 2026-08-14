@@ -246,7 +246,7 @@ export type BunextPageServerFn<
     T extends { [k: string]: any } = { [k: string]: any },
 > = (
     ctx: Omit<BunxRouteParams, "body"> & {
-        props?: any;
+        props?: T;
     },
 ) => Promise<BunextPageModuleServerReturn<T>>;
 

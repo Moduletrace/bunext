@@ -28,7 +28,7 @@ export default async function grabPageServerRes({ url, query, routeParams, serve
             const serverData = await server_function({
                 ...routeParams,
                 query: { ...routeParams.query, ...query },
-                props: init_props,
+                props: init_props || undefined,
             });
             return _.merge(default_props, serverData);
         }
