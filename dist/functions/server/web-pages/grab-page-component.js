@@ -131,6 +131,8 @@ export default async function grabPageComponent(params) {
                     await serverPostBuildFn();
                     return component_retried;
                 }
+                global.BUNEXT_PAGES_SRC_WATCHER?.close();
+                watcherEsbuildCTX();
             }
             global.BUNEXT_REBUILD_RETRIES = 0;
         }
