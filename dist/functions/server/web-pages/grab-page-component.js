@@ -9,6 +9,7 @@ import serverPostBuildFn from "../server-post-build-fn";
 import isDevelopment from "../../../utils/is-development";
 import { existsSync } from "fs";
 import grabDirNames from "../../../utils/grab-dir-names";
+import watcherEsbuildCTX from "../watcher-esbuild-ctx";
 const { BUNX_BUNDLER_ERROR_EXIT_FILE } = grabDirNames();
 class NotFoundError extends Error {
     status = 404;
@@ -139,6 +140,8 @@ export default async function grabPageComponent(params) {
         else {
             log.error(`Error Grabbing Page Component: ${error.message}`);
             log.error(`Page: ${passed_file_path || url?.pathname}`);
+            global.BUNEXT_PAGES_SRC_WATCHER?.close();
+            watcherEsbuildCTX();
         }
         return await grabPageErrorComponent({
             error,
