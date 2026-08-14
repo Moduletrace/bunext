@@ -7,6 +7,7 @@ import type {
 } from "../../../types";
 import grabPageModules from "./grab-page-modules";
 import _ from "lodash";
+import fullRebuild from "../full-rebuild";
 
 type Params = {
     error?: any;
@@ -83,6 +84,8 @@ export default async function grabPageErrorComponent({
             root_module,
         };
     } catch {
+        fullRebuild();
+
         const DefaultNotFound: FC = () => (
             <div
                 style={{

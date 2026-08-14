@@ -188,9 +188,6 @@ export default async function grabPageComponent(
                     await serverPostBuildFn();
                     return component_retried;
                 }
-
-                global.BUNEXT_PAGES_SRC_WATCHER?.close();
-                watcherEsbuildCTX();
             }
 
             global.BUNEXT_REBUILD_RETRIES = 0;
@@ -202,8 +199,7 @@ export default async function grabPageComponent(
             log.error(`Error Grabbing Page Component: ${error.message}`);
             log.error(`Page: ${passed_file_path || url?.pathname}`);
 
-            global.BUNEXT_PAGES_SRC_WATCHER?.close();
-            watcherEsbuildCTX();
+            fullRebuild();
         }
 
         return await grabPageErrorComponent({

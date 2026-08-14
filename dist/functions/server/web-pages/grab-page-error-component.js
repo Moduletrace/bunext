@@ -2,6 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import grabDirNames from "../../../utils/grab-dir-names";
 import grabPageModules from "./grab-page-modules";
 import _ from "lodash";
+import fullRebuild from "../full-rebuild";
 export default async function grabPageErrorComponent({ error, routeParams, is404, url, }) {
     const router = global.BUNEXT_ROUTER;
     const { BUNX_ROOT_500_PRESET_COMPONENT, BUNX_ROOT_404_PRESET_COMPONENT } = grabDirNames();
@@ -51,6 +52,7 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
         };
     }
     catch {
+        fullRebuild();
         const DefaultNotFound = () => (_jsxs("div", { style: {
                 width: "100vw",
                 height: "100vh",
