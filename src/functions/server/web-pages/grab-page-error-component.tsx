@@ -8,6 +8,7 @@ import type {
 import grabPageModules from "./grab-page-modules";
 import _ from "lodash";
 import fullRebuild from "../full-rebuild";
+import isDevelopment from "../../../utils/is-development";
 
 type Params = {
     error?: any;
@@ -23,6 +24,7 @@ export default async function grabPageErrorComponent({
     url,
 }: Params): Promise<GrabPageComponentRes | Response> {
     const router = global.BUNEXT_ROUTER;
+    const is_dev = isDevelopment();
 
     const { BUNX_ROOT_500_PRESET_COMPONENT, BUNX_ROOT_404_PRESET_COMPONENT } =
         grabDirNames();
@@ -84,7 +86,9 @@ export default async function grabPageErrorComponent({
             root_module,
         };
     } catch {
-        fullRebuild();
+        if (is_dev) {
+            fullRebuild();
+        }
 
         const DefaultNotFound: FC = () => (
             <div

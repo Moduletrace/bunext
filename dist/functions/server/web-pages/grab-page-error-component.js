@@ -3,8 +3,10 @@ import grabDirNames from "../../../utils/grab-dir-names";
 import grabPageModules from "./grab-page-modules";
 import _ from "lodash";
 import fullRebuild from "../full-rebuild";
+import isDevelopment from "../../../utils/is-development";
 export default async function grabPageErrorComponent({ error, routeParams, is404, url, }) {
     const router = global.BUNEXT_ROUTER;
+    const is_dev = isDevelopment();
     const { BUNX_ROOT_500_PRESET_COMPONENT, BUNX_ROOT_404_PRESET_COMPONENT } = grabDirNames();
     const errorRoute = is404 ? "/404" : "/500";
     const presetComponent = is404
@@ -52,7 +54,9 @@ export default async function grabPageErrorComponent({ error, routeParams, is404
         };
     }
     catch {
-        fullRebuild();
+        if (is_dev) {
+            fullRebuild();
+        }
         const DefaultNotFound = () => (_jsxs("div", { style: {
                 width: "100vw",
                 height: "100vh",
